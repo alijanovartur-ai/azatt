@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тамагочи PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07080f; --surface:#0e1020; --card:#131525; --card2:#181a2e;
+  --border:#252840; --border2:#2e3158;
+  --accent:#7c6dfa; --accentH:#9d91ff;
+  --green:#26d97f; --pink:#f06292; --yellow:#ffca28; --blue:#42a5f5; --red:#ef5350;
+  --text:#eef0ff; --text2:#8890c0; --text3:#555880;
+  --r:16px; --r2:12px; --shadow:0 8px 32px rgba(0,0,0,.5);
+  /* time-of-day tint */
+  --tod-tint:rgba(0,0,0,0);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── BG ATMOSPHERE ── */
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:background 60s linear;}
+.bg-glow::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,109,250,.13) 0%,transparent 70%);
+  top:-200px;left:-150px;animation:gm1 20s ease-in-out infinite alternate;}
+.bg-glow::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,98,146,.08) 0%,transparent 70%);
+  bottom:-100px;right:-100px;animation:gm2 15s ease-in-out infinite alternate;}
+@keyframes gm1{from{transform:translate(0,0)}to{transform:translate(100px,80px)}}
+@keyframes gm2{from{transform:translate(0,0)}to{transform:translate(-70px,-90px)}}
+
+.tod-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--tod-tint);transition:background 3s linear;}
+.dots-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:28px 28px;}
+
+/* ── SCREENS ── */
+.screen{position:relative;z-index:1;display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:screenIn .45s cubic-bezier(.4,0,.2,1);}
+.screen.active{display:flex;}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════ LOBBY ══════ */
+#lobby{gap:0;text-align:center;}
+.lobby-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.3);border-radius:50px;padding:5px 16px;font-size:.68rem;font-weight:800;color:var(--accentH);letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;}
+
+.lobby-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,10vw,6.5rem);font-weight:700;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,#c4baff 45%,#f06292 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.lobby-sub{font-size:.95rem;color:var(--text2);font-weight:600;letter-spacing:1px;margin-bottom:48px;}
+
+/* showcase */
+.lobby-showcase{position:relative;width:210px;height:210px;margin:0 auto 28px;}
+.showcase-ring{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--accent),var(--pink),var(--yellow),var(--green),var(--blue),var(--accent));
+  padding:3px;animation:ringRot 4s linear infinite;}
+@keyframes ringRot{to{transform:rotate(360deg)}}
+.showcase-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;}
+.showcase-pet{font-size:5.8rem;animation:scBounce 2.2s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,109,250,.5));}
+@keyframes scBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.06)}}
+
+.pet-selector{display:flex;gap:12px;justify-content:center;margin-bottom:36px;}
+.pet-sel-btn{width:54px;height:54px;background:var(--card);border:2px solid var(--border2);border-radius:14px;cursor:pointer;font-size:1.7rem;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.4,0,.2,1);}
+.pet-sel-btn:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 20px rgba(124,109,250,.25);}
+.pet-sel-btn.active{border-color:var(--accent);background:rgba(124,109,250,.15);box-shadow:0 0 22px rgba(124,109,250,.35);transform:translateY(-4px);}
+
+.lobby-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 42px;background:linear-gradient(135deg,var(--accent),#5a4de8);border:none;border-radius:50px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(124,109,250,.45);transition:all .25s;animation:ctaP 3s ease-in-out infinite;}
+@keyframes ctaP{0%,100%{box-shadow:0 8px 25px rgba(124,109,250,.4)}50%{box-shadow:0 8px 50px rgba(124,109,250,.75)}}
+.lobby-cta:hover{transform:translateY(-3px) scale(1.03);}
+.lobby-cta .arr{animation:arrB 1s ease-in-out infinite;}
+@keyframes arrB{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+
+/* achievements preview on lobby */
+.lobby-stats-row{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
+.lobby-stat-chip{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:50px;padding:6px 14px;font-size:.72rem;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
+
+/* ══════ SELECT ══════ */
+#select-screen{gap:22px;max-width:640px;width:100%;margin:auto;}
+.sel-header{text-align:center;}
+.sel-title{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;margin-bottom:5px;}
+.sel-sub{font-size:.9rem;color:var(--text2);}
+.animal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;}
+.a-card{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);padding:18px 8px 14px;cursor:pointer;text-align:center;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.a-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,109,250,.0),rgba(124,109,250,.08));opacity:0;transition:opacity .25s;}
+.a-card:hover{border-color:var(--accent);transform:translateY(-5px);box-shadow:0 12px 30px rgba(124,109,250,.2);}
+.a-card:hover::before{opacity:1;}
+.a-card.selected{border-color:var(--accent);background:rgba(124,109,250,.1);box-shadow:0 0 0 4px rgba(124,109,250,.15),0 12px 30px rgba(124,109,250,.25);transform:translateY(-5px);}
+.a-card.selected::after{content:'✓';position:absolute;top:7px;right:9px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;}
+.a-emo{font-size:2.8rem;display:block;margin-bottom:8px;}
+.a-card:hover .a-emo,.a-card.selected .a-emo{animation:emoJ .5s ease-in-out infinite alternate;}
+@keyframes emoJ{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+.a-nm{font-size:.78rem;font-weight:800;}
+.a-type{font-size:.68rem;color:var(--text3);margin-top:2px;}
+.a-trait{font-size:.6rem;color:var(--accentH);margin-top:3px;font-weight:700;}
+@keyframes cardAppear{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* personality chips */
+.personality-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.p-chip{padding:5px 12px;border-radius:50px;font-size:.65rem;font-weight:800;border:1px solid;cursor:pointer;transition:all .2s;}
+.p-chip.sel{box-shadow:0 0 12px currentColor;}
+
+.name-section{text-align:center;width:100%;}
+.name-lbl{font-size:.7rem;font-weight:800;color:var(--text2);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px;}
+.name-field{width:100%;max-width:300px;background:var(--card);border:2px solid var(--border2);border-radius:50px;padding:13px 22px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);text-align:center;outline:none;transition:all .25s;}
+.name-field::placeholder{color:var(--text3);}
+.name-field:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,109,250,.15);}
+.begin-btn{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;padding:14px 36px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#5a4de8);color:#fff;cursor:pointer;transition:all .3s;opacity:.35;pointer-events:none;box-shadow:0 6px 20px rgba(124,109,250,.3);}
+.begin-btn.on{opacity:1;pointer-events:all;box-shadow:0 8px 30px rgba(124,109,250,.5);}
+.begin-btn.on:hover{transform:translateY(-2px) scale(1.03);}
+
+/* ══════ GAME ══════ */
+#game-screen{padding:12px;justify-content:flex-start;padding-top:14px;}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:10px 18px;width:100%;max-width:1000px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+.top-left{display:flex;align-items:center;gap:10px;}
+.top-pet-name{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;}
+.top-stage{font-size:.68rem;font-weight:800;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.25);border-radius:20px;padding:3px 10px;color:var(--accentH);}
+.top-trait{font-size:.62rem;font-weight:700;border-radius:20px;padding:3px 9px;border:1px solid;}
+.top-right{display:flex;align-items:center;gap:16px;}
+.top-coins{display:flex;align-items:center;gap:5px;font-weight:800;color:var(--yellow);font-size:.95rem;}
+.top-mood{font-size:1.2rem;}
+.top-time{font-size:.75rem;font-weight:700;color:var(--text3);display:flex;align-items:center;gap:5px;}
+.tod-icon{font-size:.9rem;}
+.top-level{font-size:.68rem;font-weight:800;color:var(--green);background:rgba(38,217,127,.1);border:1px solid rgba(38,217,127,.25);border-radius:20px;padding:3px 9px;}
+
+/* GAME WRAP */
+.game-wrap{display:grid;grid-template-columns:230px 1fr 270px;gap:12px;width:100%;max-width:1000px;align-items:start;}
+.g-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:16px;}
+.g-panel-title{font-size:.62rem;font-weight:800;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.g-panel-title::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;display:inline-block;}
+
+/* STATS */
+.stats-list{display:flex;flex-direction:column;gap:10px;}
+.stat-row{display:flex;align-items:center;gap:8px;}
+.s-ico{font-size:.95rem;width:20px;text-align:center;flex-shrink:0;}
+.s-lbl{font-size:.66rem;font-weight:700;color:var(--text2);width:60px;flex-shrink:0;}
+.s-track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;}
+.s-fill{height:100%;border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.sf-h{background:linear-gradient(90deg,#ef5350,#ff7043);}
+.sf-p{background:linear-gradient(90deg,#ffca28,#ffa726);}
+.sf-e{background:linear-gradient(90deg,#42a5f5,#26c6da);}
+.sf-c{background:linear-gradient(90deg,#ec407a,#ab47bc);}
+.sf-hp{background:linear-gradient(90deg,#26d97f,#00bcd4);}
+.sf-xp{background:linear-gradient(90deg,#7c6dfa,#f06292);}
+.s-num{font-size:.63rem;font-weight:800;width:26px;text-align:right;color:var(--text2);}
+
+/* XP BAR */
+.xp-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.xp-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.xp-lv-txt{font-size:.65rem;font-weight:800;color:var(--accentH);}
+.xp-num-txt{font-size:.62rem;color:var(--text3);font-weight:700;}
+
+/* MOOD CARD */
+.mood-card{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px;margin-top:10px;text-align:center;}
+.mood-big{font-size:2.2rem;margin-bottom:3px;animation:moodPop 2s ease-in-out infinite;}
+@keyframes moodPop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.mood-txt{font-size:.7rem;font-weight:700;color:var(--text2);}
+.mood-personality{font-size:.62rem;color:var(--text3);margin-top:2px;}
+
+/* ACTIONS */
+.act-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+.ab{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 5px;cursor:pointer;color:var(--text);font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+.ab .aico{font-size:1.4rem;}
+.ab .acost{font-size:.5rem;color:var(--yellow);font-weight:700;}
+.ab:hover{transform:translateY(-2px);}
+.ab:disabled{opacity:.25;cursor:not-allowed;transform:none;}
+.ab.feed-b:hover{background:rgba(239,83,80,.12);border-color:#ef5350;}
+.ab.play-b:hover{background:rgba(255,202,40,.1);border-color:var(--yellow);}
+.ab.sleep-b:hover{background:rgba(66,165,245,.1);border-color:var(--blue);}
+.ab.heal-b:hover{background:rgba(38,217,127,.1);border-color:var(--green);}
+.ab.bath-b:hover{background:rgba(236,64,122,.12);border-color:#ec407a;}
+.ab.walk-b:hover{background:rgba(124,109,250,.1);border-color:var(--accent);}
+
+/* CENTER */
+.center-col{display:flex;flex-direction:column;align-items:center;gap:11px;}
+
+/* PET WINDOW */
+.pet-window{width:240px;height:240px;background:var(--card);border:1px solid var(--border2);border-radius:28px;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:visible;transition:box-shadow .5s;}
+/* spinning conic border */
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false;}
+.pet-window::before{content:'';position:absolute;inset:-1px;border-radius:29px;
+  background:conic-gradient(from var(--a,0deg),var(--accent) 0%,transparent 30%,transparent 70%,var(--pink) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;padding:1.5px;
+  animation:bSpin 4s linear infinite;}
+@keyframes bSpin{to{--a:360deg}}
+.pet-window.night-mode{background:#0d1022;}
+.pet-window.night-mode::before{background:conic-gradient(from var(--a,0deg),#6baaff 0%,transparent 30%,transparent 70%,#9d91ff 100%);}
+
+.pet-bg-aura{position:absolute;inset:0;border-radius:28px;opacity:0;transition:opacity 1s;pointer-events:none;}
+.pet-bg-aura.happy{background:radial-gradient(circle at 50% 60%,rgba(255,202,40,.08) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.sad{background:radial-gradient(circle at 50% 60%,rgba(66,165,245,.06) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.sick{background:radial-gradient(circle at 50% 60%,rgba(0,255,0,.05) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.danger{background:radial-gradient(circle at 50% 60%,rgba(239,83,80,.12) 0%,transparent 60%);opacity:1;}
+
+.weather-layer{position:absolute;inset:0;border-radius:28px;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1s;}
+.weather-layer.on{opacity:1;}
+.weather-layer .w-particle{position:absolute;font-size:.8rem;animation:wFall linear infinite;}
+@keyframes wFall{from{transform:translateY(-10px) rotate(0)}to{transform:translateY(260px) rotate(360deg)}}
+
+.pet-skin-layer{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:2.6rem;pointer-events:none;z-index:10;
+  animation:skinF 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,215,0,.8));display:none;line-height:1;}
+@keyframes skinF{0%,100%{transform:translateX(-50%) translateY(0) rotate(-3deg);}50%{transform:translateX(-50%) translateY(-6px) rotate(3deg);}}
+.pet-skin-layer.skin-pop{animation:skinPop .4s cubic-bezier(.17,.67,.35,1.5) forwards,skinF 3s ease-in-out .4s infinite;}
+@keyframes skinPop{0%{transform:translateX(-50%) scale(0) rotate(-20deg);opacity:0;}60%{transform:translateX(-50%) scale(1.3) rotate(5deg);opacity:1;}100%{transform:translateX(-50%) scale(1) rotate(-3deg);opacity:1;}}
+
+.pet-activity-bubble{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 0 12px;padding:5px 9px;font-size:1.1rem;pointer-events:none;opacity:0;transform:scale(0);transform-origin:top right;transition:opacity .3s,transform .3s cubic-bezier(.17,.67,.35,1.4);z-index:3;}
+.pet-activity-bubble.show{opacity:1;transform:scale(1);}
+.pet-activity-text{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);pointer-events:none;opacity:0;transition:opacity .4s;z-index:3;}
+.pet-activity-text.show{opacity:1;}
+
+.pet-big{font-size:5rem;cursor:pointer;user-select:none;display:inline-block;filter:drop-shadow(0 0 12px rgba(124,109,250,.3));transition:filter .3s;}
+.pet-big:active{transform:scale(.82) rotate(-15deg)!important;}
+
+/* pet animations */
+.pet-big.state-idle   {animation:pIdle 3s ease-in-out infinite;}
+.pet-big.state-walk   {animation:pWalk .6s ease-in-out infinite;}
+.pet-big.state-scratch{animation:pScratch .4s ease-in-out infinite;}
+.pet-big.state-spin   {animation:pSpin .8s ease-in-out 2;}
+.pet-big.state-sit    {animation:pSit 4s ease-in-out infinite;}
+.pet-big.state-blink  {animation:pBlink .1s step-end 3;}
+.pet-big.state-sneeze {animation:pSneeze .3s ease-in-out 2;}
+.pet-big.state-dance  {animation:pDance .5s ease-in-out infinite;}
+.pet-big.state-flip   {animation:pFlip .6s ease-in-out 2;}
+.pet-big.pet-sad   {animation:pShake .5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(66,165,245,.5)) saturate(.5);}
+.pet-big.pet-happy {animation:pJoy .4s ease-in-out 4;filter:drop-shadow(0 0 22px rgba(255,215,0,.8));}
+.pet-big.pet-sick  {animation:pSick 1.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(0,255,0,.5)) hue-rotate(60deg) brightness(.75);}
+.pet-big.pet-sleep {animation:pSleep 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(107,170,255,.4));}
+.pet-big.pet-danger{animation:pDanger .25s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(255,50,50,.95)) brightness(1.2);}
+.pet-big.pet-run   {animation:pRun .3s linear infinite;}
+@keyframes pIdle{0%,100%{transform:translateY(0) rotate(-1deg) scale(1);}40%{transform:translateY(-12px) rotate(1deg) scale(1.04);}70%{transform:translateY(-7px) rotate(0)}}
+@keyframes pWalk{0%{transform:translateX(-5px) rotate(-5deg);}50%{transform:translateX(5px) rotate(5deg);}100%{transform:translateX(-5px) rotate(-5deg);}}
+@keyframes pScratch{0%,100%{transform:rotate(0);}25%{transform:rotate(-10deg) translateY(-2px);}75%{transform:rotate(10deg) translateY(2px);}}
+@keyframes pSpin{0%{transform:rotate(0) scale(1);}50%{transform:rotate(180deg) scale(1.1);}100%{transform:rotate(360deg) scale(1);}}
+@keyframes pSit{0%,100%{transform:translateY(0) scale(1,1);}50%{transform:translateY(5px) scale(1.06,.93);}}
+@keyframes pBlink{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.08);}}
+@keyframes pSneeze{0%,100%{transform:rotate(0);}30%{transform:rotate(-18deg) translateX(-5px);}60%{transform:rotate(12deg) translateX(9px);}}
+@keyframes pDance{0%,100%{transform:rotate(-8deg) translateY(0);}25%{transform:rotate(8deg) translateY(-8px);}75%{transform:rotate(-4deg) translateY(-4px);}}
+@keyframes pFlip{0%{transform:scale(1) rotate(0);}50%{transform:scale(1.15) rotate(180deg);}100%{transform:scale(1) rotate(360deg);}}
+@keyframes pShake{0%,100%{transform:rotate(0);}25%{transform:rotate(-9deg);}75%{transform:rotate(9deg);}}
+@keyframes pJoy{0%,100%{transform:scale(1);}50%{transform:scale(1.28) translateY(-18px);}}
+@keyframes pSick{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(6px) rotate(3deg);}}
+@keyframes pSleep{0%,100%{transform:translateY(0) rotate(-6deg) scale(.94);}50%{transform:translateY(-6px) rotate(-6deg) scale(.94);}}
+@keyframes pDanger{0%,100%{transform:scale(1) rotate(0);}25%{transform:scale(1.17) rotate(-6deg);}75%{transform:scale(1.17) rotate(6deg);}}
+@keyframes pRun{0%{transform:translateX(-9px) scaleX(1);}50%{transform:translateX(9px) scaleX(-1);}100%{transform:translateX(-9px) scaleX(1);}}
+
+/* STATUS TAGS */
+.pet-status-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
+.s-tag{font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid;}
+.tag-sick{color:var(--green);border-color:var(--green);background:rgba(38,217,127,.1);}
+.tag-hungry{color:var(--red);border-color:var(--red);background:rgba(239,83,80,.1);}
+.tag-tired{color:var(--blue);border-color:var(--blue);background:rgba(66,165,245,.1);}
+.tag-happy{color:var(--yellow);border-color:var(--yellow);background:rgba(255,202,40,.1);}
+.tag-dirty{color:var(--pink);border-color:var(--pink);background:rgba(240,98,146,.1);}
+.tag-max{color:var(--accentH);border-color:var(--accentH);background:rgba(124,109,250,.1);}
+
+/* ACHIEVEMENTS mini-strip */
+.ach-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:240px;}
+.ach-badge{width:32px;height:32px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:default;transition:all .2s;position:relative;}
+.ach-badge.earned{border-color:var(--yellow);background:rgba(255,202,40,.08);box-shadow:0 0 10px rgba(255,202,40,.2);}
+.ach-badge.earned:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:4px 8px;font-size:.55rem;white-space:nowrap;color:var(--text);pointer-events:none;font-family:'Nunito',sans-serif;font-weight:700;}
+.ach-badge:not(.earned){opacity:.2;filter:grayscale(1);}
+
+/* RIGHT PANEL */
+.right-col{display:flex;flex-direction:column;gap:10px;}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:10px;padding:3px;margin-bottom:11px;}
+.tab-btn{flex:1;font-family:'Nunito',sans-serif;font-size:.58rem;font-weight:800;padding:7px 2px;background:transparent;border:none;color:var(--text3);cursor:pointer;border-radius:8px;transition:all .2s;letter-spacing:.5px;text-transform:uppercase;}
+.tab-btn.active{background:var(--card2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.tab-btn:hover:not(.active){color:var(--text2);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* SHOP */
+.shop-items{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.shop-item{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 6px;cursor:pointer;text-align:center;transition:all .2s;}
+.shop-item:hover{border-color:var(--yellow);background:rgba(255,202,40,.06);transform:translateY(-1px);}
+.shop-item.owned{opacity:.5;cursor:default;}
+.si-ico{font-size:1.4rem;display:block;margin-bottom:3px;}
+.si-name{font-size:.57rem;font-weight:800;color:var(--text);display:block;margin-bottom:2px;}
+.si-desc{font-size:.52rem;color:var(--text3);display:block;margin-bottom:3px;}
+.si-price{font-size:.58rem;font-weight:700;color:var(--yellow);}
+
+/* SKINS */
+.skins-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.skin-card{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 6px;cursor:pointer;text-align:center;transition:all .2s;position:relative;}
+.skin-card:hover{border-color:var(--yellow);transform:translateY(-1px);}
+.skin-card.owned{border-color:rgba(38,217,127,.3);}
+.skin-card.equipped{border-color:var(--yellow);background:rgba(255,202,40,.08);box-shadow:0 0 14px rgba(255,202,40,.2);}
+.skin-card.equipped::after{content:'ON';position:absolute;top:4px;right:5px;font-size:.44rem;font-weight:900;color:var(--yellow);}
+.sk-ico{font-size:1.6rem;display:block;margin-bottom:3px;}
+.sk-name{font-size:.57rem;font-weight:800;color:var(--text);display:block;margin-bottom:2px;}
+.sk-price{font-size:.54rem;font-weight:700;color:var(--yellow);}
+.sk-eq{font-size:.52rem;font-weight:800;color:var(--green);display:block;margin-top:2px;}
+
+/* LOOTBOXES */
+.lootbox-section{margin-bottom:8px;}
+.lootbox-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.lootbox{background:var(--card2);border:2px solid var(--border2);border-radius:var(--r2);width:56px;padding:8px 4px;cursor:pointer;text-align:center;transition:all .25s;position:relative;overflow:hidden;}
+.lootbox::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.06) 50%,transparent 60%);animation:lbSh 3s ease-in-out infinite;}
+@keyframes lbSh{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.lootbox:hover{transform:translateY(-3px) scale(1.06);}
+.lootbox.common{border-color:#546e7a;}
+.lootbox.rare{border-color:var(--blue);box-shadow:0 0 12px rgba(66,165,245,.25);}
+.lootbox.epic{border-color:#ab47bc;box-shadow:0 0 14px rgba(171,71,188,.3);}
+.lootbox.legend{border-color:var(--yellow);animation:lbLeg 2s ease-in-out infinite;}
+@keyframes lbLeg{0%,100%{box-shadow:0 0 10px rgba(255,202,40,.3);}50%{box-shadow:0 0 30px rgba(255,202,40,.7);}}
+.lb-ico{font-size:1.5rem;display:block;margin-bottom:2px;}
+.lb-name{font-size:.28rem;font-weight:900;display:block;margin-bottom:2px;letter-spacing:.5px;}
+.lb-price{font-size:.28rem;font-weight:700;color:var(--yellow);}
+.lb-badge{font-size:.26rem;padding:1px 4px;border-radius:20px;display:inline-block;margin-bottom:2px;font-weight:800;}
+.lootbox.common .lb-badge{background:rgba(84,110,122,.2);color:#90a4ae;border:1px solid #546e7a;}
+.lootbox.rare .lb-badge{background:rgba(66,165,245,.15);color:var(--blue);border:1px solid var(--blue);}
+.lootbox.epic .lb-badge{background:rgba(171,71,188,.15);color:#ce93d8;border:1px solid #ab47bc;}
+.lootbox.legend .lb-badge{background:rgba(255,202,40,.15);color:var(--yellow);border:1px solid var(--yellow);}
+.lb-divider{font-size:.6rem;font-weight:700;color:var(--text3);letter-spacing:1px;text-align:center;margin:7px 0;text-transform:uppercase;}
+
+/* DIARY */
+.diary-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.diary-list::-webkit-scrollbar{width:3px;}
+.diary-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.diary-entry{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:8px 10px;}
+.diary-day{font-size:.58rem;font-weight:800;color:var(--accentH);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;}
+.diary-text{font-size:.75rem;color:var(--text2);line-height:1.6;}
+.diary-mood{font-size:.65rem;margin-top:3px;}
+
+/* LOG */
+.log-list{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
+.log-list::-webkit-scrollbar{width:3px;}
+.log-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.log-entry{font-size:.75rem;color:var(--text3);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.log-entry.good{color:var(--green);}
+.log-entry.warn{color:var(--yellow);}
+.log-entry.bad{color:var(--pink);}
+
+/* MINI-GAMES */
+.mg-area{min-height:160px;display:flex;flex-direction:column;}
+.mg-display{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;font-size:.85rem;color:var(--text2);}
+.mg-btn{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.mg-btn:hover{border-color:var(--accent);background:rgba(124,109,250,.1);}
+.mg-inp{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--accent);width:70px;text-align:center;outline:none;}
+.mg-inp:focus{border-color:var(--accent);}
+.mg-input-row{display:flex;gap:6px;}
+.reaction-circle{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.04);border:2px solid var(--border2);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
+.reaction-circle.GO{background:rgba(38,217,127,.15);border-color:var(--green);box-shadow:0 0 28px rgba(38,217,127,.4);animation:rPulse .3s ease-in-out infinite;}
+@keyframes rPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:6px 0;}
+.mem-cell{aspect-ratio:1;font-size:1.15rem;background:var(--card2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mem-cell:hover{background:rgba(124,109,250,.1);border-color:var(--accent);}
+.mem-cell.revealed{background:rgba(38,217,127,.1);border-color:var(--green);}
+.mem-cell.matched{background:rgba(255,202,40,.1);border-color:var(--yellow);cursor:default;animation:mM .3s ease;}
+.mem-cell.wrong{background:rgba(239,83,80,.2);border-color:var(--red);animation:mW .3s ease;}
+@keyframes mM{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes mW{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.fish-area{position:relative;width:100%;height:88px;background:linear-gradient(180deg,#0a1628,#0d2040 50%,#0a2850);border:1px solid #1a3a6a;border-radius:8px;overflow:hidden;margin:6px 0;}
+.fish-emoji{position:absolute;font-size:1.15rem;cursor:pointer;user-select:none;}
+.fish-hook{position:absolute;font-size:.95rem;transition:left .1s ease;}
+.type-word{font-size:1.05rem;font-weight:900;color:var(--yellow);letter-spacing:4px;text-align:center;margin:6px 0;}
+.type-chars span{transition:color .1s;}
+.type-chars span.done{color:var(--green);}
+.type-chars span.wrong-char{color:var(--red);}
+.type-input{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--accent);width:100%;text-align:center;outline:none;margin-top:5px;transition:border-color .2s;}
+.type-input:focus{border-color:var(--accent);}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:16px;left:50%;z-index:900;transform:translateX(-50%) translateY(-70px);background:var(--card);border:1px solid var(--border2);border-radius:50px;padding:10px 22px;font-size:.8rem;font-weight:700;transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);white-space:nowrap;display:flex;align-items:center;gap:8px;}
+.notif::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.notif.warn::before{background:var(--yellow);}
+.notif.bad::before{background:var(--red);}
+.notif.show{transform:translateX(-50%) translateY(0);}
+
+/* ACHIEVEMENT POP */
+.ach-pop{position:fixed;top:60px;right:16px;z-index:900;background:var(--card);border:1px solid var(--yellow);border-radius:14px;padding:10px 16px;transform:translateX(200px);transition:transform .4s cubic-bezier(.17,.67,.35,1.4);box-shadow:0 0 20px rgba(255,202,40,.2);}
+.ach-pop.show{transform:translateX(0);}
+.ach-pop-title{font-size:.55rem;font-weight:800;color:var(--yellow);letter-spacing:1px;text-transform:uppercase;}
+.ach-pop-name{font-size:.8rem;font-weight:800;margin-top:2px;}
+.ach-pop-ico{font-size:1.6rem;}
+
+/* SLEEP */
+.sleep-ov{position:fixed;inset:0;z-index:200;background:rgba(7,8,15,.96);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;}
+.sleep-ov.on{display:flex;}
+.sleep-big{font-size:5rem;animation:pSleep 3s ease-in-out infinite;}
+.sleep-txt{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:var(--blue);}
+.sleep-bar-wrap{width:200px;height:6px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
+.sleep-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width 1s linear;border-radius:10px;}
+
+/* LOOTBOX OVERLAY */
+.lb-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0;}
+.lb-overlay.on{display:flex;}
+.lb-box-anim{font-size:5rem;animation:lbBS .4s ease-in-out 3;margin-bottom:16px;}
+@keyframes lbBS{0%,100%{transform:rotate(0) scale(1);}25%{transform:rotate(-13deg) scale(1.12);}75%{transform:rotate(13deg) scale(1.12);}}
+.lb-reveal{display:none;flex-direction:column;align-items:center;gap:10px;animation:lbR .5s cubic-bezier(.17,.67,.35,1.4) both;}
+@keyframes lbR{from{opacity:0;transform:scale(0) rotate(-20deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+.lb-reveal.show{display:flex;}
+.lb-win-ico{font-size:5rem;filter:drop-shadow(0 0 30px var(--yellow));}
+.lb-win-name{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;}
+.lb-win-name.common{color:#90a4ae;}.lb-win-name.rare{color:var(--blue);}.lb-win-name.epic{color:#ce93d8;}.lb-win-name.legend{color:var(--yellow);}
+.lb-win-desc,.lb-dup-note{font-size:.85rem;color:var(--text2);}
+.lb-dup-note{color:var(--yellow);}
+.lb-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.lb-star{position:absolute;font-size:1.1rem;animation:lbSF 1s ease forwards;}
+@keyframes lbSF{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0);}}
+.lb-close-btn{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;padding:12px 30px;background:linear-gradient(135deg,var(--accent),#5a4de8);border:none;border-radius:50px;color:#fff;cursor:pointer;margin-top:8px;transition:all .2s;}
+.lb-close-btn:hover{transform:scale(1.05);}
+
+/* DANGER */
+.danger-ov{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;}
+.danger-ov.on{display:flex;}
+.danger-icon{font-size:4.5rem;animation:pDanger .3s ease-in-out infinite;}
+.danger-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.1rem,3vw,1.6rem);font-weight:700;color:var(--red);text-shadow:0 0 20px rgba(239,83,80,.6);}
+.danger-desc{font-size:.88rem;color:var(--text2);max-width:320px;line-height:1.6;}
+.danger-timer-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;width:260px;}
+.danger-timer-label{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.danger-timer-bar-bg{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
+.danger-timer-bar{height:100%;background:linear-gradient(90deg,var(--red),#ff7043);border-radius:10px;width:100%;transition:width .5s linear;}
+.danger-timer-num{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--red);}
+.danger-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.danger-btn{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;padding:11px 18px;background:transparent;cursor:pointer;border-radius:10px;transition:all .2s;border:2px solid;}
+.danger-btn.primary{border-color:var(--red);color:var(--red);}
+.danger-btn.primary:hover{background:var(--red);color:#fff;}
+.danger-btn.secondary{border-color:var(--text3);color:var(--text3);}
+.danger-btn.secondary:hover{background:rgba(255,255,255,.08);color:var(--text);}
+
+/* EVO FLASH */
+.evo-flash{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;pointer-events:none;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);}
+.evo-flash.on{display:flex;}
+.evo-txt{font-family:'Space Grotesk',sans-serif;font-size:clamp(.9rem,3vw,1.6rem);font-weight:700;color:var(--yellow);text-shadow:0 0 30px rgba(255,202,40,.8);animation:evP .5s ease-in-out 6;}
+.evo-pet{font-size:6rem;animation:evP .5s ease-in-out 6;}
+@keyframes evP{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+
+/* GAME OVER */
+.go-screen{position:fixed;inset:0;z-index:300;background:rgba(7,8,15,.99);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:24px;}
+.go-screen.on{display:flex;}
+.go-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.5rem,5vw,2.8rem);font-weight:700;color:var(--pink);text-shadow:0 0 30px rgba(240,98,146,.5);}
+.go-info{font-size:.95rem;color:var(--text2);line-height:1.9;max-width:340px;}
+.go-restart{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;padding:14px 32px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#5a4de8);color:#fff;cursor:pointer;box-shadow:0 8px 25px rgba(124,109,250,.4);transition:all .2s;}
+.go-restart:hover{transform:scale(1.05);}
+
+/* FX float */
+.fx{position:fixed;pointer-events:none;z-index:700;font-size:1.5rem;animation:fxUp 1.1s ease forwards;}
+@keyframes fxUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-70px) scale(1.9)}}
+
+/* SOUND BTN */
+.sound-btn{position:fixed;bottom:16px;right:16px;z-index:700;background:var(--card);border:1px solid var(--border2);border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1rem;transition:all .2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.sound-btn:hover{border-color:var(--accent);}
+
+/* RESPONSIVE */
+@media(max-width:800px){.game-wrap{grid-template-columns:1fr;max-width:420px;}.center-col{order:-1;}.top-bar{flex-wrap:wrap;gap:8px;}}
+</style>
+</head>
+<body>
+<div class="bg-glow" id="bg-glow"></div>
+<div class="tod-overlay" id="tod-overlay"></div>
+<div class="dots-bg"></div>
+<div class="notif" id="notif"></div>
+<div class="ach-pop" id="ach-pop"><div class="ach-pop-ico" id="ach-pop-ico">🏆</div><div class="ach-pop-title">Достижение!</div><div class="ach-pop-name" id="ach-pop-name">—</div></div>
+
+<!-- ══ LOBBY ══ -->
+<div class="screen active" id="lobby">
+  <div class="lobby-badge">✦ Virtual Pet Game ✦</div>
+  <div class="lobby-title">Тамагочи</div>
+  <div class="lobby-sub">Вырасти своего питомца</div>
+  <div class="lobby-showcase">
+    <div class="showcase-ring">
+      <div class="showcase-inner">
+        <div class="showcase-pet" id="lobby-emo">🐶</div>
+      </div>
+    </div>
+  </div>
+  <div class="pet-selector">
+    <button class="pet-sel-btn active" onclick="lobbyPick(0)">🐱</button>
+    <button class="pet-sel-btn" onclick="lobbyPick(1)">🐶</button>
+    <button class="pet-sel-btn" onclick="lobbyPick(2)">🐰</button>
+    <button class="pet-sel-btn" onclick="lobbyPick(3)">🐹</button>
+  </div>
+  <button class="lobby-cta" onclick="showScreen('select-screen')">Начать игру <span class="arr">→</span></button>
+  <div class="lobby-stats-row" id="lobby-stats-row"></div>
+</div>
+
+<!-- ══ SELECT ══ -->
+<div class="screen" id="select-screen">
+  <div class="sel-header">
+    <div class="sel-title">Выбери питомца</div>
+    <div class="sel-sub">Каждый со своим характером</div>
+  </div>
+  <div class="animal-grid" id="animal-grid"></div>
+
+  <!-- personality picker -->
+  <div style="text-align:center;">
+    <div class="name-lbl" style="margin-bottom:8px;">Характер питомца</div>
+    <div class="personality-row" id="personality-row">
+      <button class="p-chip sel" data-p="0" onclick="pickPersonality(0)" style="color:#ffca28;border-color:#ffca28;">☀️ Весёлый</button>
+      <button class="p-chip" data-p="1" onclick="pickPersonality(1)" style="color:#42a5f5;border-color:#42a5f5;">🌊 Спокойный</button>
+      <button class="p-chip" data-p="2" onclick="pickPersonality(2)" style="color:#f06292;border-color:#f06292;">🌸 Ласковый</button>
+      <button class="p-chip" data-p="3" onclick="pickPersonality(3)" style="color:#26d97f;border-color:#26d97f;">⚡ Энергичный</button>
+    </div>
+  </div>
+
+  <div class="name-section">
+    <span class="name-lbl">Придумай кличку</span>
+    <input class="name-field" id="name-field" type="text" placeholder="Имя питомца..." maxlength="12">
+  </div>
+  <button class="begin-btn" id="begin-btn" onclick="startGame()">Начать приключение →</button>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="game-screen">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-left">
+      <span class="top-pet-name" id="g-name">—</span>
+      <span class="top-stage" id="g-stage">Малыш</span>
+      <span class="top-trait" id="g-trait" style="color:var(--yellow);border-color:var(--yellow);">☀️ Весёлый</span>
+      <span class="top-level" id="g-level">Ур. 1</span>
+    </div>
+    <div class="top-right">
+      <span class="top-time"><span class="tod-icon" id="tod-icon">☀️</span><span id="game-clock">00:00:00</span></span>
+      <span class="top-coins">🪙 <span id="coins-val">0</span></span>
+      <span class="top-mood" id="g-mood">😊</span>
+    </div>
+  </div>
+
+  <div class="game-wrap">
+
+    <!-- LEFT -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <!-- STATS -->
+      <div class="g-panel">
+        <div class="g-panel-title">Статистика</div>
+        <div class="stats-list">
+          <div class="stat-row"><span class="s-ico">🍖</span><span class="s-lbl">Голод</span><div class="s-track"><div class="s-fill sf-h" id="sf-h"></div></div><span class="s-num" id="sv-h">100</span></div>
+          <div class="stat-row"><span class="s-ico">😄</span><span class="s-lbl">Радость</span><div class="s-track"><div class="s-fill sf-p" id="sf-p"></div></div><span class="s-num" id="sv-p">100</span></div>
+          <div class="stat-row"><span class="s-ico">⚡</span><span class="s-lbl">Энергия</span><div class="s-track"><div class="s-fill sf-e" id="sf-e"></div></div><span class="s-num" id="sv-e">100</span></div>
+          <div class="stat-row"><span class="s-ico">🛁</span><span class="s-lbl">Чистота</span><div class="s-track"><div class="s-fill sf-c" id="sf-c"></div></div><span class="s-num" id="sv-c">100</span></div>
+          <div class="stat-row"><span class="s-ico">❤️</span><span class="s-lbl">Здоровье</span><div class="s-track"><div class="s-fill sf-hp" id="sf-hp"></div></div><span class="s-num" id="sv-hp">100</span></div>
+        </div>
+        <!-- XP -->
+        <div class="xp-section">
+          <div class="xp-label-row">
+            <span class="xp-lv-txt" id="xp-lv-txt">Ур. 1</span>
+            <span class="xp-num-txt" id="xp-num-txt">0 / 100 XP</span>
+          </div>
+          <div class="s-track"><div class="s-fill sf-xp" id="sf-xp" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- MOOD CARD -->
+      <div class="g-panel" style="padding:14px;">
+        <div class="g-panel-title">Настроение</div>
+        <div class="mood-card">
+          <div class="mood-big" id="mood-big">😊</div>
+          <div class="mood-txt" id="mood-txt">Счастлив</div>
+          <div class="mood-personality" id="mood-personality">☀️ Весёлый</div>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="g-panel">
+        <div class="g-panel-title">Действия</div>
+        <div class="act-grid">
+          <button class="ab feed-b"  onclick="doAct('feed')"><span class="aico">🍖</span>Кормить</button>
+          <button class="ab play-b"  onclick="doAct('play')"><span class="aico">🎮</span>Играть</button>
+          <button class="ab sleep-b" onclick="doAct('sleep')"><span class="aico">😴</span>Спать</button>
+          <button class="ab heal-b"  onclick="doAct('heal')"><span class="aico">💊</span>Лечить<span class="acost">15🪙</span></button>
+          <button class="ab bath-b"  onclick="doAct('bath')"><span class="aico">🛁</span>Купать</button>
+          <button class="ab walk-b"  onclick="doAct('walk')"><span class="aico">🦮</span>Гулять</button>
+        </div>
+      </div>
+
+    </div><!-- /LEFT -->
+
+    <!-- CENTER -->
+    <div class="center-col">
+      <div class="pet-window" id="pet-window">
+        <div class="pet-bg-aura" id="pet-bg-aura"></div>
+        <div class="weather-layer" id="weather-layer"></div>
+        <div class="pet-skin-layer" id="pet-skin-layer"></div>
+        <div class="pet-activity-bubble" id="pet-bubble"></div>
+        <div class="pet-big state-idle" id="pet-big" onclick="petPat()">🐶</div>
+        <div class="pet-activity-text" id="pet-act-text"></div>
+      </div>
+      <div class="pet-status-row" id="pet-status-row"></div>
+      <!-- achievements -->
+      <div class="ach-strip" id="ach-strip"></div>
+      <div style="font-size:.7rem;color:var(--text3);font-weight:600;">Нажми на питомца 🤍</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="g-panel" style="padding-bottom:12px;">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('minigame')">Игры</button>
+          <button class="tab-btn" onclick="switchTab('shop')">Магазин</button>
+          <button class="tab-btn" onclick="switchTab('skins')">Скины</button>
+          <button class="tab-btn" onclick="switchTab('diary')">Дневник</button>
+          <button class="tab-btn" onclick="switchTab('log')">Лог</button>
+        </div>
+
+        <div class="tab-content active" id="tab-minigame">
+          <div class="g-panel-title">Мини-игры</div>
+          <div class="mg-area"><div class="mg-display" id="mg-display">
+            <div style="font-size:.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;">Выбери игру:</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button class="mg-btn" onclick="startMG('guess')">🔢 Угадай</button>
+              <button class="mg-btn" onclick="startMG('reaction')">⚡ Реакция</button>
+              <button class="mg-btn" onclick="startMG('memory')">🧠 Память</button>
+              <button class="mg-btn" onclick="startMG('fish')">🎣 Рыбалка</button>
+              <button class="mg-btn" style="grid-column:1/-1" onclick="startMG('type')">⌨️ Печатай</button>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="tab-content" id="tab-shop">
+          <div class="g-panel-title">Магазин</div>
+          <div class="shop-items" id="shop-items"></div>
+        </div>
+
+        <div class="tab-content" id="tab-skins">
+          <div class="g-panel-title">Лутбоксы</div>
+          <div class="lootbox-section"><div class="lootbox-row" id="lootbox-row"></div></div>
+          <div class="lb-divider">── Коллекция ──</div>
+          <div class="skins-grid" id="skins-grid"></div>
+        </div>
+
+        <div class="tab-content" id="tab-diary">
+          <div class="g-panel-title">Дневник питомца</div>
+          <div class="diary-list" id="diary-list">
+            <div style="font-size:.75rem;color:var(--text3);text-align:center;padding:16px;">Записи появятся по мере взросления...</div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-log">
+          <div class="g-panel-title">Журнал событий</div>
+          <div class="log-list" id="log-list"></div>
+        </div>
+
+      </div>
+    </div><!-- /RIGHT -->
+
+  </div><!-- /GAME WRAP -->
+</div><!-- /GAME SCREEN -->
+
+<!-- SLEEP -->
+<div class="sleep-ov" id="sleep-ov">
+  <div class="sleep-big" id="sleep-big">💤</div>
+  <div class="sleep-txt">Питомец спит...</div>
+  <div class="sleep-bar-wrap"><div class="sleep-bar" id="sleep-bar"></div></div>
+</div>
+
+<!-- LOOTBOX OVERLAY -->
+<div class="lb-overlay" id="lb-overlay">
+  <div class="lb-stars" id="lb-stars"></div>
+  <div class="lb-box-anim" id="lb-box-anim">📦</div>
+  <div class="lb-reveal" id="lb-reveal">
+    <div class="lb-win-ico" id="lb-win-ico">🎩</div>
+    <div class="lb-win-name" id="lb-win-name">???</div>
+    <div class="lb-win-desc" id="lb-win-desc"></div>
+    <div class="lb-dup-note" id="lb-dup-note"></div>
+    <button class="lb-close-btn" onclick="closeLootbox()">Забрать!</button>
+  </div>
+</div>
+
+<!-- DANGER -->
+<div class="danger-ov" id="danger-ov">
+  <div class="danger-icon" id="danger-icon">☠️</div>
+  <div class="danger-title" id="danger-title">Опасность!</div>
+  <div class="danger-desc" id="danger-desc"></div>
+  <div class="danger-timer-wrap">
+    <div class="danger-timer-label">Времени осталось</div>
+    <div class="danger-timer-bar-bg"><div class="danger-timer-bar" id="danger-bar"></div></div>
+    <div class="danger-timer-num" id="danger-timer-num">15</div>
+  </div>
+  <div class="danger-actions" id="danger-actions"></div>
+</div>
+
+<!-- EVO FLASH -->
+<div class="evo-flash" id="evo-flash">
+  <div class="evo-txt">✦ Эволюция! ✦</div>
+  <div class="evo-pet" id="evo-pet">🐱</div>
+  <div class="evo-txt" id="evo-stage-txt"></div>
+</div>
+
+<!-- GAME OVER -->
+<div class="go-screen" id="go-screen">
+  <div style="font-size:4rem">💔</div>
+  <div class="go-title">Питомец погиб...</div>
+  <div class="go-info" id="go-info"></div>
+  <button class="go-restart" onclick="restartGame()">Играть снова</button>
+</div>
+
+<script>
+/* ═══════════ DATA ═══════════ */
+const ANIMALS = [
+  {
+    name:'Кошка', type:'Домашнее',
+    stages:[
+      {min:0,  evo:'🥚', label:'ЯЙЦО'},
+      {min:5,  evo:'🐱', label:'КОТЁНОК'},
+      {min:20, evo:'😸', label:'КОТ'},
+      {min:50, evo:'🦁', label:'ЛЕВ'},
+    ]
+  },
+  {
+    name:'Собака', type:'Домашнее',
+    stages:[
+      {min:0,  evo:'🥚', label:'ЯЙЦО'},
+      {min:5,  evo:'🐶', label:'ЩЕНОК'},
+      {min:20, evo:'🐕', label:'СОБАКА'},
+      {min:50, evo:'🐺', label:'ВОЛК'},
+    ]
+  },
+  {
+    name:'Кролик', type:'Пушистое',
+    stages:[
+      {min:0,  evo:'🥚', label:'ЯЙЦО'},
+      {min:5,  evo:'🐰', label:'КРОЛЬЧОНОК'},
+      {min:20, evo:'🐇', label:'КРОЛИК'},
+      {min:50, evo:'🦊', label:'МАСТЕР'},
+    ]
+  },
+  {
+    name:'Хомяк', type:'Грызун',
+    stages:[
+      {min:0,  evo:'🥚', label:'ЯЙЦО'},
+      {min:5,  evo:'🐹', label:'ХОМЯЧОК'},
+      {min:20, evo:'🐭', label:'ХОМЯК'},
+      {min:50, evo:'🐾', label:'ЛЕГЕНДА'},
+    ]
+  },
+];
+
+const SHOP_ITEMS = [
+  {id:'food_boost', ico:'🍗', name:'ДЕЛИКАТЕС',  price:30, desc:'+40 голод', type:'consumable'},
+  {id:'toy',        ico:'🪀', name:'ИГРУШКА',    price:50, desc:'+30 радость', type:'consumable'},
+  {id:'vitamin',    ico:'💉', name:'ВИТАМИН',    price:40, desc:'+30 здоровье', type:'consumable'},
+  {id:'shampoo',    ico:'🧴', name:'ШАМПУНЬ',    price:25, desc:'+50 чистота', type:'consumable'},
+  {id:'medal',      ico:'🏅', name:'МЕДАЛЬ',     price:100, desc:'Трофей', type:'trophy'},
+  {id:'crown',      ico:'👑', name:'КОРОНА',     price:200, desc:'Элита', type:'trophy'},
+];
+
+const SKINS = [
+  {id:'sk_cap',    ico:'🧢', name:'КЕПКА',       price:40},
+  {id:'sk_cowboy', ico:'🤠', name:'КОВБОЙ',      price:60},
+  {id:'sk_crown',  ico:'👑', name:'КОРОНА',      price:120},
+  {id:'sk_witch',  ico:'🧙', name:'ВЕДЬМА',      price:80},
+  {id:'sk_santa',  ico:'🎅', name:'САНТА',       price:90},
+  {id:'sk_ninja',  ico:'🥷', name:'НИНДЗЯ',      price:100},
+  {id:'sk_robot',  ico:'🤖', name:'РОБОТ',       price:150},
+  {id:'sk_alien',  ico:'👽', name:'ПРИШЕЛЕЦ',    price:130},
+  {id:'sk_glasses',ico:'🕶️', name:'ОЧКИ',        price:35},
+  {id:'sk_rainbow',ico:'🌈', name:'РАДУГА',      price:70},
+];
+
+const LOOTBOXES = [
+  {
+    id:'lb_common', ico:'📦', name:'ОБЫЧНЫЙ', rarity:'common', price:20,
+    pool:['sk_cap','sk_glasses','sk_rainbow']
+  },
+  {
+    id:'lb_rare', ico:'💎', name:'РЕДКИЙ', rarity:'rare', price:50,
+    pool:['sk_cowboy','sk_witch','sk_santa','sk_cap','sk_glasses']
+  },
+  {
+    id:'lb_epic', ico:'🔮', name:'ЭПИЧЕСКИЙ', rarity:'epic', price:90,
+    pool:['sk_ninja','sk_alien','sk_robot','sk_cowboy','sk_witch']
+  },
+  {
+    id:'lb_legend', ico:'⭐', name:'ЛЕГЕНД.', rarity:'legend', price:150,
+    pool:['sk_crown','sk_robot','sk_alien','sk_ninja','sk_santa']
+  },
+];
+
+/* ═══════════ STATE ═══════════ */
+let pet   = null;
+let gLoop = null;
+let clkIv = null;
+let chosen= null;
+let sleeping = false;
+let busy  = false;
+let lobbyIdx = 0;
+let mgState = null;
+let inventory = [];
+let startTime = null;
+let equippedSkin = null;
+let selectedPersonality = 0;
+let diaryEntries = [];
+let achievements = {};
+let todTimer = null;
+let weatherTimer = null;
+
+/* ═══════════ PERSONALITIES ═══════════ */
+const PERSONALITIES = [
+  { id:0, name:'Весёлый',     icon:'☀️', color:'var(--yellow)',
+    moodBonus:{play:8,feed:2,walk:4},  idleFavour:'dance',
+    phrases:['Давай играть!','Хочу бегать!','Весело же!','Ура, монетка!'] },
+  { id:1, name:'Спокойный',   icon:'🌊', color:'var(--blue)',
+    moodBonus:{sleep:10,bath:8,feed:5}, idleFavour:'sit',
+    phrases:['Всё хорошо...','Тихо и уютно','Немного устал','Умиротворение'] },
+  { id:2, name:'Ласковый',    icon:'🌸', color:'var(--pink)',
+    moodBonus:{pat:6,heal:8,feed:6},  idleFavour:'sneeze',
+    phrases:['Обними меня!','Ты лучший!','Люблю тебя~','Не уходи!'] },
+  { id:3, name:'Энергичный',  icon:'⚡', color:'var(--green)',
+    moodBonus:{walk:12,play:10,feed:3}, idleFavour:'flip',
+    phrases:['ПОЕХАЛИ!!','Быстрее!','Ещё раз!','Я полон сил!'] },
+];
+
+/* ═══════════ ACHIEVEMENTS ═══════════ */
+const ACHIEV_LIST = [
+  { id:'first_feed',  ico:'🍖', name:'Первый обед',     desc:'Покорми питомца впервые',      cond: ()=> pet && pet.hunger>=50 },
+  { id:'rich',        ico:'💰', name:'Богатей',          desc:'Накопи 200 монет',             cond: ()=> pet && pet.coins>=200 },
+  { id:'healthy',     ico:'💪', name:'Здоровяк',         desc:'Здоровье 100 пять тиков подряд',cond: ()=> pet && pet.health>=100 },
+  { id:'evolved',     ico:'✨', name:'Первая эволюция',  desc:'Вырасти до второй стадии',     cond: ()=> pet && pet.evoStage>=2 },
+  { id:'max_evolved', ico:'🦁', name:'Легенда',          desc:'Достичь максимальной стадии',  cond: ()=> pet && pet.evoStage>=3 },
+  { id:'level10',     ico:'🏆', name:'Ветеран',          desc:'Достичь 10 уровня',            cond: ()=> pet && pet.level>=10 },
+  { id:'skinned',     ico:'🎩', name:'Модник',           desc:'Надень скин',                  cond: ()=> !!equippedSkin },
+  { id:'survivor',    ico:'⚔️', name:'Выживший',         desc:'Пережить 3 опасности',         cond: ()=> (pet&&pet.dangersBeaten||0)>=3 },
+];
+
+/* ═══════════ LOBBY STATS ═══════════ */
+function buildLobbyStats() {
+  const row = document.getElementById('lobby-stats-row');
+  if(!row) return;
+  const earned = ACHIEV_LIST.filter(a=>achievements[a.id]);
+  row.innerHTML = earned.length ?
+    earned.map(a=>`<div class="lobby-stat-chip">${a.ico} ${a.name}</div>`).join('') :
+    '<div class="lobby-stat-chip">🎮 Начни игру!</div>';
+}
+
+/* ═══════════ XP SYSTEM ═══════════ */
+function xpNeeded(lv) { return lv * 100; }
+
+function addXP(amount) {
+  if(!pet) return;
+  pet.xp = (pet.xp||0) + amount;
+  const needed = xpNeeded(pet.level||1);
+  if(pet.xp >= needed) {
+    pet.xp -= needed;
+    pet.level = (pet.level||1) + 1;
+    pet.coins += pet.level * 10;
+    showNotif('⬆️ Уровень ' + pet.level + '! +' + (pet.level*10) + ' монет');
+    addLog('Новый уровень: ' + pet.level, 'good');
+    fx('⬆️');
+    renderXP();
+    checkAchievements();
+  }
+  renderXP();
+}
+
+function renderXP() {
+  if(!pet) return;
+  const lv = pet.level||1;
+  const xp = pet.xp||0;
+  const need = xpNeeded(lv);
+  const el = document.getElementById('sf-xp');
+  if(el) el.style.width = Math.min(100,(xp/need*100)) + '%';
+  const lt = document.getElementById('xp-lv-txt');
+  if(lt) lt.textContent = 'Ур. ' + lv;
+  const nt = document.getElementById('xp-num-txt');
+  if(nt) nt.textContent = xp + ' / ' + need + ' XP';
+  const gl = document.getElementById('g-level');
+  if(gl) gl.textContent = 'Ур. ' + lv;
+}
+
+/* ═══════════ ACHIEVEMENTS ═══════════ */
+function checkAchievements() {
+  ACHIEV_LIST.forEach(a => {
+    if(!achievements[a.id] && a.cond()) {
+      achievements[a.id] = true;
+      showAchievPop(a);
+      addLog('🏆 Достижение: ' + a.name, 'good');
+    }
+  });
+  renderAchievStrip();
+}
+
+function showAchievPop(a) {
+  const pop = document.getElementById('ach-pop');
+  document.getElementById('ach-pop-ico').textContent = a.ico;
+  document.getElementById('ach-pop-name').textContent = a.name;
+  pop.classList.add('show');
+  setTimeout(() => pop.classList.remove('show'), 3500);
+}
+
+function renderAchievStrip() {
+  const strip = document.getElementById('ach-strip');
+  if(!strip) return;
+  strip.innerHTML = ACHIEV_LIST.map(a => {
+    const e = achievements[a.id];
+    return `<div class="ach-badge ${e?'earned':''}" data-tip="${a.name}: ${a.desc}">${a.ico}</div>`;
+  }).join('');
+}
+
+/* ═══════════ DIARY SYSTEM ═══════════ */
+const DIARY_EVENTS = {
+  day1:   (nm,p)=>`Сегодня я появился на свет! Меня назвали ${nm}. Я ${p.icon} ${p.name} питомец. Мир такой большой...`,
+  evo2:   (nm,s)=>`Я вырос! Теперь я ${s.evo} ${s.label}. Чувствую себя сильнее!`,
+  evo3:   (nm,s)=>`Невероятно! Я снова эволюционировал — ${s.evo} ${s.label}. Я становлюсь настоящей легендой!`,
+  evo4:   (nm,s)=>`Финальная форма достигнута! Я — ${s.evo} ${s.label}. Больше некуда расти... но я счастлив!`,
+  sick:   (nm)  =>`Плохой день. Я заболел и чувствую себя ужасно. Надеюсь, хозяин меня вылечит...`,
+  healed: (nm)  =>`Я снова здоров! Хозяин позаботился обо мне. Люблю его!`,
+  danger: (nm,d)=>`Сегодня произошло кое-что страшное: ${d}. Хозяин спас меня. Я так благодарен!`,
+  rich:   (nm)  =>`У нас теперь много монет! Богатая жизнь — это хорошо.`,
+  level5: (nm)  =>`Я достиг 5 уровня! Хозяин хорошо за мной ухаживает.`,
+};
+
+function addDiaryEntry(key, ...args) {
+  const fn = DIARY_EVENTS[key];
+  if(!fn) return;
+  const text = fn(...args);
+  const personality = PERSONALITIES[selectedPersonality];
+  const entry = {
+    day: pet ? pet.age : 0,
+    text,
+    mood: document.getElementById('g-mood')?.textContent || '😊',
+    time: new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),
+  };
+  diaryEntries.unshift(entry);
+  renderDiary();
+}
+
+function renderDiary() {
+  const list = document.getElementById('diary-list');
+  if(!list) return;
+  if(!diaryEntries.length) {
+    list.innerHTML = '<div style="font-size:.75rem;color:var(--text3);text-align:center;padding:16px;">Записи появятся по мере взросления...</div>';
+    return;
+  }
+  list.innerHTML = diaryEntries.map(e=>`
+    <div class="diary-entry">
+      <div class="diary-day">День ${e.day} · ${e.time}</div>
+      <div class="diary-text">${e.text}</div>
+      <div class="diary-mood">${e.mood}</div>
+    </div>`).join('');
+}
+
+/* ═══════════ TIME OF DAY ═══════════ */
+function updateTimeOfDay() {
+  const h = new Date().getHours();
+  let icon, tint, label;
+  if(h>=6&&h<10)       { icon='🌅'; tint='rgba(255,180,80,.04)';  label='Утро'; }
+  else if(h>=10&&h<17) { icon='☀️'; tint='rgba(255,255,100,.02)'; label='День'; }
+  else if(h>=17&&h<20) { icon='🌆'; tint='rgba(255,120,40,.05)';  label='Вечер'; }
+  else if(h>=20&&h<23) { icon='🌃'; tint='rgba(40,50,120,.08)';   label='Ночь'; }
+  else                  { icon='🌙'; tint='rgba(20,30,100,.12)';   label='Глубокая ночь'; }
+
+  const todIcon = document.getElementById('tod-icon');
+  if(todIcon) todIcon.textContent = icon;
+  const todOv = document.getElementById('tod-overlay');
+  if(todOv) todOv.style.background = tint;
+  // Night mode on pet window
+  const pw = document.getElementById('pet-window');
+  if(pw) pw.classList.toggle('night-mode', h<6||h>=22);
+  // boost sleep during night
+  if(pet && (h<6||h>=23)) {
+    pet._nightBonus = true;
+  } else if(pet) {
+    pet._nightBonus = false;
+  }
+}
+
+/* ═══════════ WEATHER ═══════════ */
+const WEATHERS = [
+  {id:'none',  particles:[]},
+  {id:'rain',  particles:['💧','🌧️']},
+  {id:'snow',  particles:['❄️','🌨️']},
+  {id:'stars', particles:['⭐','✨','🌟']},
+];
+let currentWeather = 0;
+
+function triggerRandomWeather() {
+  const w = Math.floor(Math.random()*WEATHERS.length);
+  setWeather(w);
+  setTimeout(()=>setWeather(0), 20000);
+}
+
+function setWeather(idx) {
+  currentWeather = idx;
+  const layer = document.getElementById('weather-layer');
+  if(!layer) return;
+  layer.innerHTML='';
+  if(idx===0){layer.classList.remove('on');return;}
+  layer.classList.add('on');
+  const w = WEATHERS[idx];
+  for(let i=0;i<6;i++){
+    const p = document.createElement('div');
+    p.className='w-particle';
+    p.textContent = w.particles[Math.floor(Math.random()*w.particles.length)];
+    p.style.left = (Math.random()*90)+'%';
+    p.style.animationDuration = (1+Math.random()*2)+'s';
+    p.style.animationDelay = (Math.random()*2)+'s';
+    layer.appendChild(p);
+  }
+}
+
+/* ═══════════ PERSONALITY SELECT ═══════════ */
+function pickPersonality(idx) {
+  selectedPersonality = idx;
+  document.querySelectorAll('.p-chip').forEach((b,i)=>{
+    b.classList.toggle('sel', i===idx);
+  });
+}
+
+/* ═══════════ LOBBY ═══════════ */
+function lobbyPick(i) {
+  lobbyIdx = i;
+  document.querySelectorAll('.pet-dot').forEach((d,j) => d.classList.toggle('active', j===i));
+  document.querySelectorAll('.pet-sel-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.getElementById('lobby-emo').textContent = ANIMALS[i].stages[1].evo;
+}
+
+/* ═══════════ SCREENS ═══════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='select-screen') buildGrid();
+  if(id==='lobby') buildLobbyStats();
+}
+
+/* ═══════════ SELECT ═══════════ */
+function buildGrid() {
+  const g = document.getElementById('animal-grid');
+  g.innerHTML = '';
+  ANIMALS.forEach((a,i) => {
+    const d = document.createElement('div');
+    d.className = 'a-card';
+    if(chosen && chosen.name === a.name) d.classList.add('selected');
+    const traitNames=['Весёлый','Спокойный','Ласковый','Энергичный'];
+    d.innerHTML = `<span class="a-emo">${a.stages[1].evo}</span><div class="a-nm">${a.name}</div><div class="a-type">${a.type}</div>`;
+    d.style.animationDelay = (i * 0.08) + 's';
+    d.style.animation = 'cardAppear 0.4s ease both';
+    d.onclick = () => pickAnimal(i, d);
+    g.appendChild(d);
+  });
+  document.getElementById('name-field').oninput = checkBegin;
+}
+
+function pickAnimal(i, el) {
+  document.querySelectorAll('.a-card').forEach(c => {
+    c.classList.remove('selected');
+    c.style.animation = '';
+  });
+  el.classList.add('selected');
+  // bounce effect
+  el.style.animation = 'cardSelect 0.3s ease';
+  setTimeout(() => el.style.animation = '', 300);
+  chosen = ANIMALS[i];
+
+  // Preview in lobby pet
+  document.getElementById('lobby-emo').textContent = ANIMALS[i].stages[1].evo;
+  checkBegin();
+}
+
+function checkBegin() {
+  const ok = chosen && document.getElementById('name-field').value.trim();
+  document.getElementById('begin-btn').classList.toggle('on', !!ok);
+}
+
+/* ═══════════ START GAME ═══════════ */
+function startGame() {
+  const nm = document.getElementById('name-field').value.trim();
+  if(!nm || !chosen) return;
+
+  pet = {
+    name: nm,
+    animal: chosen,
+    hunger: 80, happy: 80, energy: 80, clean: 80, health: 90,
+    coins: 10, age: 5, evoStage: 1, sick: false, sickTurns: 0,
+    xp: 0, level: 1, dangersBeaten: 0,
+    personality: selectedPersonality,
+    _nightBonus: false,
+  };
+  inventory = [];
+  diaryEntries = [];
+  achievements = {};
+  startTime = Date.now();
+
+  // update new top bar
+  const gnm = document.getElementById('g-name');
+  if(gnm) gnm.textContent = nm;
+  document.getElementById('pet-big').textContent = chosen.stages[1].evo;
+  document.getElementById('sleep-big').textContent = chosen.stages[1].evo;
+  showScreen('game-screen');
+  buildShop();
+  buildSkins();
+  buildLootboxes();
+  render();
+  addLog('Игра началась! ' + nm + ' появился на свет.', 'good');
+
+  clearInterval(gLoop);
+  gLoop = setInterval(tick, 4000);
+  startIdleLoop();
+  startIdleAnimLoop();
+  startDangerLoop();
+
+  clearInterval(clkIv);
+  clkIv = setInterval(updateClock, 1000);
+  setInterval(diseaseCheck, 30000);
+
+  // new systems
+  updateTimeOfDay();
+  clearInterval(todTimer);
+  todTimer = setInterval(updateTimeOfDay, 60000);
+  clearInterval(weatherTimer);
+  weatherTimer = setInterval(triggerRandomWeather, 45000);
+
+  // personality display
+  const p = PERSONALITIES[selectedPersonality];
+  const gt = document.getElementById('g-trait');
+  if(gt) { gt.textContent = p.icon+' '+p.name; gt.style.color=p.color; gt.style.borderColor=p.color; }
+  const mp = document.getElementById('mood-personality');
+  if(mp) mp.textContent = p.icon+' '+p.name;
+
+  renderXP();
+  renderAchievStrip();
+
+  // first diary entry
+  setTimeout(()=>addDiaryEntry('day1', nm, p), 500);
+}
+
+/* ═══════════ TICK ═══════════ */
+function tick() {
+  if(!pet || sleeping) return;
+  pet.hunger = cl(pet.hunger - 3);
+  pet.happy  = cl(pet.happy  - 2);
+  pet.energy = cl(pet.energy - 1.5);
+  pet.clean  = cl(pet.clean  - 1);
+  pet.age++;
+
+  if(pet.sick) {
+    pet.health = cl(pet.health - 4);
+    pet.sickTurns++;
+    if(pet.sickTurns > 8) { gameOver('болезнь'); return; }
+  }
+  if(pet.hunger < 15 || pet.energy < 8) {
+    pet.health = cl(pet.health - 3);
+  }
+  if(pet.clean < 15) pet.health = cl(pet.health - 1.5);
+  if(pet.health <= 0) { gameOver('истощение'); return; }
+
+  checkEvo();
+  render();
+  autoAlerts();
+  checkAchievements();
+
+  // XP for surviving each tick
+  addXP(5 + (pet.level||1));
+
+  // coin for staying alive
+  if(pet.age % 5 === 0) {
+    pet.coins += 3;
+    addLog('+3 монеты за выживание!', 'good');
+  }
+
+  // Level 5 diary
+  if((pet.level||1)===5 && !achievements._diary5) {
+    achievements._diary5=true; addDiaryEntry('level5', pet.name);
+  }
+  if(pet.coins>=200 && !achievements._diaryRich) {
+    achievements._diaryRich=true; addDiaryEntry('rich', pet.name);
+  }
+}
+
+/* ═══════════ ALERTS ═══════════ */
+function autoAlerts() {
+  if(pet.sick)           { showNotif('🤒 ' + pet.name + ' болен! Лечи!', 'bad'); sndAlert(); }
+  else if(pet.hunger<20) showNotif('🍖 ' + pet.name + ' умирает с голода!', 'bad');
+  else if(pet.health<25) showNotif('❤️ Критическое здоровье!', 'bad');
+  else if(pet.energy<15) showNotif('😴 ' + pet.name + ' валится с ног!', 'warn');
+  else if(pet.happy<20)  showNotif('😢 ' + pet.name + ' очень грустит!', 'warn');
+  else if(pet.clean<20)  showNotif('🛁 ' + pet.name + ' грязный!', 'warn');
+}
+
+/* ═══════════ DISEASE ═══════════ */
+function diseaseCheck() {
+  if(!pet || sleeping || pet.sick) return;
+  const chance = pet.clean < 30 ? 0.35 : pet.health < 50 ? 0.2 : 0.08;
+  if(Math.random() < chance) {
+    pet.sick = true;
+    pet.sickTurns = 0;
+    showNotif('🤒 ' + pet.name + ' заболел!', 'bad');
+    addLog(pet.name + ' заболел! Используй лечение.', 'bad');
+    render();
+    setTimeout(()=>addDiaryEntry('sick',pet.name),300);
+  }
+}
+
+/* ═══════════ EVOLUTION ═══════════ */
+function checkEvo() {
+  const stages = pet.animal.stages;
+  let newStage = 0;
+  stages.forEach((s,i) => { if(pet.age >= s.min) newStage = i; });
+  if(newStage > pet.evoStage) {
+    pet.evoStage = newStage;
+    triggerEvo(stages[newStage]);
+  }
+}
+
+function triggerEvo(stage) {
+  const flash = document.getElementById('evo-flash');
+  document.getElementById('evo-pet').textContent = stage.evo;
+  document.getElementById('evo-stage-txt').textContent = stage.label;
+  document.getElementById('sleep-big').textContent = stage.evo;
+  flash.classList.add('on');
+  sndEvo(); addXP(50);
+  addLog('✦ ЭВОЛЮЦИЯ! Теперь ' + stage.label, 'good');
+  const key = ['','','evo2','evo3','evo4'][pet.evoStage]||'evo2';
+  setTimeout(()=>addDiaryEntry(key, pet.name, stage), 800);
+  setTimeout(() => flash.classList.remove('on'), 3000);
+  checkAchievements();
+}
+
+/* ═══════════ RENDER ═══════════ */
+function render() {
+  if(!pet) return;
+  const stats = ['h','p','e','c','hp'];
+  const keys  = ['hunger','happy','energy','clean','health'];
+  stats.forEach((s,i) => {
+    document.getElementById('sf-'+s).style.width = pet[keys[i]] + '%';
+    document.getElementById('sv-'+s).textContent = Math.round(pet[keys[i]]);
+  });
+
+  document.getElementById('coins-val').textContent = pet.coins;
+  // top bar updates
+  const gnm2 = document.getElementById('g-name'); if(gnm2) gnm2.textContent = pet.name;
+  const gst = document.getElementById('g-stage');
+  if(gst) gst.textContent = pet.animal.stages[pet.evoStage].label;
+  // mood emoji for top bar
+  const avg = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
+  const moodEl = document.getElementById('g-mood');
+  if(moodEl) moodEl.textContent = pet.sick ? '🤒' : avg>70 ? '😄' : avg>45 ? '😊' : avg>25 ? '😕' : '😢';
+
+  const stage = pet.animal.stages[pet.evoStage];
+  document.getElementById('pet-big').textContent = stage.evo;
+  const evoEl = document.getElementById('pet-evo'); if(evoEl) evoEl.textContent = '● ' + stage.label;
+  const gst2 = document.getElementById('g-stage'); if(gst2) gst2.textContent = stage.label;
+
+  // Mood animation
+  const pb = document.getElementById('pet-big');
+  pb.classList.remove('pet-sad','pet-sick','pet-sleep');
+  if(pet.sick) pb.classList.add('pet-sick');
+  else {
+    const avg = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
+    if(avg < 30) pb.classList.add('pet-sad');
+  }
+
+  // Keep skin layer visible if equipped
+  if(equippedSkin) {
+    const layer = document.getElementById('pet-skin-layer');
+    if(layer) layer.style.display = 'block';
+  }
+
+  // Status tags
+  const sr = document.getElementById('pet-status-row');
+  sr.innerHTML = '';
+  if(pet.sick)            sr.innerHTML += '<span class="s-tag tag-sick">БОЛЕН</span>';
+  if(pet.hunger < 25)     sr.innerHTML += '<span class="s-tag tag-hungry">ГОЛОДЕН</span>';
+  if(pet.energy < 25)     sr.innerHTML += '<span class="s-tag tag-tired">УСТАЛ</span>';
+  if(pet.clean < 25)      sr.innerHTML += '<span class="s-tag tag-dirty">ГРЯЗНЫЙ</span>';
+  if(pet.happy > 70 && !pet.sick) sr.innerHTML += '<span class="s-tag tag-happy">СЧАСТЛИВ</span>';
+  if(pet.level>=5)        sr.innerHTML += '<span class="s-tag tag-max">ВЕТ.</span>';
+
+  // Mood card
+  const avg2 = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
+  const moodBig = document.getElementById('mood-big');
+  const moodTxt = document.getElementById('mood-txt');
+  if(moodBig && moodTxt) {
+    if(pet.sick){ moodBig.textContent='🤒'; moodTxt.textContent='Болеет'; }
+    else if(avg2>80){ moodBig.textContent='🤩'; moodTxt.textContent='В восторге!'; }
+    else if(avg2>65){ moodBig.textContent='😄'; moodTxt.textContent='Счастлив'; }
+    else if(avg2>50){ moodBig.textContent='😊'; moodTxt.textContent='Доволен'; }
+    else if(avg2>35){ moodBig.textContent='😐'; moodTxt.textContent='Так себе'; }
+    else if(avg2>20){ moodBig.textContent='😕'; moodTxt.textContent='Грустит'; }
+    else            { moodBig.textContent='😢'; moodTxt.textContent='Очень плохо'; }
+  }
+
+  // Pet aura
+  const aura = document.getElementById('pet-bg-aura');
+  if(aura){
+    aura.className='pet-bg-aura';
+    if(pet.sick) aura.classList.add('sick');
+    else if(avg2>65) aura.classList.add('happy');
+    else if(avg2<30) aura.classList.add('sad');
+  }
+}
+
+/* ═══════════ ACTIONS ═══════════ */
+function doAct(type) {
+  if(!pet || sleeping || busy) return;
+  busy = true; setTimeout(()=>busy=false, 700);
+  const pb = document.getElementById('pet-big');
+
+  switch(type) {
+    case 'feed':
+      if(pet.hunger>=95){ showNotif('😋 Уже сыт!'); busy=false; return; }
+      pet.hunger = Math.min(100, pet.hunger+25);
+      pet.coins = Math.max(0, pet.coins-2);
+      sndFeed(); fx('🍖'); addLog('Покормил ' + pet.name, 'good');
+      break;
+    case 'play':
+      if(pet.energy<15){ showNotif('😴 Нет сил!','warn'); busy=false; return; }
+      const pBonus = PERSONALITIES[pet.personality||0].moodBonus.play||0;
+      pet.happy  = Math.min(100, pet.happy+20+pBonus);
+      pet.energy = cl(pet.energy-15);
+      pet.hunger = cl(pet.hunger-8);
+      pet.coins += 5;
+      addXP(15);
+      sndPlay(); fx('🎮'); addLog('Поиграл с ' + pet.name + ' +5 монет', 'good');
+      break;
+    case 'sleep':
+      sndSleep(); doSleep(); return;
+    case 'heal':
+      if(!pet.sick && pet.health>=90){ showNotif('💊 Питомец здоров!'); busy=false; return; }
+      if(pet.coins < 15){ showNotif('🪙 Нужно 15 монет!','warn'); busy=false; return; }
+      const wasSick = pet.sick;
+      pet.sick = false; pet.sickTurns = 0;
+      pet.health = Math.min(100, pet.health+30);
+      pet.coins -= 15;
+      addXP(20);
+      sndHeal(); fx('💊'); addLog(pet.name + ' вылечен!', 'good');
+      if(wasSick) setTimeout(()=>addDiaryEntry('healed',pet.name),300);
+      break;
+    case 'bath':
+      if(pet.clean>=95){ showNotif('🛁 Уже чистый!'); busy=false; return; }
+      pet.clean = Math.min(100, pet.clean+45);
+      pet.happy = Math.min(100, pet.happy+5);
+      sndBath(); fx('🛁'); addLog('Искупал ' + pet.name, 'good');
+      break;
+    case 'walk':
+      if(pet.energy<20){ showNotif('😴 Слишком устал!','warn'); busy=false; return; }
+      const wBonus = PERSONALITIES[pet.personality||0].moodBonus.walk||0;
+      pet.happy  = Math.min(100, pet.happy+15+wBonus);
+      pet.health = Math.min(100, pet.health+5);
+      pet.energy = cl(pet.energy-20);
+      pet.hunger = cl(pet.hunger-10);
+      pet.coins += 8;
+      addXP(10);
+      sndWalk(); fx('🦮'); addLog('Прогулка! +8 монет', 'good');
+      break;
+  }
+
+  pb.classList.add('pet-happy');
+  setTimeout(()=>pb.classList.remove('pet-happy'),2000);
+  render();
+}
+
+/* ═══════════ SLEEP ═══════════ */
+function doSleep() {
+  sleeping = true;
+  const ov = document.getElementById('sleep-ov');
+  const bar = document.getElementById('sleep-bar');
+  ov.classList.add('on');
+  bar.style.width = '0%';
+
+  let t = 0;
+  const total = 5;
+  const iv = setInterval(() => {
+    t++;
+    bar.style.width = (t/total*100) + '%';
+    pet.energy = Math.min(100, pet.energy+12);
+    pet.health = Math.min(100, pet.health+3);
+    pet.happy  = Math.min(100, pet.happy+4);
+    render();
+    if(t >= total) {
+      clearInterval(iv);
+      sleeping = false; busy = false;
+      ov.classList.remove('on');
+      showNotif('☀️ ' + pet.name + ' проснулся!');
+      addLog(pet.name + ' выспался', 'good');
+    }
+  }, 1000);
+}
+
+/* ═══════════ PAT ═══════════ */
+function petPat() {
+  if(!pet) return;
+  const patBonus = PERSONALITIES[pet.personality||0].moodBonus.pat||0;
+  pet.happy = Math.min(100, pet.happy+4+patBonus);
+  sndPat();
+  fx(['💕','✨','💖','🌟','⭐'][Math.random()*5|0]);
+  addXP(3);
+  // personality phrase occasionally
+  if(Math.random()<.35) {
+    const p = PERSONALITIES[pet.personality||0];
+    const phrase = p.phrases[Math.floor(Math.random()*p.phrases.length)];
+    showBubble('💬', phrase);
+  }
+  render();
+}
+
+/* ═══════════ SHOP ═══════════ */
+function buildShop() {
+  const c = document.getElementById('shop-items');
+  c.innerHTML = '';
+  SHOP_ITEMS.forEach(item => {
+    const d = document.createElement('div');
+    const owned = inventory.includes(item.id) && item.type==='trophy';
+    d.className = 'shop-item' + (owned?' owned':'');
+    d.innerHTML = `<span class="si-ico">${item.ico}</span><span class="si-name">${item.name}</span><span class="si-desc">${item.desc||''}</span><span class="si-price">🪙 ${item.price}</span>`;
+    if(!owned) d.onclick = () => buyItem(item);
+    c.appendChild(d);
+  });
+}
+
+function buyItem(item) {
+  if(!pet) return;
+  if(pet.coins < item.price) { showNotif('🪙 Недостаточно монет!','warn'); return; }
+  pet.coins -= item.price;
+  inventory.push(item.id);
+
+  switch(item.id) {
+    case 'food_boost': pet.hunger = Math.min(100, pet.hunger+40); fx('🍗'); break;
+    case 'toy':        pet.happy  = Math.min(100, pet.happy+30);  fx('🪀'); break;
+    case 'vitamin':    pet.health = Math.min(100, pet.health+30); pet.sick=false; fx('💉'); break;
+    case 'shampoo':    pet.clean  = Math.min(100, pet.clean+50);  fx('🧴'); break;
+    case 'medal':      fx('🏅'); break;
+    case 'crown':      fx('👑'); break;
+  }
+  addLog('Куплено: ' + item.name, 'good');
+  buildShop();
+  buildSkins();
+  buildLootboxes();
+  render();
+}
+
+/* ═══════════ SKINS ═══════════ */
+function buildSkins() {
+  const g = document.getElementById('skins-grid');
+  if(!g) return;
+  g.innerHTML = '';
+  SKINS.forEach(skin => {
+    const owned = inventory.includes(skin.id);
+    const isEquipped = equippedSkin === skin.id;
+    const d = document.createElement('div');
+    d.className = 'skin-card' + (owned ? ' owned' : '') + (isEquipped ? ' equipped' : '');
+    const priceOrOwned = owned
+      ? `<span class="sk-eq">${isEquipped ? '▼ СНЯТЬ' : '▶ НАДЕТЬ'}</span>`
+      : `<span class="sk-price">🪙 ${skin.price}</span>`;
+    d.innerHTML = `<span class="sk-ico">${skin.ico}</span><span class="sk-name">${skin.name}</span>${priceOrOwned}`;
+    d.onclick = () => owned ? toggleSkin(skin) : buySkin(skin);
+    g.appendChild(d);
+  });
+}
+
+function buySkin(skin) {
+  if(!pet) return;
+  if(pet.coins < skin.price) { showNotif('🪙 Нужно ' + skin.price + ' монет!', 'warn'); return; }
+  pet.coins -= skin.price;
+  inventory.push(skin.id);
+  equipSkin(skin);
+  addLog('Куплен скин: ' + skin.name, 'good');
+  buildSkins();
+  buildShop();
+  render();
+  fx(skin.ico);
+}
+
+function toggleSkin(skin) {
+  if(equippedSkin === skin.id) {
+    equippedSkin = null;
+    const layer = document.getElementById('pet-skin-layer');
+    layer.style.display = 'none';
+    layer.classList.remove('skin-pop');
+    addLog('Скин снят', 'good');
+    showNotif('👗 Скин снят');
+  } else {
+    equipSkin(skin);
+    addLog('Надет скин: ' + skin.name, 'good');
+  }
+  buildSkins();
+}
+
+function equipSkin(skin) {
+  equippedSkin = skin.id;
+  const layer = document.getElementById('pet-skin-layer');
+  layer.textContent = skin.ico;
+  layer.style.display = 'block';
+  // pop animation
+  layer.classList.remove('skin-pop');
+  void layer.offsetWidth; // reflow
+  layer.classList.add('skin-pop');
+  showNotif('✨ Надет скин: ' + skin.name);
+}
+
+/* ═══════════ LOOTBOXES ═══════════ */
+function buildLootboxes() {
+  const row = document.getElementById('lootbox-row');
+  if(!row) return;
+  row.innerHTML = '';
+  LOOTBOXES.forEach(lb => {
+    const d = document.createElement('div');
+    d.className = 'lootbox ' + lb.rarity;
+    d.innerHTML = `
+      <span class="lb-badge">${lb.rarity.toUpperCase()}</span>
+      <span class="lb-ico">${lb.ico}</span>
+      <span class="lb-name">${lb.name}</span>
+      <span class="lb-price">🪙 ${lb.price}</span>`;
+    d.onclick = () => openLootbox(lb);
+    row.appendChild(d);
+  });
+}
+
+function openLootbox(lb) {
+  if(!pet) return;
+  if(pet.coins < lb.price) { showNotif('🪙 Нужно ' + lb.price + ' монет!', 'warn'); return; }
+  pet.coins -= lb.price;
+  render();
+
+  // pick random skin from pool
+  const skinId = lb.pool[Math.floor(Math.random() * lb.pool.length)];
+  const skin = SKINS.find(s => s.id === skinId);
+  const isDup = inventory.includes(skinId);
+  if(!isDup) {
+    inventory.push(skinId);
+    // auto-equip new skin from lootbox
+    setTimeout(() => equipSkin(skin), 1600);
+  }
+
+  // show overlay
+  const ov = document.getElementById('lb-overlay');
+  const boxAnim = document.getElementById('lb-box-anim');
+  const reveal = document.getElementById('lb-reveal');
+  ov.classList.add('on');
+  boxAnim.style.display = 'block';
+  boxAnim.textContent = lb.ico;
+  reveal.classList.remove('show');
+
+  // shake then reveal
+  setTimeout(() => {
+    boxAnim.style.display = 'none';
+    document.getElementById('lb-win-ico').textContent = skin.ico;
+    const nameEl = document.getElementById('lb-win-name');
+    nameEl.textContent = skin.name;
+    nameEl.className = 'lb-win-name ' + lb.rarity;
+    document.getElementById('lb-win-desc').textContent = isDup ? 'УЖЕ ЕСТЬ В КОЛЛЕКЦИИ' : 'НОВЫЙ ПРЕДМЕТ!';
+    document.getElementById('lb-dup-note').textContent = isDup ? '+10 монет компенсация' : '';
+    if(isDup) pet.coins += 10;
+    reveal.classList.add('show');
+    sndLootbox();
+    spawnLbStars(lb.rarity);
+    addLog('Лутбокс ' + lb.name + ': выпало ' + skin.name + (isDup?' (дубль)':''), isDup?'warn':'good');
+    buildSkins();
+    buildLootboxes();
+    render();
+  }, 1400);
+}
+
+function spawnLbStars(rarity) {
+  const container = document.getElementById('lb-stars');
+  container.innerHTML = '';
+  const emojis = rarity==='legend' ? ['⭐','✨','💫','🌟'] : rarity==='epic' ? ['💜','✨','🔮'] : rarity==='rare' ? ['💙','✨','💎'] : ['✨','⚪'];
+  for(let i=0;i<16;i++) {
+    const s = document.createElement('div');
+    s.className = 'lb-star';
+    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const angle = (i/16)*360;
+    const dist = 100 + Math.random()*120;
+    s.style.cssText = `left:50%;top:50%;--tx:${Math.cos(angle*Math.PI/180)*dist}px;--ty:${Math.sin(angle*Math.PI/180)*dist}px;animation-delay:${Math.random()*0.3}s`;
+    container.appendChild(s);
+  }
+}
+
+function closeLootbox() {
+  document.getElementById('lb-overlay').classList.remove('on');
+  document.getElementById('lb-reveal').classList.remove('show');
+  document.getElementById('lb-box-anim').style.display = 'block';
+}
+
+/* ═══════════ SOUND (Web Audio API) ═══════════ */
+let audioCtx = null;
+let soundOn = true;
+
+function getAudio() {
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, vol=0.18, delay=0) {
+  if(!soundOn) return;
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.05);
+  } catch(e) {}
+}
+
+function playJingle(notes) {
+  // notes: [{f, t, d}] freq, type, duration
+  notes.forEach(n => playTone(n.f, n.t||'square', n.d||0.1, n.v||0.15, n.delay||0));
+}
+
+function sndFeed()    { playJingle([{f:440,delay:0,d:.12},{f:554,delay:.13,d:.12},{f:659,delay:.26,d:.18}]); }
+function sndPlay()    { playJingle([{f:523,delay:0,d:.08,t:'triangle'},{f:659,delay:.09,d:.08,t:'triangle'},{f:784,delay:.18,d:.08,t:'triangle'},{f:1047,delay:.27,d:.15,t:'triangle'}]); }
+function sndSleep()   { playJingle([{f:330,delay:0,d:.2,t:'sine'},{f:294,delay:.22,d:.2,t:'sine'},{f:262,delay:.44,d:.3,t:'sine'}]); }
+function sndHeal()    { playJingle([{f:523,delay:0,d:.1,t:'sine'},{f:784,delay:.12,d:.1,t:'sine'},{f:1047,delay:.24,d:.15,t:'sine'}]); }
+function sndBath()    { playJingle([{f:800,delay:0,d:.05,t:'triangle'},{f:900,delay:.06,d:.05,t:'triangle'},{f:1000,delay:.12,d:.08,t:'triangle'}]); }
+function sndWalk()    { playJingle([{f:392,delay:0,d:.1},{f:440,delay:.11,d:.1},{f:392,delay:.22,d:.1},{f:523,delay:.33,d:.15}]); }
+function sndPat()     { playTone(660,'sine',0.08,0.12); }
+function sndAlert()   { playJingle([{f:220,delay:0,d:.15,t:'sawtooth'},{f:180,delay:.18,d:.2,t:'sawtooth'}]); }
+function sndEvo()     { playJingle([{f:523,delay:0,d:.1,t:'square'},{f:659,delay:.12,d:.1,t:'square'},{f:784,delay:.24,d:.1,t:'square'},{f:1047,delay:.36,d:.2,t:'square'},{f:1319,delay:.58,d:.3,t:'sine'}]); }
+function sndLootbox() { playJingle([{f:440,delay:0,d:.08,t:'square'},{f:554,delay:.09,d:.08,t:'square'},{f:659,delay:.18,d:.08,t:'square'},{f:880,delay:.27,d:.08,t:'square'},{f:1108,delay:.36,d:.15,t:'sine'}]); }
+function sndCoin()    { playJingle([{f:880,delay:0,d:.08,t:'sine'},{f:1108,delay:.1,d:.1,t:'sine'}]); }
+function sndDeath()   { playJingle([{f:294,delay:0,d:.3,t:'sawtooth'},{f:220,delay:.35,d:.3,t:'sawtooth'},{f:175,delay:.7,d:.5,t:'sawtooth'}]); }
+
+function toggleSound() {
+  soundOn = !soundOn;
+  document.getElementById('sound-btn').textContent = soundOn ? '🔊' : '🔇';
+}
+
+/* ═══════════ PET IDLE ACTIVITY ═══════════ */
+const IDLE_ACTIONS = [
+  { text:'играет с мячом', bubble:'⚽', sound:'play', weight:3 },
+  { text:'прыгает', bubble:'✨', sound:'pat', weight:3 },
+  { text:'чешет ухо', bubble:'🐾', sound:null, weight:4 },
+  { text:'смотрит в окно', bubble:'🌙', sound:null, weight:3 },
+  { text:'нашёл монетку!', bubble:'🪙', sound:'coin', coins:2, weight:2 },
+  { text:'зевает', bubble:'😪', sound:'sleep', weight:3 },
+  { text:'танцует', bubble:'🎵', sound:'play', weight:2 },
+  { text:'нюхает цветок', bubble:'🌸', sound:null, weight:2 },
+  { text:'копает ямку', bubble:'⛏️', sound:null, weight:2 },
+  { text:'нашёл угощение!', bubble:'🍬', sound:'feed', hunger:5, weight:2 },
+  { text:'сделал сальто', bubble:'🤸', sound:'play', weight:1 },
+  { text:'мечтает', bubble:'💭', sound:null, weight:2 },
+];
+
+let idleLoop = null;
+
+/* ═══════════ DANGERS ═══════════ */
+const DANGERS = [
+  {
+    id:'poison',
+    icon:'☠️', title:'ПИТОМЕЦ ОТРАВЛЕН!',
+    desc:'Кто-то подбросил ядовитую еду! Срочно дай антидот!',
+    timeLimit:15,
+    effect: ()=>{ pet.health = cl(pet.health-40); pet.sick=true; pet.sickTurns=5; },
+    penalty: ()=>{ pet.health = cl(pet.health-55); },
+    actions:[
+      { label:'💊 АНТИДОТ', cost:20, key:'antidote',
+        resolve: ()=>{ pet.sick=false; pet.health=Math.min(100,pet.health+20); pet.sickTurns=0; } }
+    ]
+  },
+  {
+    id:'thief',
+    icon:'🦹', title:'ВОР КРАДЁТ МОНЕТЫ!',
+    desc:'Вор залез в копилку! Прогони его или потеряешь монеты!',
+    timeLimit:12,
+    effect: ()=>{ },
+    penalty: ()=>{ pet.coins=Math.max(0, pet.coins-Math.floor(pet.coins*.5)); },
+    actions:[
+      { label:'🪃 ПРОГНАТЬ', cost:0, key:'chase',
+        resolve: ()=>{ pet.coins+=15; pet.happy=Math.min(100,pet.happy+10); } }
+    ]
+  },
+  {
+    id:'storm',
+    icon:'⛈️', title:'НАДВИГАЕТСЯ ГРОЗА!',
+    desc:'Страшная буря! Питомец в панике — успокой его или он заболеет!',
+    timeLimit:18,
+    effect: ()=>{ pet.happy=cl(pet.happy-30); pet.energy=cl(pet.energy-20); },
+    penalty: ()=>{ pet.sick=true; pet.sickTurns=3; pet.health=cl(pet.health-25); },
+    actions:[
+      { label:'🤗 ОБНЯТЬ', cost:0, key:'hug',
+        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+35); pet.energy=Math.min(100,pet.energy+10); } },
+      { label:'🍫 ШОКОЛАД', cost:15, key:'chocolate',
+        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+50); pet.hunger=Math.min(100,pet.hunger+10); } }
+    ]
+  },
+  {
+    id:'fire',
+    icon:'🔥', title:'ПОЖАР!',
+    desc:'Загорелся угол комнаты! Туши огонь — иначе питомец получит ожоги!',
+    timeLimit:10,
+    effect: ()=>{ pet.health=cl(pet.health-20); pet.clean=cl(pet.clean-30); },
+    penalty: ()=>{ pet.health=cl(pet.health-45); pet.clean=0; },
+    actions:[
+      { label:'🪣 ТУШИТЬ', cost:0, key:'extinguish',
+        resolve: ()=>{ pet.health=Math.min(100,pet.health+15); showNotif('🔥 Пожар потушен!'); } }
+    ]
+  },
+  {
+    id:'alien',
+    icon:'👾', title:'НЛО ПОХИЩАЕТ ПИТОМЦА!',
+    desc:'Инопланетяне пытаются похитить твоего питомца! Скорей!',
+    timeLimit:14,
+    effect: ()=>{ pet.happy=cl(pet.happy-25); },
+    penalty: ()=>{ pet.coins=Math.max(0,pet.coins-30); pet.happy=cl(pet.happy-40); },
+    actions:[
+      { label:'📡 ОТОГНАТЬ', cost:10, key:'signal',
+        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+40); pet.coins+=20; } }
+    ]
+  },
+  {
+    id:'plague',
+    icon:'🦠', title:'ЭПИДЕМИЯ!',
+    desc:'В округе эпидемия! Сделай питомцу прививку пока не поздно!',
+    timeLimit:20,
+    effect: ()=>{ },
+    penalty: ()=>{ pet.sick=true; pet.sickTurns=6; pet.health=cl(pet.health-30); pet.clean=cl(pet.clean-20); },
+    actions:[
+      { label:'💉 ПРИВИВКА', cost:25, key:'vaccine',
+        resolve: ()=>{ pet.health=Math.min(100,pet.health+25); pet.sick=false; } }
+    ]
+  },
+];
+
+let activeDanger = null;
+let dangerTimerIv = null;
+let dangerTimeLeft = 0;
+let dangerLoop = null;
+
+function startIdleLoop() {
+  clearInterval(idleLoop);
+  clearInterval(idleStateLoop);
+  clearInterval(dangerLoop);
+  clearInterval(dangerTimerIv);
+  activeDanger = null;
+  document.getElementById('danger-ov').classList.remove('on');
+  idleLoop = setInterval(doPetIdle, 7000);
+}
+
+function doPetIdle() {
+  if(!pet || sleeping) return;
+  if(pet.energy < 10 || pet.health < 10) return; // too weak to play
+
+  // weighted random pick
+  const total = IDLE_ACTIONS.reduce((s,a) => s + a.weight, 0);
+  let r = Math.random() * total, action = IDLE_ACTIONS[0];
+  for(const a of IDLE_ACTIONS) { r -= a.weight; if(r <= 0) { action = a; break; } }
+
+  // apply effects
+  if(action.coins) { pet.coins += action.coins; sndCoin(); render(); }
+  if(action.hunger) { pet.hunger = Math.min(100, pet.hunger + action.hunger); render(); }
+
+  // show bubble
+  showBubble(action.bubble, action.text);
+
+  // play sound
+  if(action.sound === 'play') sndPlay();
+  else if(action.sound === 'pat') sndPat();
+  else if(action.sound === 'feed') sndFeed();
+  else if(action.sound === 'sleep') sndSleep();
+
+  // animate pet
+  const pb = document.getElementById('pet-big');
+  pb.classList.add('pet-happy');
+  setTimeout(() => pb.classList.remove('pet-happy'), 1500);
+
+  addLog(pet.name + ' ' + action.text, 'good');
+}
+
+function showBubble(emoji, text) {
+  const bubble = document.getElementById('pet-bubble');
+  const actText = document.getElementById('pet-act-text');
+  if(!bubble || !actText) return;
+
+  bubble.textContent = emoji;
+  bubble.classList.add('show');
+  actText.textContent = text;
+  actText.classList.add('show');
+
+  setTimeout(() => {
+    bubble.classList.remove('show');
+    actText.classList.remove('show');
+  }, 4000);
+}
+
+/* ═══════════ DANGER SYSTEM ═══════════ */
+function startDangerLoop() {
+  clearInterval(dangerLoop);
+  // random danger every 45-90 sec
+  dangerLoop = setInterval(() => {
+    if(!pet || sleeping || activeDanger) return;
+    if(Math.random() < 0.6) triggerRandomDanger();
+  }, 45000 + Math.random()*45000);
+}
+
+function triggerRandomDanger() {
+  const d = DANGERS[Math.floor(Math.random() * DANGERS.length)];
+  triggerDanger(d);
+}
+
+function triggerDanger(danger) {
+  if(!pet || activeDanger) return;
+  activeDanger = danger;
+
+  // apply immediate effect
+  danger.effect();
+  render();
+
+  // show overlay
+  document.getElementById('danger-icon').textContent  = danger.icon;
+  document.getElementById('danger-title').textContent = danger.title;
+  document.getElementById('danger-desc').textContent  = danger.desc;
+
+  // build action buttons
+  const actDiv = document.getElementById('danger-actions');
+  actDiv.innerHTML = '';
+  danger.actions.forEach(act => {
+    const btn = document.createElement('button');
+    btn.className = 'danger-btn primary';
+    btn.innerHTML = act.cost > 0
+      ? act.label + '<br><span style="font-size:.35rem;color:var(--accent3)">🪙 ' + act.cost + '</span>'
+      : act.label;
+    btn.onclick = () => resolveDanger(act);
+    actDiv.appendChild(btn);
+  });
+  // ignore button
+  const skipBtn = document.createElement('button');
+  skipBtn.className = 'danger-btn secondary';
+  skipBtn.textContent = '❌ ИГНОРИРОВАТЬ';
+  skipBtn.onclick = () => ignoreDanger();
+  actDiv.appendChild(skipBtn);
+
+  // start countdown
+  dangerTimeLeft = danger.timeLimit;
+  document.getElementById('danger-timer-num').textContent = dangerTimeLeft;
+  document.getElementById('danger-bar').style.width = '100%';
+  document.getElementById('danger-ov').classList.add('on');
+  document.body.classList.add('danger-flash');
+  setTimeout(() => document.body.classList.remove('danger-flash'), 1200);
+
+  // flicker pet
+  const pb = document.getElementById('pet-big');
+  pb.classList.add('pet-danger');
+
+  // sound
+  playJingle([{f:150,delay:0,d:.2,t:'sawtooth'},{f:120,delay:.25,d:.2,t:'sawtooth'},{f:150,delay:.5,d:.4,t:'sawtooth'}]);
+
+  clearInterval(dangerTimerIv);
+  dangerTimerIv = setInterval(() => {
+    dangerTimeLeft--;
+    const pct = (dangerTimeLeft / danger.timeLimit * 100);
+    document.getElementById('danger-timer-num').textContent = dangerTimeLeft;
+    document.getElementById('danger-bar').style.width = pct + '%';
+    // bar color urgency
+    document.getElementById('danger-bar').style.background =
+      pct > 50 ? 'linear-gradient(90deg,#ff3333,#ff8800)'
+      : pct > 25 ? 'linear-gradient(90deg,#cc0000,#ff3333)'
+      : '#cc0000';
+    if(dangerTimeLeft <= 0) timeoutDanger();
+  }, 1000);
+
+  addLog('⚠️ ' + danger.title, 'bad');
+}
+
+function resolveDanger(act) {
+  if(pet) { pet.dangersBeaten=(pet.dangersBeaten||0)+1; addXP(30); checkAchievements(); }
+  if(pet && activeDanger) setTimeout(()=>addDiaryEntry('danger',pet.name,activeDanger.title),400);
+  if(!activeDanger || !pet) return;
+  if(act.cost > 0 && pet.coins < act.cost) {
+    showNotif('🪙 Нужно ' + act.cost + ' монет!', 'warn'); return;
+  }
+  if(act.cost > 0) pet.coins -= act.cost;
+  act.resolve();
+  closeDangerOv();
+  showNotif('✅ ' + activeDanger.title.replace('!','') + ' — спасён!');
+  addLog('✅ Опасность устранена!', 'good');
+  sndHeal();
+  activeDanger = null;
+  render();
+}
+
+function ignoreDanger() {
+  if(!activeDanger) return;
+  timeoutDanger();
+}
+
+function timeoutDanger() {
+  if(!activeDanger) return;
+  activeDanger.penalty();
+  closeDangerOv();
+  showNotif('💀 Слишком поздно! Питомец пострадал!', 'bad');
+  addLog('💀 ' + activeDanger.title + ' — не успел!', 'bad');
+  sndDeath();
+  activeDanger = null;
+  if(pet.health <= 0) gameOver('опасность');
+  else render();
+}
+
+function closeDangerOv() {
+  clearInterval(dangerTimerIv);
+  document.getElementById('danger-ov').classList.remove('on');
+  const pb = document.getElementById('pet-big');
+  pb.classList.remove('pet-danger');
+  setIdleAnimation();
+}
+
+/* ═══════════ IDLE ANIMATION CYCLE ═══════════ */
+const IDLE_STATES = ['state-idle','state-walk','state-scratch','state-spin','state-sit','state-sneeze','state-blink'];
+let idleStateLoop = null;
+
+function startIdleAnimLoop() {
+  clearInterval(idleStateLoop);
+  setIdleAnimation();
+  idleStateLoop = setInterval(setIdleAnimation, 4000);
+}
+
+function setIdleAnimation() {
+  if(!pet) return;
+  const pb = document.getElementById('pet-big');
+  if(!pb) return;
+  // don't override reactive states
+  const reactive = ['pet-sad','pet-happy','pet-sick','pet-sleep','pet-danger','pet-run'];
+  if(reactive.some(c => pb.classList.contains(c))) return;
+
+  // weight idle more than others
+  const pick = Math.random();
+  let state;
+  if(pick < 0.4)      state = 'state-idle';
+  else if(pick < 0.6) state = 'state-walk';
+  else if(pick < 0.72) state = 'state-scratch';
+  else if(pick < 0.82) state = 'state-spin';
+  else if(pick < 0.9)  state = 'state-sit';
+  else if(pick < 0.95) state = 'state-sneeze';
+  else                 state = 'state-blink';
+
+  IDLE_STATES.forEach(s => pb.classList.remove(s));
+  pb.classList.add(state);
+}
+
+/* ═══════════ MINI-GAMES ═══════════ */
+function startMG(type) {
+  const d = document.getElementById('mg-display');
+  if(type==='guess') {
+    mgState = { type:'guess', number: Math.floor(Math.random()*10)+1, tries:3 };
+    d.innerHTML = `
+      <div style="font-family:var(--pixel);font-size:.5rem;color:var(--muted);margin-bottom:8px;">УГАДАЙ ЧИСЛО 1-10</div>
+      <div style="font-family:var(--pixel);font-size:.45rem;color:var(--accent4);">ПОПЫТКИ: <span id="mg-tries">3</span></div>
+      <div style="font-family:var(--vt);font-size:1rem;color:var(--muted);margin:6px 0;" id="mg-hint">—</div>
+      <div class="mg-input-row">
+        <input class="mg-inp" id="mg-guess" type="number" min="1" max="10" placeholder="?">
+        <button class="mg-btn" onclick="checkGuess()">ОК</button>
+      </div>`;
+    document.getElementById('mg-guess').onkeydown = e => { if(e.key==='Enter') checkGuess(); };
+  } else if(type==='reaction') {
+    mgState = { type:'reaction', active:false, score:0, round:0 };
+    d.innerHTML = `
+      <div style="font-family:var(--pixel);font-size:.45rem;color:var(--muted);margin-bottom:8px;">НАЖМИ КОГДА ЗЕЛЁНЫЙ!</div>
+      <div style="font-family:var(--pixel);font-size:.5rem;color:var(--accent3);margin-bottom:10px;">СЧЁТ: <span id="mg-score">0</span></div>
+      <div class="reaction-circle" id="reaction-circle" onclick="reactionClick()">⏳</div>
+      <div style="font-family:var(--vt);font-size:1.1rem;color:var(--muted);margin-top:8px;" id="react-msg">ЖДИ...</div>`;
+    setTimeout(reactionNext, 1500);
+  } else if(type==='memory') {
+    startMemoryGame();
+  } else if(type==='fish') {
+    startFishGame();
+  } else if(type==='type') {
+    startTypeGame();
+  }
+}
+
+function checkGuess() {
+  if(!mgState || mgState.type!=='guess') return;
+  const v = parseInt(document.getElementById('mg-guess').value);
+  if(!v || v<1 || v>10) return;
+  mgState.tries--;
+  document.getElementById('mg-tries').textContent = mgState.tries;
+  const hint = document.getElementById('mg-hint');
+  if(v === mgState.number) {
+    hint.style.color = 'var(--accent)';
+    hint.textContent = '✔ ВЕРНО! +15 монет +20 радость';
+    pet.coins += 15;
+    pet.happy = Math.min(100, pet.happy+20);
+    addLog('Мини-игра: угадал! +15 монет', 'good');
+    render();
+    setTimeout(()=>resetMG(), 2000);
+  } else if(mgState.tries<=0) {
+    hint.style.color = 'var(--accent2)';
+    hint.textContent = '✘ Было: ' + mgState.number;
+    addLog('Мини-игра: проиграл. Было ' + mgState.number, 'bad');
+    setTimeout(()=>resetMG(), 2500);
+  } else {
+    hint.style.color = 'var(--accent3)';
+    hint.textContent = v < mgState.number ? '▲ БОЛЬШЕ' : '▼ МЕНЬШЕ';
+  }
+  document.getElementById('mg-guess').value='';
+}
+
+function reactionNext() {
+  if(!mgState || mgState.type!=='reaction') return;
+  const circle = document.getElementById('reaction-circle');
+  if(!circle) return;
+  mgState.active = false;
+  circle.className = 'reaction-circle';
+  circle.textContent = '⏳';
+  document.getElementById('react-msg').textContent = 'ЖДЁМ...';
+  const delay = 1000 + Math.random()*2500;
+  setTimeout(() => {
+    if(!mgState || mgState.type!=='reaction') return;
+    const c2 = document.getElementById('reaction-circle');
+    if(!c2) return;
+    mgState.active = true;
+    c2.className = 'reaction-circle GO';
+    c2.textContent = '🟢';
+    mgState.startTime = Date.now();
+    setTimeout(()=>{ if(mgState&&mgState.active){ mgState.active=false; const c3=document.getElementById('reaction-circle'); if(c3){c3.className='reaction-circle';c3.textContent='❌';} document.getElementById('react-msg').textContent='ПОЗДНО! -1 ОЧКО'; mgState.score=Math.max(0,mgState.score-1); document.getElementById('mg-score').textContent=mgState.score; mgState.round++; if(mgState.round<6) setTimeout(reactionNext,1200); else endReaction(); } }, 900);
+  }, delay);
+}
+
+function reactionClick() {
+  if(!mgState || mgState.type!=='reaction') return;
+  const c = document.getElementById('reaction-circle');
+  if(!c) return;
+  if(mgState.active) {
+    const rt = Date.now() - mgState.startTime;
+    mgState.active = false;
+    c.className = 'reaction-circle'; c.textContent = '✅';
+    const pts = rt < 300 ? 3 : rt < 600 ? 2 : 1;
+    mgState.score += pts;
+    document.getElementById('mg-score').textContent = mgState.score;
+    document.getElementById('react-msg').textContent = rt+'мс! +'+pts;
+    mgState.round++;
+    if(mgState.round < 6) setTimeout(reactionNext, 1000);
+    else setTimeout(endReaction, 800);
+  } else {
+    document.getElementById('react-msg').textContent = 'РАНО! Жди зелёного';
+  }
+}
+
+function endReaction() {
+  if(!mgState) return;
+  const score = mgState.score;
+  const coins = score * 8;
+  const happy = Math.min(30, score * 5);
+  pet.coins += coins; pet.happy = Math.min(100, pet.happy+happy);
+  addLog('Реакция: '+score+' очков! +'+coins+' монет', 'good');
+  render();
+  resetMG();
+  showNotif('🎮 Результат: '+score+' очков! +'+coins+' монет');
+}
+
+/* ── MEMORY GAME ── */
+function startMemoryGame() {
+  const emojis = ['🐱','🐶','🐹','🐰','🦊','🐸','🌟','🎮'];
+  const pairs = [...emojis,...emojis];
+  // shuffle
+  for(let i=pairs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[pairs[i],pairs[j]]=[pairs[j],pairs[i]]; }
+  mgState = { type:'memory', pairs, revealed:[], matched:[], busy:false };
+  const d = document.getElementById('mg-display');
+  d.innerHTML = `
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:4px;">НАЙДИ ПАРЫ! +20🪙 за каждую</div>
+    <div class="mem-grid" id="mem-grid"></div>
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent3);margin-top:4px;">ПАРЫ: <span id="mem-pairs">0</span>/8</div>`;
+  renderMemGrid();
+}
+
+function renderMemGrid() {
+  const g = document.getElementById('mem-grid');
+  if(!g) return;
+  g.innerHTML='';
+  mgState.pairs.forEach((emoji,i)=>{
+    const c = document.createElement('div');
+    c.className='mem-cell' + (mgState.matched.includes(i)?' matched':'');
+    c.textContent = mgState.revealed.includes(i)||mgState.matched.includes(i) ? emoji : '❓';
+    c.onclick = ()=>memClick(i);
+    g.appendChild(c);
+  });
+}
+
+function memClick(i) {
+  if(!mgState||mgState.type!=='memory'||mgState.busy) return;
+  if(mgState.matched.includes(i)||mgState.revealed.includes(i)) return;
+  mgState.revealed.push(i);
+  renderMemGrid();
+  sndPat();
+  if(mgState.revealed.length===2) {
+    mgState.busy=true;
+    const [a,b]=mgState.revealed;
+    setTimeout(()=>{
+      if(mgState.pairs[a]===mgState.pairs[b]){
+        mgState.matched.push(a,b);
+        pet.coins+=20; pet.happy=Math.min(100,pet.happy+5);
+        sndCoin(); render();
+        document.getElementById('mem-pairs').textContent=mgState.matched.length/2;
+        if(mgState.matched.length===16){
+          showNotif('🧠 Всё угадал! +50 монет бонус');
+          pet.coins+=50; render();
+          addLog('Память: все пары! +50 бонус','good');
+          setTimeout(resetMG,1800);
+        }
+      } else {
+        // mark wrong briefly
+        const cells=document.querySelectorAll('.mem-cell');
+        [a,b].forEach(idx=>{ if(cells[idx]) cells[idx].classList.add('wrong'); });
+        setTimeout(()=>{ [a,b].forEach(idx=>{ if(cells[idx]) cells[idx].classList.remove('wrong'); }); },400);
+      }
+      mgState.revealed=[];
+      mgState.busy=false;
+      renderMemGrid();
+    },700);
+  }
+}
+
+/* ── FISHING GAME ── */
+let fishTimers=[];
+function startFishGame() {
+  fishTimers.forEach(t=>clearInterval(t));fishTimers=[];
+  mgState={type:'fish',score:0,timeLeft:20,hookY:50};
+  const d=document.getElementById('mg-display');
+  d.innerHTML=`
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:4px;">ПОЙМАЙ РЫБУ! Кликни на неё🎣</div>
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent3);">УЛОВ: <span id="fish-score">0</span> | ⏱ <span id="fish-time">20</span>с</div>
+    <div class="fish-area" id="fish-area">
+      <div class="fish-hook" id="fish-hook" style="left:50%;top:10%">🪝</div>
+    </div>`;
+
+  // spawn fish every 1.5s
+  const spawnT=setInterval(()=>{
+    if(!mgState||mgState.type!=='fish'){clearInterval(spawnT);return;}
+    spawnFish();
+  },1500);
+  fishTimers.push(spawnT);
+
+  // countdown
+  const countT=setInterval(()=>{
+    if(!mgState||mgState.type!=='fish'){clearInterval(countT);return;}
+    mgState.timeLeft--;
+    const el=document.getElementById('fish-time');
+    if(el) el.textContent=mgState.timeLeft;
+    if(mgState.timeLeft<=0){
+      clearInterval(countT);
+      endFish();
+    }
+  },1000);
+  fishTimers.push(countT);
+
+  // move hook with mouse/touch over area
+  setTimeout(()=>{
+    const area=document.getElementById('fish-area');
+    if(area){
+      area.onmousemove=e=>{
+        if(!mgState||mgState.type!=='fish') return;
+        const r=area.getBoundingClientRect();
+        const px=Math.max(5,Math.min(90,((e.clientX-r.left)/r.width)*100));
+        const hook=document.getElementById('fish-hook');
+        if(hook) hook.style.left=px+'%';
+      };
+    }
+  },100);
+}
+
+function spawnFish(){
+  const area=document.getElementById('fish-area');
+  if(!area) return;
+  const fishes=['🐟','🐠','🐡','🦈','🦑'];
+  const rarity=[5,5,5,2,1];
+  const coins=[5,8,10,25,40];
+  let r=Math.random()*18,fi=0;
+  for(let i=0;i<rarity.length;i++){r-=rarity[i];if(r<=0){fi=i;break;}}
+  const f=document.createElement('div');
+  f.className='fish-emoji';
+  f.textContent=fishes[fi];
+  const lane=10+Math.floor(Math.random()*3)*28;
+  f.style.top=lane+'px';
+  f.style.left='-10%';
+  f.dataset.coins=coins[fi];
+  area.appendChild(f);
+  f.onclick=()=>catchFish(f,coins[fi]);
+  // move fish across
+  let pos=-10;
+  const dir=Math.random()<.5?1:-1;
+  if(dir===-1){f.style.left='110%';f.style.transform='scaleX(-1)';}
+  const mv=setInterval(()=>{
+    if(!mgState||mgState.type!=='fish'||!f.parentNode){clearInterval(mv);return;}
+    pos+=(dir*1.5);
+    f.style.left=pos+'%';
+    if(pos>110||pos<-10){clearInterval(mv);if(f.parentNode)f.remove();}
+  },50);
+  fishTimers.push(mv);
+  setTimeout(()=>{if(f.parentNode)f.remove();},6000);
+}
+
+function catchFish(el,coins){
+  if(!mgState||mgState.type!=='fish') return;
+  el.remove();
+  mgState.score+=coins;
+  pet.coins+=coins;
+  sndCoin(); render();
+  fx(coins>=25?'🦈':'🐟');
+  const sc=document.getElementById('fish-score');
+  if(sc) sc.textContent=mgState.score;
+}
+
+function endFish(){
+  fishTimers.forEach(t=>clearInterval(t));fishTimers=[];
+  const score=mgState?mgState.score:0;
+  pet.happy=Math.min(100,pet.happy+15);
+  addLog('Рыбалка: +'+score+' монет','good');
+  showNotif('🎣 Рыбалка окончена! +'+score+' монет');
+  render();
+  setTimeout(resetMG,1500);
+}
+
+/* ── TYPING GAME ── */
+const TYPE_WORDS=['ТАМАГОЧИ','ПИТОМЕЦ','МОНЕТЫ','ЭВОЛЮЦИЯ','ЗДОРОВЬЕ','РАДОСТЬ','ПОБЕДА','МАГАЗИН','СКИНЫ','ОПАСНОСТЬ'];
+function startTypeGame(){
+  const word=TYPE_WORDS[Math.floor(Math.random()*TYPE_WORDS.length)];
+  mgState={type:'type',word,typed:'',timeLeft:15,done:false};
+  const d=document.getElementById('mg-display');
+  d.innerHTML=`
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:6px;">НАБЕРИ СЛОВО БЫСТРЕЕ!</div>
+    <div class="type-word"><span class="type-chars" id="type-chars">${word.split('').map(c=>`<span>${c}</span>`).join('')}</span></div>
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent4);margin-bottom:6px;">⏱ <span id="type-time">15</span>с</div>
+    <input class="type-input" id="type-input" type="text" placeholder="ПЕЧАТАЙ ЗДЕСЬ..." maxlength="${word.length}" autocomplete="off">`;
+  const inp=document.getElementById('type-input');
+  inp.focus();
+  inp.oninput=typeCheck;
+
+  const tv=setInterval(()=>{
+    if(!mgState||mgState.type!=='type'||mgState.done){clearInterval(tv);return;}
+    mgState.timeLeft--;
+    const el=document.getElementById('type-time');
+    if(el) el.textContent=mgState.timeLeft;
+    if(mgState.timeLeft<=0){
+      clearInterval(tv);
+      if(!mgState.done){
+        showNotif('⌨️ Время вышло!','warn');
+        addLog('Печать: не успел','bad');
+        setTimeout(resetMG,1200);
+      }
+    }
+  },1000);
+}
+
+function typeCheck(){
+  if(!mgState||mgState.type!=='type') return;
+  const inp=document.getElementById('type-input');
+  if(!inp) return;
+  const val=inp.value.toUpperCase();
+  const chars=document.querySelectorAll('#type-chars span');
+  chars.forEach((c,i)=>{
+    c.classList.remove('done','wrong-char');
+    if(i<val.length){
+      if(val[i]===mgState.word[i]) c.classList.add('done');
+      else c.classList.add('wrong-char');
+    }
+  });
+  if(val===mgState.word){
+    mgState.done=true;
+    const bonus=mgState.timeLeft*3+20;
+    pet.coins+=bonus; pet.happy=Math.min(100,pet.happy+20);
+    sndPlay(); render();
+    showNotif('⌨️ Молодец! +'+bonus+' монет');
+    addLog('Печать: слово набрано! +'+bonus+' монет','good');
+    setTimeout(resetMG,1500);
+  }
+}
+
+function resetMG() {
+  mgState = null;
+  document.getElementById('mg-display').innerHTML = `
+    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:10px;">ВЫБЕРИ ИГРУ:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <button class="mg-btn" onclick="startMG('guess')">🔢 УГАДАЙ</button>
+      <button class="mg-btn" onclick="startMG('reaction')">⚡ РЕАКЦИЯ</button>
+      <button class="mg-btn" onclick="startMG('memory')">🧠 ПАМЯТЬ</button>
+      <button class="mg-btn" onclick="startMG('fish')">🎣 РЫБАЛКА</button>
+      <button class="mg-btn" style="grid-column:1/-1" onclick="startMG('type')">⌨️ ПЕЧАТАЙ</button>
+    </div>`;
+}
+
+/* ═══════════ TABS ═══════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    const tabs=['minigame','shop','skins','diary','log'];
+    b.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='diary') renderDiary();
+}
+
+/* ═══════════ CLOCK ═══════════ */
+function updateClock() {
+  if(!startTime) return;
+  const el = document.getElementById('game-clock');
+  const s = Math.floor((Date.now()-startTime)/1000);
+  const hh=String(Math.floor(s/3600)).padStart(2,'0');
+  const mm=String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const ss=String(s%60).padStart(2,'0');
+  el.textContent = hh+':'+mm+':'+ss;
+}
+
+/* ═══════════ GAME OVER ═══════════ */
+function gameOver(reason) {
+  clearInterval(gLoop);
+  clearInterval(clkIv);
+  clearInterval(idleLoop);
+  clearInterval(idleStateLoop);
+  clearInterval(dangerLoop);
+  clearInterval(dangerTimerIv);
+  activeDanger = null;
+  document.getElementById('danger-ov').classList.remove('on');
+  sndDeath();
+  const el = document.getElementById('go-info');
+  el.innerHTML = pet.name + ' прожил <b style="color:var(--accent3)">' + pet.age + '</b> дней<br>Причина: ' + reason + '<br>Монет собрано: ' + pet.coins;
+  document.getElementById('go-screen').classList.add('on');
+}
+
+function restartGame() {
+  document.getElementById('go-screen').classList.remove('on');
+  pet=null; chosen=null; sleeping=false; busy=false; mgState=null; inventory=[]; equippedSkin=null;
+  clearInterval(idleLoop);
+  clearInterval(idleStateLoop);
+  clearInterval(dangerLoop);
+  clearInterval(dangerTimerIv);
+  activeDanger = null;
+  document.getElementById('danger-ov').classList.remove('on');
+  document.getElementById('lb-overlay').classList.remove('on');
+  document.getElementById('name-field').value='';
+  document.getElementById('begin-btn').classList.remove('on');
+  showScreen('lobby');
+}
+
+/* ═══════════ HELPERS ═══════════ */
+function cl(v) { return Math.max(0, Math.min(100, v)); }
+
+let _nt;
+function showNotif(msg, type='') {
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.className='notif '+type+' show';
+  clearTimeout(_nt);
+  _nt=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+function addLog(msg, cls='') {
+  const list = document.getElementById('log-list');
+  if(!list) return;
+  const e = document.createElement('div');
+  e.className = 'log-entry ' + cls;
+  const time = pet ? pet.age+'д' : '--';
+  e.textContent = '[' + time + '] ' + msg;
+  list.insertBefore(e, list.firstChild);
+  if(list.children.length > 30) list.removeChild(list.lastChild);
+}
+
+function fx(emoji) {
+  const el = document.createElement('div');
+  el.className='fx'; el.textContent=emoji;
+  const r = document.getElementById('pet-big').getBoundingClientRect();
+  el.style.left=(r.left+r.width/2-14)+'px';
+  el.style.top=r.top+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+</script>
+<!-- DANGER OVERLAY -->
+<div class="danger-ov" id="danger-ov">
+  <div class="danger-icon" id="danger-icon">☠️</div>
+  <div class="danger-title" id="danger-title">ОПАСНОСТЬ!</div>
+  <div class="danger-desc"  id="danger-desc">Описание опасности</div>
+  <div class="danger-timer-wrap">
+    <div class="danger-timer-label">ВРЕМЕНИ ОСТАЛОСЬ</div>
+    <div class="danger-timer-bar-bg"><div class="danger-timer-bar" id="danger-bar"></div></div>
+    <div class="danger-timer-num" id="danger-timer-num">15</div>
+  </div>
+  <div class="danger-actions" id="danger-actions"></div>
+</div>
+
+<button class="sound-btn"  id="sound-btn" onclick="toggleSound()" title="Звук">🔊</button>
+</body>
+</html>
