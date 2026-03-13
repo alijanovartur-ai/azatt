@@ -2,2370 +2,1467 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тамагочи PRO</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>WAVR — Music</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; }
 :root {
-  --bg:#07080f; --surface:#0e1020; --card:#131525; --card2:#181a2e;
-  --border:#252840; --border2:#2e3158;
-  --accent:#7c6dfa; --accentH:#9d91ff;
-  --green:#26d97f; --pink:#f06292; --yellow:#ffca28; --blue:#42a5f5; --red:#ef5350;
-  --text:#eef0ff; --text2:#8890c0; --text3:#555880;
-  --r:16px; --r2:12px; --shadow:0 8px 32px rgba(0,0,0,.5);
-  /* time-of-day tint */
-  --tod-tint:rgba(0,0,0,0);
+  --bg: #F5F0E8;
+  --surface: rgba(255,255,255,0.82);
+  --border: rgba(0,0,0,0.07);
+  --accent: #E8520A;
+  --accent-soft: rgba(232,82,10,0.1);
+  --ink: #1C1C1E;
+  --ink2: #3A3A3C;
+  --ink3: #8E8E93;
+  --ink4: #C7C7CC;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
-/* ── BG ATMOSPHERE ── */
-.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:background 60s linear;}
-.bg-glow::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;
-  background:radial-gradient(circle,rgba(124,109,250,.13) 0%,transparent 70%);
-  top:-200px;left:-150px;animation:gm1 20s ease-in-out infinite alternate;}
-.bg-glow::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;
-  background:radial-gradient(circle,rgba(240,98,146,.08) 0%,transparent 70%);
-  bottom:-100px;right:-100px;animation:gm2 15s ease-in-out infinite alternate;}
-@keyframes gm1{from{transform:translate(0,0)}to{transform:translate(100px,80px)}}
-@keyframes gm2{from{transform:translate(0,0)}to{transform:translate(-70px,-90px)}}
+/* ─── BASE ─── */
+html, body { height:100%; overflow:hidden; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, sans-serif;
+}
 
-.tod-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--tod-tint);transition:background 3s linear;}
-.dots-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
-  background-size:28px 28px;}
+/* ─── DESKTOP LAYOUT ─── */
+@media (min-width: 701px) {
+  body {
+    display: grid;
+    grid-template-rows: 1fr 80px;
+    grid-template-columns: 220px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .mobile-nav { display: none !important; }
+  .sidebar { display: flex !important; }
+  .player-desktop { display: grid !important; }
+  .player-mobile { display: none !important; }
+  .topbar { display: flex !important; }
+}
 
-/* ── SCREENS ── */
-.screen{position:relative;z-index:1;display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:screenIn .45s cubic-bezier(.4,0,.2,1);}
-.screen.active{display:flex;}
-@keyframes screenIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+/* ─── MOBILE LAYOUT ─── */
+@media (max-width: 700px) {
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .sidebar { display: none !important; }
+  .sidebar-overlay { display: none !important; }
+  .topbar-desktop { display: none !important; }
+  .player-desktop { display: none !important; }
+  .player-mobile { display: flex !important; }
+  .mobile-nav { display: flex !important; }
+  .main {
+    grid-row: unset !important;
+    grid-column: unset !important;
+    flex: 1;
+    min-height: 0;
+  }
+}
 
-/* ══════ LOBBY ══════ */
-#lobby{gap:0;text-align:center;}
-.lobby-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.3);border-radius:50px;padding:5px 16px;font-size:.68rem;font-weight:800;color:var(--accentH);letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;}
+/* ─── AMBIENT ─── */
+#ambient {
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  transition: background 1.4s cubic-bezier(.4,0,.2,1);
+  background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(110,40,190,0.08) 0%, transparent 70%);
+}
 
-.lobby-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,10vw,6.5rem);font-weight:700;line-height:1;
-  background:linear-gradient(135deg,#fff 0%,#c4baff 45%,#f06292 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
-.lobby-sub{font-size:.95rem;color:var(--text2);font-weight:600;letter-spacing:1px;margin-bottom:48px;}
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+.sidebar  { animation: fadeUp .5s ease both; }
+.topbar   { animation: fadeUp .45s .05s ease both; }
+.player-desktop { animation: fadeUp .45s .32s ease both; }
 
-/* showcase */
-.lobby-showcase{position:relative;width:210px;height:210px;margin:0 auto 28px;}
-.showcase-ring{position:absolute;inset:0;border-radius:50%;
-  background:conic-gradient(from 0deg,var(--accent),var(--pink),var(--yellow),var(--green),var(--blue),var(--accent));
-  padding:3px;animation:ringRot 4s linear infinite;}
-@keyframes ringRot{to{transform:rotate(360deg)}}
-.showcase-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;}
-.showcase-pet{font-size:5.8rem;animation:scBounce 2.2s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,109,250,.5));}
-@keyframes scBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.06)}}
+/* ─── SIDEBAR ─── */
+.sidebar {
+  grid-row:1/2; grid-column:1/2;
+  padding:24px 10px; flex-direction:column;
+  overflow-y:auto; border-right:1px solid var(--border);
+  background:rgba(245,240,232,0.92); backdrop-filter:blur(20px);
+  position:relative; z-index:2;
+}
+.logo { font-size:20px; font-weight:700; letter-spacing:-0.6px; color:var(--ink); padding:4px 10px 22px; display:flex; align-items:center; gap:8px; }
+.logo-mark { width:26px; height:26px; background:var(--accent); border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 10px rgba(232,82,10,0.35); }
+.logo-mark svg { width:14px; height:14px; }
+.sec-label { font-size:10px; font-weight:600; color:var(--ink4); letter-spacing:0.8px; text-transform:uppercase; padding:12px 10px 5px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:500; color:var(--ink3); transition:all 0.15s; }
+.nav-item:hover { background:rgba(0,0,0,0.05); color:var(--ink2); }
+.nav-item.active { background:var(--surface); color:var(--accent); box-shadow:0 1px 4px rgba(0,0,0,0.07); }
+.chart-item { display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; cursor:pointer; font-size:12.5px; color:var(--ink3); transition:all 0.15s; }
+.chart-item:hover { color:var(--ink2); background:rgba(0,0,0,0.04); }
+.chart-item.active { color:var(--accent); font-weight:500; }
+.chart-flag { width:18px; height:13px; border-radius:2px; flex-shrink:0; }
+.flag-world{background:linear-gradient(135deg,#4A90D9,#2E6DB4)}
+.flag-us{background:linear-gradient(180deg,#B22234 33%,white 33%,white 66%,#3C3B6E 66%)}
+.flag-gb{background:#012169}
+.flag-fr{background:linear-gradient(90deg,#002395 33%,white 33%,white 66%,#ED2939 66%)}
+.flag-de{background:linear-gradient(180deg,#000 33%,#D00 33%,#D00 66%,#FFCE00 66%)}
+.flag-br{background:#009C3B}
+.flag-ru{background:linear-gradient(180deg,white 33%,#0039A6 33%,#0039A6 66%,#D52B1E 66%)}
+.flag-jp{background:white}
+.flag-kr{background:white}
+.flag-in{background:linear-gradient(180deg,#FF9933 33%,white 33%,white 66%,#138808 66%)}
+.flag-mx{background:linear-gradient(90deg,#006847 33%,white 33%,white 66%,#CE1126 66%)}
+.flag-au{background:#012169}
+.flag-kz{background:#00AFCA}
 
-.pet-selector{display:flex;gap:12px;justify-content:center;margin-bottom:36px;}
-.pet-sel-btn{width:54px;height:54px;background:var(--card);border:2px solid var(--border2);border-radius:14px;cursor:pointer;font-size:1.7rem;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.4,0,.2,1);}
-.pet-sel-btn:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 20px rgba(124,109,250,.25);}
-.pet-sel-btn.active{border-color:var(--accent);background:rgba(124,109,250,.15);box-shadow:0 0 22px rgba(124,109,250,.35);transform:translateY(-4px);}
+/* ─── MAIN ─── */
+.main { grid-row:1/2; grid-column:2/3; display:flex; flex-direction:column; overflow:hidden; position:relative; z-index:1; }
 
-.lobby-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 42px;background:linear-gradient(135deg,var(--accent),#5a4de8);border:none;border-radius:50px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(124,109,250,.45);transition:all .25s;animation:ctaP 3s ease-in-out infinite;}
-@keyframes ctaP{0%,100%{box-shadow:0 8px 25px rgba(124,109,250,.4)}50%{box-shadow:0 8px 50px rgba(124,109,250,.75)}}
-.lobby-cta:hover{transform:translateY(-3px) scale(1.03);}
-.lobby-cta .arr{animation:arrB 1s ease-in-out infinite;}
-@keyframes arrB{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+/* ─── TOPBAR DESKTOP ─── */
+.topbar { height:62px; display:flex; align-items:center; padding:0 30px; gap:12px; background:rgba(245,240,232,0.88); backdrop-filter:blur(24px); border-bottom:1px solid var(--border); flex-shrink:0; }
+.search-pill { flex:1; max-width:420px; display:flex; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0 13px; gap:8px; height:35px; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:all 0.2s; }
+.search-pill:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); background:white; }
+.search-pill svg { color:var(--ink4); flex-shrink:0; }
+.search-pill input { flex:1; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--ink); outline:none; }
+.search-pill input::placeholder { color:var(--ink4); }
+.search-go { background:var(--accent); color:white; border:none; border-radius:8px; padding:7px 18px; font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer; transition:all 0.15s; }
+.search-go:hover { filter:brightness(1.08); transform:translateY(-1px); box-shadow:0 4px 14px rgba(232,82,10,0.28); }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#FF8C3A); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:white; cursor:pointer; box-shadow:0 2px 8px rgba(232,82,10,0.25); }
 
-/* achievements preview on lobby */
-.lobby-stats-row{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
-.lobby-stat-chip{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:50px;padding:6px 14px;font-size:.72rem;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
+/* ─── MOBILE TOPBAR ─── */
+.topbar-mobile {
+  display: none;
+  padding: 12px 16px 10px;
+  padding-top: calc(12px + var(--safe-top));
+  background: rgba(245,240,232,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+  align-items: center;
+  z-index: 10;
+}
+@media (max-width: 700px) {
+  .topbar-mobile { display: flex; }
+}
+.topbar-mobile .logo-small {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 17px; font-weight: 700; letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.topbar-mobile .logo-mark-sm {
+  width: 24px; height: 24px; background: var(--accent); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(232,82,10,0.35);
+}
+.topbar-mobile .search-pill-mobile {
+  flex: 1; display: flex; align-items: center;
+  background: white; border: 1px solid var(--border);
+  border-radius: 10px; padding: 0 12px; gap: 8px; height: 36px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+.topbar-mobile .search-pill-mobile:focus-within {
+  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.topbar-mobile .search-pill-mobile input {
+  flex: 1; border: none; background: transparent;
+  font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); outline: none;
+}
+.topbar-mobile .search-pill-mobile input::placeholder { color: var(--ink4); }
 
-/* ══════ SELECT ══════ */
-#select-screen{gap:22px;max-width:640px;width:100%;margin:auto;}
-.sel-header{text-align:center;}
-.sel-title{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;margin-bottom:5px;}
-.sel-sub{font-size:.9rem;color:var(--text2);}
-.animal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;}
-.a-card{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);padding:18px 8px 14px;cursor:pointer;text-align:center;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
-.a-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,109,250,.0),rgba(124,109,250,.08));opacity:0;transition:opacity .25s;}
-.a-card:hover{border-color:var(--accent);transform:translateY(-5px);box-shadow:0 12px 30px rgba(124,109,250,.2);}
-.a-card:hover::before{opacity:1;}
-.a-card.selected{border-color:var(--accent);background:rgba(124,109,250,.1);box-shadow:0 0 0 4px rgba(124,109,250,.15),0 12px 30px rgba(124,109,250,.25);transform:translateY(-5px);}
-.a-card.selected::after{content:'✓';position:absolute;top:7px;right:9px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;}
-.a-emo{font-size:2.8rem;display:block;margin-bottom:8px;}
-.a-card:hover .a-emo,.a-card.selected .a-emo{animation:emoJ .5s ease-in-out infinite alternate;}
-@keyframes emoJ{from{transform:translateY(0)}to{transform:translateY(-7px)}}
-.a-nm{font-size:.78rem;font-weight:800;}
-.a-type{font-size:.68rem;color:var(--text3);margin-top:2px;}
-.a-trait{font-size:.6rem;color:var(--accentH);margin-top:3px;font-weight:700;}
-@keyframes cardAppear{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* ─── CONTENT ─── */
+.content {
+  flex:1; overflow-y:auto; padding:20px 16px 24px;
+  scrollbar-width:thin; scrollbar-color:var(--ink4) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 701px) {
+  .content { padding: 26px 30px; }
+}
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+.page-header { margin-bottom:18px; animation: fadeUp .4s .1s ease both; }
+.page-eyebrow { font-size:11px; font-weight:500; color:var(--accent); letter-spacing:0.7px; text-transform:uppercase; margin-bottom:4px; }
+.page-title { font-size:22px; font-weight:700; letter-spacing:-0.6px; }
+@media (min-width: 701px) { .page-title { font-size: 26px; } }
+.page-meta { font-size:12.5px; color:var(--ink3); margin-top:3px; }
 
-/* personality chips */
-.personality-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
-.p-chip{padding:5px 12px;border-radius:50px;font-size:.65rem;font-weight:800;border:1px solid;cursor:pointer;transition:all .2s;}
-.p-chip.sel{box-shadow:0 0 12px currentColor;}
+/* ─── FEATURED GRID ─── */
+.feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+@media (min-width: 701px) { .feat-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; margin-bottom:24px; } }
+/* На мобиле скрываем featured grid, оставляем только tracklist */
+@media (max-width: 700px) { .feat-grid { display: none; } }
+.feat-card { background:white; border-radius:12px; overflow:hidden; cursor:pointer; transition:all .3s cubic-bezier(.22,1,.36,1); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+.feat-card:active { transform:scale(0.96); }
+@media (min-width: 701px) { .feat-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.12); } }
+.feat-cover { width:100%; aspect-ratio:1; background:var(--bg); position:relative; overflow:hidden; }
+.feat-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+.feat-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); display:flex; align-items:center; justify-content:center; transition:.2s; }
+@media (min-width: 701px) {
+  .feat-card:hover .feat-overlay { background:rgba(0,0,0,0.35); }
+  .feat-card:hover .feat-play { opacity:1; transform:scale(1); }
+}
+.feat-play { width:36px; height:36px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.7); transition:all .25s cubic-bezier(.34,1.56,.64,1); }
+.feat-info { padding:7px 9px; }
+.feat-title { font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.feat-artist { font-size:10.5px; color:var(--ink3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.name-section{text-align:center;width:100%;}
-.name-lbl{font-size:.7rem;font-weight:800;color:var(--text2);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px;}
-.name-field{width:100%;max-width:300px;background:var(--card);border:2px solid var(--border2);border-radius:50px;padding:13px 22px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);text-align:center;outline:none;transition:all .25s;}
-.name-field::placeholder{color:var(--text3);}
-.name-field:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,109,250,.15);}
-.begin-btn{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;padding:14px 36px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#5a4de8);color:#fff;cursor:pointer;transition:all .3s;opacity:.35;pointer-events:none;box-shadow:0 6px 20px rgba(124,109,250,.3);}
-.begin-btn.on{opacity:1;pointer-events:all;box-shadow:0 8px 30px rgba(124,109,250,.5);}
-.begin-btn.on:hover{transform:translateY(-2px) scale(1.03);}
+/* ─── CHART SELECTOR MOBILE ─── */
+.chart-scroll-wrap {
+  display: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -16px 16px;
+  padding: 2px 16px 4px;
+}
+.chart-scroll-wrap::-webkit-scrollbar { display: none; }
+@media (max-width: 700px) { .chart-scroll-wrap { display: block; } }
+.chart-scroll { display: flex; gap: 8px; width: max-content; padding-right: 16px; }
+.chart-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 20px;
+  background: white; border: 1px solid var(--border);
+  font-size: 12px; font-weight: 500; color: var(--ink3);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.chart-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(232,82,10,0.3); }
+.chart-chip-flag { width: 16px; height: 11px; border-radius: 2px; flex-shrink: 0; }
 
-/* ══════ GAME ══════ */
-#game-screen{padding:12px;justify-content:flex-start;padding-top:14px;}
+/* ─── COL HEADERS ─── */
+.col-headers { display:grid; grid-template-columns:28px 48px 1fr 28px 40px; gap:10px; padding:0 12px 8px; border-bottom:1px solid var(--border); margin-bottom:6px; }
+@media (max-width: 700px) {
+  .col-headers { display: none; }
+}
+.col-h { font-size:10.5px; font-weight:500; color:var(--ink4); text-transform:uppercase; letter-spacing:0.6px; }
 
-/* TOP BAR */
-.top-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:10px 18px;width:100%;max-width:1000px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
-.top-left{display:flex;align-items:center;gap:10px;}
-.top-pet-name{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;}
-.top-stage{font-size:.68rem;font-weight:800;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.25);border-radius:20px;padding:3px 10px;color:var(--accentH);}
-.top-trait{font-size:.62rem;font-weight:700;border-radius:20px;padding:3px 9px;border:1px solid;}
-.top-right{display:flex;align-items:center;gap:16px;}
-.top-coins{display:flex;align-items:center;gap:5px;font-weight:800;color:var(--yellow);font-size:.95rem;}
-.top-mood{font-size:1.2rem;}
-.top-time{font-size:.75rem;font-weight:700;color:var(--text3);display:flex;align-items:center;gap:5px;}
-.tod-icon{font-size:.9rem;}
-.top-level{font-size:.68rem;font-weight:800;color:var(--green);background:rgba(38,217,127,.1);border:1px solid rgba(38,217,127,.25);border-radius:20px;padding:3px 9px;}
+/* ─── TRACK ─── */
+.tracklist { display:flex; flex-direction:column; gap:2px; }
+.track {
+  display:grid; grid-template-columns:28px 48px 1fr 28px 40px;
+  align-items:center; gap:10px; padding:7px 12px; border-radius:12px;
+  cursor:pointer; position:relative;
+  transition: box-shadow 0.25s ease, background 0.15s ease;
+  background:transparent;
+}
+@media (max-width: 700px) {
+  .track {
+    grid-template-columns: 52px 1fr 36px 36px;
+    padding: 7px 0;
+    border-radius: 10px;
+    gap: 12px;
+  }
+  .track:active { background: rgba(255,255,255,0.7); border-radius: 10px; }
+  .t-num { display: none !important; }
+  .t-play { left: 0; width: 52px; }
+}
+@media (min-width: 701px) {
+  .track.hovered { background:white; box-shadow:0 1px 1px rgba(0,0,0,0.04),0 4px 8px rgba(0,0,0,0.06),0 12px 28px rgba(0,0,0,0.09),0 0 0 1px rgba(0,0,0,0.04); }
+  .track.hovered .t-num { opacity:0; }
+  .track.hovered .t-play { opacity:1; }
+  .track.hovered .t-art { box-shadow:6px 10px 24px rgba(0,0,0,0.22); }
+  .track.hovered .t-like { opacity:1; }
+  .track.hovered .t-art-shadow { opacity:1; transform:scaleX(1.1) translateY(4px); }
+}
+.track.now { background:white; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(232,82,10,0.15); }
+.track.now .t-num { opacity:0; }
+.track.now .t-play { opacity:1; }
+.track.now .t-like.on { opacity:1; }
+.t-num { font-size:12px; color:var(--ink3); text-align:right; font-variant-numeric:tabular-nums; transition:opacity 0.12s; }
+.t-play { position:absolute; left:4px; width:28px; text-align:center; font-size:10px; color:var(--accent); opacity:0; transition:opacity 0.12s; font-weight:700; }
+@media (min-width: 701px) { .t-play { left: 14px; width: 32px; } }
+.t-art { width:48px; height:48px; border-radius:8px; overflow:hidden; flex-shrink:0; box-shadow:0 2px 6px rgba(0,0,0,0.15); transition:all 0.3s cubic-bezier(.22,1,.36,1); position:relative; z-index:5; background:var(--bg); }
+.t-art img { width:100%; height:100%; object-fit:cover; display:block; }
+@media (max-width: 700px) {
+  .t-art { width:52px; height:52px; border-radius:9px; }
+}
+.track.now .t-art { box-shadow:0 0 0 2.5px var(--accent),4px 6px 16px rgba(232,82,10,0.3); }
+.t-art-shadow { position:absolute; width:48px; height:10px; background:radial-gradient(ellipse,rgba(0,0,0,0.3) 0%,transparent 70%); border-radius:50%; bottom:-6px; left:0; opacity:0; filter:blur(3px); transition:opacity 0.3s ease,transform 0.3s ease; pointer-events:none; }
+.t-info { min-width:0; }
+.t-name { font-size:13px; font-weight:600; letter-spacing:-0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); transition:color 0.2s; }
+.track.now .t-name { color:var(--accent); }
+.t-sub { font-size:11px; color:var(--ink3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.t-like {
+  background:none; border:none; font-size:16px; color:var(--ink4);
+  cursor:pointer; padding:4px; border-radius:50%; transition:all 0.15s;
+  width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+}
+@media (max-width: 700px) { .t-like { opacity: 1 !important; } }
+@media (min-width: 701px) { .t-like { opacity: 0; } }
+.t-like:active, .t-like:hover { color:var(--accent); background:var(--accent-soft); }
+.t-like.on { color:var(--accent); opacity:1 !important; }
+.t-dur { font-size:13px; color:var(--accent); text-align:right; font-variant-numeric:tabular-nums; cursor:pointer; }
+.t-dur:active { opacity: 0.6; }
+.bars { display:flex; align-items:flex-end; gap:2px; height:13px; justify-content:flex-end; }
+.bar { width:2px; background:var(--accent); border-radius:2px; animation:eq .8s ease-in-out infinite alternate; }
+.bar:nth-child(1){animation-delay:0s}.bar:nth-child(2){animation-delay:.2s}.bar:nth-child(3){animation-delay:.35s}.bar:nth-child(4){animation-delay:.1s}
+@keyframes eq { from{transform:scaleY(.2)} to{transform:scaleY(1)} }
 
-/* GAME WRAP */
-.game-wrap{display:grid;grid-template-columns:230px 1fr 270px;gap:12px;width:100%;max-width:1000px;align-items:start;}
-.g-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:16px;}
-.g-panel-title{font-size:.62rem;font-weight:800;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:7px;}
-.g-panel-title::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;display:inline-block;}
+/* ─── LOADER ─── */
+.loader-wrap { display:flex; align-items:center; justify-content:center; padding:60px; flex-direction:column; gap:14px; }
+.spinner { width:32px; height:32px; border:2.5px solid var(--ink4); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text { font-size:13px; color:var(--ink3); }
+.empty-state { text-align:center; padding:48px 24px; color:var(--ink3); font-size:13px; }
 
-/* STATS */
-.stats-list{display:flex;flex-direction:column;gap:10px;}
-.stat-row{display:flex;align-items:center;gap:8px;}
-.s-ico{font-size:.95rem;width:20px;text-align:center;flex-shrink:0;}
-.s-lbl{font-size:.66rem;font-weight:700;color:var(--text2);width:60px;flex-shrink:0;}
-.s-track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;}
-.s-fill{height:100%;border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1);}
-.sf-h{background:linear-gradient(90deg,#ef5350,#ff7043);}
-.sf-p{background:linear-gradient(90deg,#ffca28,#ffa726);}
-.sf-e{background:linear-gradient(90deg,#42a5f5,#26c6da);}
-.sf-c{background:linear-gradient(90deg,#ec407a,#ab47bc);}
-.sf-hp{background:linear-gradient(90deg,#26d97f,#00bcd4);}
-.sf-xp{background:linear-gradient(90deg,#7c6dfa,#f06292);}
-.s-num{font-size:.63rem;font-weight:800;width:26px;text-align:right;color:var(--text2);}
+/* ─── SEARCH TAB ─── */
+.search-big { display:flex; gap:10px; margin-bottom:20px; }
+.search-big-pill { flex:1; display:flex; align-items:center; background:white; border:1px solid var(--border); border-radius:10px; padding:0 14px; gap:8px; height:42px; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:all .2s; }
+.search-big-pill:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.search-big-pill input { flex:1; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); outline:none; }
 
-/* XP BAR */
-.xp-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
-.xp-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.xp-lv-txt{font-size:.65rem;font-weight:800;color:var(--accentH);}
-.xp-num-txt{font-size:.62rem;color:var(--text3);font-weight:700;}
+/* ─── PLAYER DESKTOP ─── */
+.player-desktop {
+  grid-row:2/3; grid-column:1/3;
+  background:rgba(242,236,226,0.96); backdrop-filter:blur(30px) saturate(160%);
+  border-top:1px solid var(--border);
+  grid-template-columns:260px 1fr 260px;
+  align-items:center; padding:0 24px; gap:16px;
+  position:relative; z-index:2;
+}
+.p-track { display:flex; align-items:center; gap:11px; min-width:0; }
+.p-art { width:44px; height:44px; border-radius:7px; overflow:hidden; flex-shrink:0; box-shadow:0 3px 12px rgba(0,0,0,0.18); transition:all .3s cubic-bezier(.34,1.56,.64,1); cursor:pointer; background:var(--bg); }
+.p-art:hover { transform:scale(1.1) rotate(-3deg); box-shadow:6px 8px 20px rgba(0,0,0,0.22); }
+.p-art img { width:100%; height:100%; object-fit:cover; display:block; }
+.p-info { min-width:0; flex:1; }
+.p-name { font-size:12.5px; font-weight:600; color:var(--ink); letter-spacing:-0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.p-sub { font-size:11px; color:var(--ink3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.p-like { background:none; border:none; font-size:17px; color:var(--ink4); cursor:pointer; padding:5px; border-radius:50%; transition:all .15s; flex-shrink:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
+.p-like:hover { color:var(--accent); background:var(--accent-soft); }
+.p-like.on { color:var(--accent); }
+.p-center { display:flex; flex-direction:column; align-items:center; gap:7px; }
+.p-controls { display:flex; align-items:center; gap:6px; }
+.p-btn { background:none; border:none; color:var(--ink3); cursor:pointer; padding:5px; border-radius:50%; transition:all .15s; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
+.p-btn:hover { color:var(--ink); background:rgba(0,0,0,0.06); }
+.p-btn.on { color:var(--accent); }
+.p-play { width:36px; height:36px; border-radius:50%; background:var(--ink); border:none; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+.p-play:hover { transform:scale(1.09); box-shadow:0 4px 18px rgba(0,0,0,0.24); }
+.p-progress { width:100%; display:flex; align-items:center; gap:8px; }
+.p-time { font-size:10px; color:var(--ink3); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.p-bar { flex:1; height:3px; background:var(--ink4); border-radius:3px; cursor:pointer; position:relative; transition:height .15s; }
+.p-bar:hover { height:5px; }
+.p-bar-fill { height:100%; width:0%; background:var(--ink); border-radius:3px; transition:background .2s; }
+.p-bar:hover .p-bar-fill { background:var(--accent); }
+.p-bar-thumb { position:absolute; top:50%; transform:translateY(-50%); width:12px; height:12px; background:white; border-radius:50%; border:2px solid var(--ink); opacity:0; transition:opacity .15s; pointer-events:none; margin-left:-6px; }
+.p-bar:hover .p-bar-thumb { opacity:1; }
+.p-right { display:flex; align-items:center; gap:12px; justify-content:flex-end; }
+.vol-row { display:flex; align-items:center; gap:7px; }
+.vol-icon { color:var(--ink3); display:flex; align-items:center; }
+.vol-bar { width:70px; height:3px; background:var(--ink4); border-radius:3px; cursor:pointer; overflow:hidden; }
+.vol-fill { height:100%; width:70%; background:var(--ink3); border-radius:3px; transition:background .15s; }
+.vol-row:hover .vol-fill { background:var(--ink); }
 
-/* MOOD CARD */
-.mood-card{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px;margin-top:10px;text-align:center;}
-.mood-big{font-size:2.2rem;margin-bottom:3px;animation:moodPop 2s ease-in-out infinite;}
-@keyframes moodPop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.mood-txt{font-size:.7rem;font-weight:700;color:var(--text2);}
-.mood-personality{font-size:.62rem;color:var(--text3);margin-top:2px;}
+/* ─── PLAYER MOBILE ─── */
+.player-mobile {
+  display: none;
+  flex-direction: column;
+  background: rgba(242,236,226,0.98);
+  backdrop-filter: blur(30px) saturate(160%);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.player-mini {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 6px;
+}
+.pm-art {
+  width: 36px; height: 36px; border-radius: 7px; overflow: hidden;
+  flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  background: var(--bg); cursor: pointer;
+}
+.pm-art img { width:100%; height:100%; object-fit:cover; display:block; }
+.pm-info { flex: 1; min-width: 0; cursor: pointer; }
+.pm-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.pm-sub { font-size: 10.5px; color: var(--ink3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm-controls { display: flex; align-items: center; gap: 2px; }
+.pm-btn { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 5px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+.pm-btn:active { background: rgba(0,0,0,0.08); }
+.pm-play {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); border: none; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.pm-play:active { transform: scale(0.94); }
+.pm-like { background: none; border: none; font-size: 15px; color: var(--ink4); cursor: pointer; padding: 4px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+.pm-like.on { color: var(--accent); }
+.pm-progress {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px 7px;
+}
+.pm-time { font-size: 9px; color: var(--ink4); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pm-bar {
+  flex: 1; height: 2px; background: var(--ink4); border-radius: 3px;
+  cursor: pointer; position: relative;
+  touch-action: none;
+}
+.pm-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 3px; pointer-events: none; }
+.pm-bar-thumb { display: none; }
 
-/* ACTIONS */
-.act-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
-.ab{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 5px;cursor:pointer;color:var(--text);font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
-.ab .aico{font-size:1.4rem;}
-.ab .acost{font-size:.5rem;color:var(--yellow);font-weight:700;}
-.ab:hover{transform:translateY(-2px);}
-.ab:disabled{opacity:.25;cursor:not-allowed;transform:none;}
-.ab.feed-b:hover{background:rgba(239,83,80,.12);border-color:#ef5350;}
-.ab.play-b:hover{background:rgba(255,202,40,.1);border-color:var(--yellow);}
-.ab.sleep-b:hover{background:rgba(66,165,245,.1);border-color:var(--blue);}
-.ab.heal-b:hover{background:rgba(38,217,127,.1);border-color:var(--green);}
-.ab.bath-b:hover{background:rgba(236,64,122,.12);border-color:#ec407a;}
-.ab.walk-b:hover{background:rgba(124,109,250,.1);border-color:var(--accent);}
+/* ─── MOBILE BOTTOM NAV ─── */
+.mobile-nav {
+  display: none;
+  background: rgba(245,240,232,0.97);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+  padding-bottom: calc(8px + var(--safe-bottom));
+  flex-shrink: 0;
+  z-index: 10;
+}
+.mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
+.mnav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer; padding: 4px 10px;
+  color: var(--ink4); transition: all 0.15s; border-radius: 10px;
+  flex: 1;
+}
+.mnav-btn.active { color: var(--accent); }
+.mnav-btn svg { flex-shrink: 0; }
+.mnav-label { font-size: 9.5px; font-weight: 500; }
 
-/* CENTER */
-.center-col{display:flex;flex-direction:column;align-items:center;gap:11px;}
+/* ─── SIDEBAR MOBILE SHEET ─── */
+.sidebar-sheet {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+}
+.sidebar-sheet.open { display: flex; }
+.sidebar-sheet-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+}
+.sidebar-sheet-panel {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 280px;
+  background: var(--bg); overflow-y: auto;
+  padding: 24px 10px; padding-top: calc(24px + var(--safe-top));
+  display: flex; flex-direction: column;
+  box-shadow: 4px 0 30px rgba(0,0,0,0.2);
+  animation: slideInLeft 0.28s cubic-bezier(.22,1,.36,1);
+}
+@keyframes slideInLeft { from{transform:translateX(-100%)} to{transform:none} }
 
-/* PET WINDOW */
-.pet-window{width:240px;height:240px;background:var(--card);border:1px solid var(--border2);border-radius:28px;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:visible;transition:box-shadow .5s;}
-/* spinning conic border */
-@property --a{syntax:'<angle>';initial-value:0deg;inherits:false;}
-.pet-window::before{content:'';position:absolute;inset:-1px;border-radius:29px;
-  background:conic-gradient(from var(--a,0deg),var(--accent) 0%,transparent 30%,transparent 70%,var(--pink) 100%);
-  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;padding:1.5px;
-  animation:bSpin 4s linear infinite;}
-@keyframes bSpin{to{--a:360deg}}
-.pet-window.night-mode{background:#0d1022;}
-.pet-window.night-mode::before{background:conic-gradient(from var(--a,0deg),#6baaff 0%,transparent 30%,transparent 70%,#9d91ff 100%);}
+/* ─── FULL PLAYER SHEET (mobile) ─── */
+.full-player {
+  display: none;
+  position: fixed; inset: 0; z-index: 150;
+  background: var(--bg);
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 28px;
+  padding-top: calc(20px + var(--safe-top));
+  padding-bottom: calc(20px + var(--safe-bottom));
+  animation: slideUpFull 0.32s cubic-bezier(.22,1,.36,1);
+}
+.full-player.open { display: flex; }
+@keyframes slideUpFull { from{transform:translateY(100%)} to{transform:none} }
+.fp-header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.fp-close { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 6px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.fp-title { font-size: 13px; font-weight: 600; color: var(--ink3); }
+.fp-art {
+  width: min(280px, 80vw); aspect-ratio: 1; border-radius: 20px;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+  margin-bottom: 32px; flex-shrink: 0; background: var(--bg);
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+.fp-art.playing { transform: scale(1.04); }
+.fp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fp-info { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.fp-texts { min-width: 0; flex: 1; }
+.fp-name { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-sub { font-size: 14px; color: var(--ink3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-like { background: none; border: none; font-size: 22px; color: var(--ink4); cursor: pointer; padding: 8px; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fp-like.on { color: var(--accent); }
+.fp-progress { width: 100%; display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.fp-time { font-size: 11px; color: var(--ink3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fp-bar {
+  flex: 1; height: 4px; background: var(--ink4); border-radius: 4px;
+  cursor: pointer; position: relative; touch-action: none;
+}
+.fp-bar-fill { height: 100%; width: 0%; background: var(--ink); border-radius: 4px; pointer-events: none; }
+.fp-bar-thumb {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; background: white; border-radius: 50%;
+  border: 2.5px solid var(--ink); pointer-events: none; margin-left: -8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.fp-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; }
+.fp-btn { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 8px; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+.fp-btn.on { color: var(--accent); }
+.fp-play {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--ink); border: none; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+  transition: transform 0.15s;
+}
+.fp-play:active { transform: scale(0.94); }
+.fp-vol { width: 100%; display: flex; align-items: center; gap: 10px; }
+.fp-vol-icon { color: var(--ink3); display: flex; align-items: center; }
+.fp-vol-bar { flex: 1; height: 3px; background: var(--ink4); border-radius: 3px; cursor: pointer; overflow: hidden; }
+.fp-vol-fill { height: 100%; width: 70%; background: var(--ink3); border-radius: 3px; }
 
-.pet-bg-aura{position:absolute;inset:0;border-radius:28px;opacity:0;transition:opacity 1s;pointer-events:none;}
-.pet-bg-aura.happy{background:radial-gradient(circle at 50% 60%,rgba(255,202,40,.08) 0%,transparent 70%);opacity:1;}
-.pet-bg-aura.sad{background:radial-gradient(circle at 50% 60%,rgba(66,165,245,.06) 0%,transparent 70%);opacity:1;}
-.pet-bg-aura.sick{background:radial-gradient(circle at 50% 60%,rgba(0,255,0,.05) 0%,transparent 70%);opacity:1;}
-.pet-bg-aura.danger{background:radial-gradient(circle at 50% 60%,rgba(239,83,80,.12) 0%,transparent 60%);opacity:1;}
+/* ─── TOAST ─── */
+.toast { position:fixed; bottom:170px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:9px 18px; border-radius:20px; font-size:12.5px; opacity:0; transition:all .3s; pointer-events:none; z-index:999; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+@media (max-width: 700px) { .toast { bottom: 140px; max-width: calc(100vw - 40px); white-space: normal; text-align: center; } }
 
-.weather-layer{position:absolute;inset:0;border-radius:28px;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1s;}
-.weather-layer.on{opacity:1;}
-.weather-layer .w-particle{position:absolute;font-size:.8rem;animation:wFall linear infinite;}
-@keyframes wFall{from{transform:translateY(-10px) rotate(0)}to{transform:translateY(260px) rotate(360deg)}}
+/* ─── VIDEO MODAL ─── */
+.video-modal { display:none; position:fixed; inset:0; z-index:300; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); padding: 16px; }
+.video-modal.open { display:flex; }
+.video-box { background:#111; border-radius:16px; overflow:hidden; width:min(760px,100%); box-shadow:0 30px 80px rgba(0,0,0,0.6); animation:fadeUp .3s ease; position:relative; }
+.video-box iframe { display:block; width:100%; aspect-ratio:16/9; border:none; }
+.video-close { position:absolute; top:10px; right:10px; width:32px; height:32px; background:rgba(0,0,0,0.6); border:none; border-radius:50%; color:white; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; z-index:10; transition:.15s; }
+.video-close:hover, .video-close:active { background:rgba(255,255,255,0.2); }
+.video-info { padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
+.video-title { font-size:13.5px; font-weight:600; color:white; }
+.video-artist { font-size:11.5px; color:rgba(255,255,255,0.5); margin-top:2px; }
 
-.pet-skin-layer{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:2.6rem;pointer-events:none;z-index:10;
-  animation:skinF 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,215,0,.8));display:none;line-height:1;}
-@keyframes skinF{0%,100%{transform:translateX(-50%) translateY(0) rotate(-3deg);}50%{transform:translateX(-50%) translateY(-6px) rotate(3deg);}}
-.pet-skin-layer.skin-pop{animation:skinPop .4s cubic-bezier(.17,.67,.35,1.5) forwards,skinF 3s ease-in-out .4s infinite;}
-@keyframes skinPop{0%{transform:translateX(-50%) scale(0) rotate(-20deg);opacity:0;}60%{transform:translateX(-50%) scale(1.3) rotate(5deg);opacity:1;}100%{transform:translateX(-50%) scale(1) rotate(-3deg);opacity:1;}}
-
-.pet-activity-bubble{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 0 12px;padding:5px 9px;font-size:1.1rem;pointer-events:none;opacity:0;transform:scale(0);transform-origin:top right;transition:opacity .3s,transform .3s cubic-bezier(.17,.67,.35,1.4);z-index:3;}
-.pet-activity-bubble.show{opacity:1;transform:scale(1);}
-.pet-activity-text{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);pointer-events:none;opacity:0;transition:opacity .4s;z-index:3;}
-.pet-activity-text.show{opacity:1;}
-
-.pet-big{font-size:5rem;cursor:pointer;user-select:none;display:inline-block;filter:drop-shadow(0 0 12px rgba(124,109,250,.3));transition:filter .3s;}
-.pet-big:active{transform:scale(.82) rotate(-15deg)!important;}
-
-/* pet animations */
-.pet-big.state-idle   {animation:pIdle 3s ease-in-out infinite;}
-.pet-big.state-walk   {animation:pWalk .6s ease-in-out infinite;}
-.pet-big.state-scratch{animation:pScratch .4s ease-in-out infinite;}
-.pet-big.state-spin   {animation:pSpin .8s ease-in-out 2;}
-.pet-big.state-sit    {animation:pSit 4s ease-in-out infinite;}
-.pet-big.state-blink  {animation:pBlink .1s step-end 3;}
-.pet-big.state-sneeze {animation:pSneeze .3s ease-in-out 2;}
-.pet-big.state-dance  {animation:pDance .5s ease-in-out infinite;}
-.pet-big.state-flip   {animation:pFlip .6s ease-in-out 2;}
-.pet-big.pet-sad   {animation:pShake .5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(66,165,245,.5)) saturate(.5);}
-.pet-big.pet-happy {animation:pJoy .4s ease-in-out 4;filter:drop-shadow(0 0 22px rgba(255,215,0,.8));}
-.pet-big.pet-sick  {animation:pSick 1.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(0,255,0,.5)) hue-rotate(60deg) brightness(.75);}
-.pet-big.pet-sleep {animation:pSleep 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(107,170,255,.4));}
-.pet-big.pet-danger{animation:pDanger .25s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(255,50,50,.95)) brightness(1.2);}
-.pet-big.pet-run   {animation:pRun .3s linear infinite;}
-@keyframes pIdle{0%,100%{transform:translateY(0) rotate(-1deg) scale(1);}40%{transform:translateY(-12px) rotate(1deg) scale(1.04);}70%{transform:translateY(-7px) rotate(0)}}
-@keyframes pWalk{0%{transform:translateX(-5px) rotate(-5deg);}50%{transform:translateX(5px) rotate(5deg);}100%{transform:translateX(-5px) rotate(-5deg);}}
-@keyframes pScratch{0%,100%{transform:rotate(0);}25%{transform:rotate(-10deg) translateY(-2px);}75%{transform:rotate(10deg) translateY(2px);}}
-@keyframes pSpin{0%{transform:rotate(0) scale(1);}50%{transform:rotate(180deg) scale(1.1);}100%{transform:rotate(360deg) scale(1);}}
-@keyframes pSit{0%,100%{transform:translateY(0) scale(1,1);}50%{transform:translateY(5px) scale(1.06,.93);}}
-@keyframes pBlink{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.08);}}
-@keyframes pSneeze{0%,100%{transform:rotate(0);}30%{transform:rotate(-18deg) translateX(-5px);}60%{transform:rotate(12deg) translateX(9px);}}
-@keyframes pDance{0%,100%{transform:rotate(-8deg) translateY(0);}25%{transform:rotate(8deg) translateY(-8px);}75%{transform:rotate(-4deg) translateY(-4px);}}
-@keyframes pFlip{0%{transform:scale(1) rotate(0);}50%{transform:scale(1.15) rotate(180deg);}100%{transform:scale(1) rotate(360deg);}}
-@keyframes pShake{0%,100%{transform:rotate(0);}25%{transform:rotate(-9deg);}75%{transform:rotate(9deg);}}
-@keyframes pJoy{0%,100%{transform:scale(1);}50%{transform:scale(1.28) translateY(-18px);}}
-@keyframes pSick{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(6px) rotate(3deg);}}
-@keyframes pSleep{0%,100%{transform:translateY(0) rotate(-6deg) scale(.94);}50%{transform:translateY(-6px) rotate(-6deg) scale(.94);}}
-@keyframes pDanger{0%,100%{transform:scale(1) rotate(0);}25%{transform:scale(1.17) rotate(-6deg);}75%{transform:scale(1.17) rotate(6deg);}}
-@keyframes pRun{0%{transform:translateX(-9px) scaleX(1);}50%{transform:translateX(9px) scaleX(-1);}100%{transform:translateX(-9px) scaleX(1);}}
-
-/* STATUS TAGS */
-.pet-status-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
-.s-tag{font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid;}
-.tag-sick{color:var(--green);border-color:var(--green);background:rgba(38,217,127,.1);}
-.tag-hungry{color:var(--red);border-color:var(--red);background:rgba(239,83,80,.1);}
-.tag-tired{color:var(--blue);border-color:var(--blue);background:rgba(66,165,245,.1);}
-.tag-happy{color:var(--yellow);border-color:var(--yellow);background:rgba(255,202,40,.1);}
-.tag-dirty{color:var(--pink);border-color:var(--pink);background:rgba(240,98,146,.1);}
-.tag-max{color:var(--accentH);border-color:var(--accentH);background:rgba(124,109,250,.1);}
-
-/* ACHIEVEMENTS mini-strip */
-.ach-strip{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:240px;}
-.ach-badge{width:32px;height:32px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:default;transition:all .2s;position:relative;}
-.ach-badge.earned{border-color:var(--yellow);background:rgba(255,202,40,.08);box-shadow:0 0 10px rgba(255,202,40,.2);}
-.ach-badge.earned:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:4px 8px;font-size:.55rem;white-space:nowrap;color:var(--text);pointer-events:none;font-family:'Nunito',sans-serif;font-weight:700;}
-.ach-badge:not(.earned){opacity:.2;filter:grayscale(1);}
-
-/* RIGHT PANEL */
-.right-col{display:flex;flex-direction:column;gap:10px;}
-.tabs{display:flex;gap:2px;background:rgba(255,255,255,.04);border-radius:10px;padding:3px;margin-bottom:11px;}
-.tab-btn{flex:1;font-family:'Nunito',sans-serif;font-size:.58rem;font-weight:800;padding:7px 2px;background:transparent;border:none;color:var(--text3);cursor:pointer;border-radius:8px;transition:all .2s;letter-spacing:.5px;text-transform:uppercase;}
-.tab-btn.active{background:var(--card2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.tab-btn:hover:not(.active){color:var(--text2);}
-.tab-content{display:none;}
-.tab-content.active{display:block;}
-
-/* SHOP */
-.shop-items{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-.shop-item{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 6px;cursor:pointer;text-align:center;transition:all .2s;}
-.shop-item:hover{border-color:var(--yellow);background:rgba(255,202,40,.06);transform:translateY(-1px);}
-.shop-item.owned{opacity:.5;cursor:default;}
-.si-ico{font-size:1.4rem;display:block;margin-bottom:3px;}
-.si-name{font-size:.57rem;font-weight:800;color:var(--text);display:block;margin-bottom:2px;}
-.si-desc{font-size:.52rem;color:var(--text3);display:block;margin-bottom:3px;}
-.si-price{font-size:.58rem;font-weight:700;color:var(--yellow);}
-
-/* SKINS */
-.skins-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-.skin-card{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 6px;cursor:pointer;text-align:center;transition:all .2s;position:relative;}
-.skin-card:hover{border-color:var(--yellow);transform:translateY(-1px);}
-.skin-card.owned{border-color:rgba(38,217,127,.3);}
-.skin-card.equipped{border-color:var(--yellow);background:rgba(255,202,40,.08);box-shadow:0 0 14px rgba(255,202,40,.2);}
-.skin-card.equipped::after{content:'ON';position:absolute;top:4px;right:5px;font-size:.44rem;font-weight:900;color:var(--yellow);}
-.sk-ico{font-size:1.6rem;display:block;margin-bottom:3px;}
-.sk-name{font-size:.57rem;font-weight:800;color:var(--text);display:block;margin-bottom:2px;}
-.sk-price{font-size:.54rem;font-weight:700;color:var(--yellow);}
-.sk-eq{font-size:.52rem;font-weight:800;color:var(--green);display:block;margin-top:2px;}
-
-/* LOOTBOXES */
-.lootbox-section{margin-bottom:8px;}
-.lootbox-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
-.lootbox{background:var(--card2);border:2px solid var(--border2);border-radius:var(--r2);width:56px;padding:8px 4px;cursor:pointer;text-align:center;transition:all .25s;position:relative;overflow:hidden;}
-.lootbox::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.06) 50%,transparent 60%);animation:lbSh 3s ease-in-out infinite;}
-@keyframes lbSh{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-.lootbox:hover{transform:translateY(-3px) scale(1.06);}
-.lootbox.common{border-color:#546e7a;}
-.lootbox.rare{border-color:var(--blue);box-shadow:0 0 12px rgba(66,165,245,.25);}
-.lootbox.epic{border-color:#ab47bc;box-shadow:0 0 14px rgba(171,71,188,.3);}
-.lootbox.legend{border-color:var(--yellow);animation:lbLeg 2s ease-in-out infinite;}
-@keyframes lbLeg{0%,100%{box-shadow:0 0 10px rgba(255,202,40,.3);}50%{box-shadow:0 0 30px rgba(255,202,40,.7);}}
-.lb-ico{font-size:1.5rem;display:block;margin-bottom:2px;}
-.lb-name{font-size:.28rem;font-weight:900;display:block;margin-bottom:2px;letter-spacing:.5px;}
-.lb-price{font-size:.28rem;font-weight:700;color:var(--yellow);}
-.lb-badge{font-size:.26rem;padding:1px 4px;border-radius:20px;display:inline-block;margin-bottom:2px;font-weight:800;}
-.lootbox.common .lb-badge{background:rgba(84,110,122,.2);color:#90a4ae;border:1px solid #546e7a;}
-.lootbox.rare .lb-badge{background:rgba(66,165,245,.15);color:var(--blue);border:1px solid var(--blue);}
-.lootbox.epic .lb-badge{background:rgba(171,71,188,.15);color:#ce93d8;border:1px solid #ab47bc;}
-.lootbox.legend .lb-badge{background:rgba(255,202,40,.15);color:var(--yellow);border:1px solid var(--yellow);}
-.lb-divider{font-size:.6rem;font-weight:700;color:var(--text3);letter-spacing:1px;text-align:center;margin:7px 0;text-transform:uppercase;}
-
-/* DIARY */
-.diary-list{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
-.diary-list::-webkit-scrollbar{width:3px;}
-.diary-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.diary-entry{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:8px 10px;}
-.diary-day{font-size:.58rem;font-weight:800;color:var(--accentH);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;}
-.diary-text{font-size:.75rem;color:var(--text2);line-height:1.6;}
-.diary-mood{font-size:.65rem;margin-top:3px;}
-
-/* LOG */
-.log-list{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;}
-.log-list::-webkit-scrollbar{width:3px;}
-.log-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.log-entry{font-size:.75rem;color:var(--text3);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.log-entry.good{color:var(--green);}
-.log-entry.warn{color:var(--yellow);}
-.log-entry.bad{color:var(--pink);}
-
-/* MINI-GAMES */
-.mg-area{min-height:160px;display:flex;flex-direction:column;}
-.mg-display{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;font-size:.85rem;color:var(--text2);}
-.mg-btn{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;cursor:pointer;transition:all .2s;}
-.mg-btn:hover{border-color:var(--accent);background:rgba(124,109,250,.1);}
-.mg-inp{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--accent);width:70px;text-align:center;outline:none;}
-.mg-inp:focus{border-color:var(--accent);}
-.mg-input-row{display:flex;gap:6px;}
-.reaction-circle{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.04);border:2px solid var(--border2);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
-.reaction-circle.GO{background:rgba(38,217,127,.15);border-color:var(--green);box-shadow:0 0 28px rgba(38,217,127,.4);animation:rPulse .3s ease-in-out infinite;}
-@keyframes rPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:6px 0;}
-.mem-cell{aspect-ratio:1;font-size:1.15rem;background:var(--card2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.mem-cell:hover{background:rgba(124,109,250,.1);border-color:var(--accent);}
-.mem-cell.revealed{background:rgba(38,217,127,.1);border-color:var(--green);}
-.mem-cell.matched{background:rgba(255,202,40,.1);border-color:var(--yellow);cursor:default;animation:mM .3s ease;}
-.mem-cell.wrong{background:rgba(239,83,80,.2);border-color:var(--red);animation:mW .3s ease;}
-@keyframes mM{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-@keyframes mW{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.fish-area{position:relative;width:100%;height:88px;background:linear-gradient(180deg,#0a1628,#0d2040 50%,#0a2850);border:1px solid #1a3a6a;border-radius:8px;overflow:hidden;margin:6px 0;}
-.fish-emoji{position:absolute;font-size:1.15rem;cursor:pointer;user-select:none;}
-.fish-hook{position:absolute;font-size:.95rem;transition:left .1s ease;}
-.type-word{font-size:1.05rem;font-weight:900;color:var(--yellow);letter-spacing:4px;text-align:center;margin:6px 0;}
-.type-chars span{transition:color .1s;}
-.type-chars span.done{color:var(--green);}
-.type-chars span.wrong-char{color:var(--red);}
-.type-input{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px;font-family:'Nunito',sans-serif;font-size:.75rem;color:var(--accent);width:100%;text-align:center;outline:none;margin-top:5px;transition:border-color .2s;}
-.type-input:focus{border-color:var(--accent);}
-
-/* NOTIFICATION */
-.notif{position:fixed;top:16px;left:50%;z-index:900;transform:translateX(-50%) translateY(-70px);background:var(--card);border:1px solid var(--border2);border-radius:50px;padding:10px 22px;font-size:.8rem;font-weight:700;transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);white-space:nowrap;display:flex;align-items:center;gap:8px;}
-.notif::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
-.notif.warn::before{background:var(--yellow);}
-.notif.bad::before{background:var(--red);}
-.notif.show{transform:translateX(-50%) translateY(0);}
-
-/* ACHIEVEMENT POP */
-.ach-pop{position:fixed;top:60px;right:16px;z-index:900;background:var(--card);border:1px solid var(--yellow);border-radius:14px;padding:10px 16px;transform:translateX(200px);transition:transform .4s cubic-bezier(.17,.67,.35,1.4);box-shadow:0 0 20px rgba(255,202,40,.2);}
-.ach-pop.show{transform:translateX(0);}
-.ach-pop-title{font-size:.55rem;font-weight:800;color:var(--yellow);letter-spacing:1px;text-transform:uppercase;}
-.ach-pop-name{font-size:.8rem;font-weight:800;margin-top:2px;}
-.ach-pop-ico{font-size:1.6rem;}
-
-/* SLEEP */
-.sleep-ov{position:fixed;inset:0;z-index:200;background:rgba(7,8,15,.96);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;}
-.sleep-ov.on{display:flex;}
-.sleep-big{font-size:5rem;animation:pSleep 3s ease-in-out infinite;}
-.sleep-txt{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:var(--blue);}
-.sleep-bar-wrap{width:200px;height:6px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
-.sleep-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent));width:0%;transition:width 1s linear;border-radius:10px;}
-
-/* LOOTBOX OVERLAY */
-.lb-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0;}
-.lb-overlay.on{display:flex;}
-.lb-box-anim{font-size:5rem;animation:lbBS .4s ease-in-out 3;margin-bottom:16px;}
-@keyframes lbBS{0%,100%{transform:rotate(0) scale(1);}25%{transform:rotate(-13deg) scale(1.12);}75%{transform:rotate(13deg) scale(1.12);}}
-.lb-reveal{display:none;flex-direction:column;align-items:center;gap:10px;animation:lbR .5s cubic-bezier(.17,.67,.35,1.4) both;}
-@keyframes lbR{from{opacity:0;transform:scale(0) rotate(-20deg);}to{opacity:1;transform:scale(1) rotate(0);}}
-.lb-reveal.show{display:flex;}
-.lb-win-ico{font-size:5rem;filter:drop-shadow(0 0 30px var(--yellow));}
-.lb-win-name{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;}
-.lb-win-name.common{color:#90a4ae;}.lb-win-name.rare{color:var(--blue);}.lb-win-name.epic{color:#ce93d8;}.lb-win-name.legend{color:var(--yellow);}
-.lb-win-desc,.lb-dup-note{font-size:.85rem;color:var(--text2);}
-.lb-dup-note{color:var(--yellow);}
-.lb-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-.lb-star{position:absolute;font-size:1.1rem;animation:lbSF 1s ease forwards;}
-@keyframes lbSF{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0);}}
-.lb-close-btn{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;padding:12px 30px;background:linear-gradient(135deg,var(--accent),#5a4de8);border:none;border-radius:50px;color:#fff;cursor:pointer;margin-top:8px;transition:all .2s;}
-.lb-close-btn:hover{transform:scale(1.05);}
-
-/* DANGER */
-.danger-ov{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px;}
-.danger-ov.on{display:flex;}
-.danger-icon{font-size:4.5rem;animation:pDanger .3s ease-in-out infinite;}
-.danger-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.1rem,3vw,1.6rem);font-weight:700;color:var(--red);text-shadow:0 0 20px rgba(239,83,80,.6);}
-.danger-desc{font-size:.88rem;color:var(--text2);max-width:320px;line-height:1.6;}
-.danger-timer-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;width:260px;}
-.danger-timer-label{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
-.danger-timer-bar-bg{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;}
-.danger-timer-bar{height:100%;background:linear-gradient(90deg,var(--red),#ff7043);border-radius:10px;width:100%;transition:width .5s linear;}
-.danger-timer-num{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--red);}
-.danger-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
-.danger-btn{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;padding:11px 18px;background:transparent;cursor:pointer;border-radius:10px;transition:all .2s;border:2px solid;}
-.danger-btn.primary{border-color:var(--red);color:var(--red);}
-.danger-btn.primary:hover{background:var(--red);color:#fff;}
-.danger-btn.secondary{border-color:var(--text3);color:var(--text3);}
-.danger-btn.secondary:hover{background:rgba(255,255,255,.08);color:var(--text);}
-
-/* EVO FLASH */
-.evo-flash{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;pointer-events:none;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);}
-.evo-flash.on{display:flex;}
-.evo-txt{font-family:'Space Grotesk',sans-serif;font-size:clamp(.9rem,3vw,1.6rem);font-weight:700;color:var(--yellow);text-shadow:0 0 30px rgba(255,202,40,.8);animation:evP .5s ease-in-out 6;}
-.evo-pet{font-size:6rem;animation:evP .5s ease-in-out 6;}
-@keyframes evP{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
-
-/* GAME OVER */
-.go-screen{position:fixed;inset:0;z-index:300;background:rgba(7,8,15,.99);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:24px;}
-.go-screen.on{display:flex;}
-.go-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.5rem,5vw,2.8rem);font-weight:700;color:var(--pink);text-shadow:0 0 30px rgba(240,98,146,.5);}
-.go-info{font-size:.95rem;color:var(--text2);line-height:1.9;max-width:340px;}
-.go-restart{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;padding:14px 32px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#5a4de8);color:#fff;cursor:pointer;box-shadow:0 8px 25px rgba(124,109,250,.4);transition:all .2s;}
-.go-restart:hover{transform:scale(1.05);}
-
-/* FX float */
-.fx{position:fixed;pointer-events:none;z-index:700;font-size:1.5rem;animation:fxUp 1.1s ease forwards;}
-@keyframes fxUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-70px) scale(1.9)}}
-
-/* SOUND BTN */
-.sound-btn{position:fixed;bottom:16px;right:16px;z-index:700;background:var(--card);border:1px solid var(--border2);border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:1rem;transition:all .2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.3);}
-.sound-btn:hover{border-color:var(--accent);}
-
-/* RESPONSIVE */
-@media(max-width:800px){.game-wrap{grid-template-columns:1fr;max-width:420px;}.center-col{order:-1;}.top-bar{flex-wrap:wrap;gap:8px;}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:4px}
 </style>
 </head>
 <body>
-<div class="bg-glow" id="bg-glow"></div>
-<div class="tod-overlay" id="tod-overlay"></div>
-<div class="dots-bg"></div>
-<div class="notif" id="notif"></div>
-<div class="ach-pop" id="ach-pop"><div class="ach-pop-ico" id="ach-pop-ico">🏆</div><div class="ach-pop-title">Достижение!</div><div class="ach-pop-name" id="ach-pop-name">—</div></div>
 
-<!-- ══ LOBBY ══ -->
-<div class="screen active" id="lobby">
-  <div class="lobby-badge">✦ Virtual Pet Game ✦</div>
-  <div class="lobby-title">Тамагочи</div>
-  <div class="lobby-sub">Вырасти своего питомца</div>
-  <div class="lobby-showcase">
-    <div class="showcase-ring">
-      <div class="showcase-inner">
-        <div class="showcase-pet" id="lobby-emo">🐶</div>
+<div id="ambient"></div>
+<div id="yt-player" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal" id="video-modal" onclick="closeVideo(event)">
+  <div class="video-box">
+    <button class="video-close" onclick="closeVideoBtn()">✕</button>
+    <div id="video-iframe-wrap"></div>
+    <div class="video-info">
+      <div>
+        <div class="video-title" id="video-title">—</div>
+        <div class="video-artist" id="video-artist">—</div>
       </div>
     </div>
   </div>
-  <div class="pet-selector">
-    <button class="pet-sel-btn active" onclick="lobbyPick(0)">🐱</button>
-    <button class="pet-sel-btn" onclick="lobbyPick(1)">🐶</button>
-    <button class="pet-sel-btn" onclick="lobbyPick(2)">🐰</button>
-    <button class="pet-sel-btn" onclick="lobbyPick(3)">🐹</button>
-  </div>
-  <button class="lobby-cta" onclick="showScreen('select-screen')">Начать игру <span class="arr">→</span></button>
-  <div class="lobby-stats-row" id="lobby-stats-row"></div>
 </div>
 
-<!-- ══ SELECT ══ -->
-<div class="screen" id="select-screen">
-  <div class="sel-header">
-    <div class="sel-title">Выбери питомца</div>
-    <div class="sel-sub">Каждый со своим характером</div>
+<!-- FULL PLAYER SHEET (mobile) -->
+<div class="full-player" id="full-player">
+  <div class="fp-header">
+    <button class="fp-close" onclick="closeFullPlayer()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <span class="fp-title">Воспроизводится</span>
+    <div style="width:36px"></div>
   </div>
-  <div class="animal-grid" id="animal-grid"></div>
+  <div class="fp-art" id="fp-art"></div>
+  <div class="fp-info">
+    <div class="fp-texts">
+      <div class="fp-name" id="fp-name">Выбери трек</div>
+      <div class="fp-sub" id="fp-sub">WAVR Music</div>
+    </div>
+    <button class="fp-like" id="fp-like" onclick="toggleLikeFromPlayer()">&#9825;</button>
+  </div>
+  <div class="fp-progress">
+    <span class="fp-time" id="fp-curr">0:00</span>
+    <div class="fp-bar" id="fp-bar" onclick="seekTo2(event)">
+      <div class="fp-bar-fill" id="fp-fill"></div>
+      <div class="fp-bar-thumb" id="fp-thumb"></div>
+    </div>
+    <span class="fp-time" id="fp-total">0:00</span>
+  </div>
+  <div class="fp-controls">
+    <button class="fp-btn" onclick="prevSong()">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
+    </button>
+    <button class="fp-play" id="fp-pbtn" onclick="togglePlay()">
+      <svg id="fp-play-icon" width="20" height="20" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button class="fp-btn" onclick="nextSong()">
+      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
+    </button>
+    <button class="fp-btn on" id="fp-shuf" onclick="toggleShuffle()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+    </button>
+  </div>
+  <div class="fp-vol">
+    <span class="fp-vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg></span>
+    <div class="fp-vol-bar" onclick="setFpVolClick(event,this)"><div class="fp-vol-fill" id="fp-vfill" style="width:70%"></div></div>
+    <span class="fp-vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span>
+  </div>
+</div>
 
-  <!-- personality picker -->
-  <div style="text-align:center;">
-    <div class="name-lbl" style="margin-bottom:8px;">Характер питомца</div>
-    <div class="personality-row" id="personality-row">
-      <button class="p-chip sel" data-p="0" onclick="pickPersonality(0)" style="color:#ffca28;border-color:#ffca28;">☀️ Весёлый</button>
-      <button class="p-chip" data-p="1" onclick="pickPersonality(1)" style="color:#42a5f5;border-color:#42a5f5;">🌊 Спокойный</button>
-      <button class="p-chip" data-p="2" onclick="pickPersonality(2)" style="color:#f06292;border-color:#f06292;">🌸 Ласковый</button>
-      <button class="p-chip" data-p="3" onclick="pickPersonality(3)" style="color:#26d97f;border-color:#26d97f;">⚡ Энергичный</button>
+<!-- SIDEBAR SHEET (mobile charts) -->
+<div class="sidebar-sheet" id="sidebar-sheet">
+  <div class="sidebar-sheet-overlay" onclick="closeSidebarSheet()"></div>
+  <div class="sidebar-sheet-panel" id="sidebar-sheet-panel">
+    <div class="logo" style="padding-bottom:16px">
+      <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
+      Wavr
+    </div>
+    <div class="sec-label">Чарты</div>
+    <div class="chart-item active" onclick="loadChart('world',this);closeSidebarSheet()"><div class="chart-flag flag-world"></div>Весь мир</div>
+    <div class="chart-item" onclick="loadChart('usa',this);closeSidebarSheet()"><div class="chart-flag flag-us"></div>США</div>
+    <div class="chart-item" onclick="loadChart('uk',this);closeSidebarSheet()"><div class="chart-flag flag-gb"></div>Великобритания</div>
+    <div class="chart-item" onclick="loadChart('france',this);closeSidebarSheet()"><div class="chart-flag flag-fr"></div>Франция</div>
+    <div class="chart-item" onclick="loadChart('germany',this);closeSidebarSheet()"><div class="chart-flag flag-de"></div>Германия</div>
+    <div class="chart-item" onclick="loadChart('brazil',this);closeSidebarSheet()"><div class="chart-flag flag-br"></div>Бразилия</div>
+    <div class="chart-item" onclick="loadChart('russia',this);closeSidebarSheet()"><div class="chart-flag flag-ru"></div>Россия</div>
+    <div class="chart-item" onclick="loadChart('japan',this);closeSidebarSheet()"><div class="chart-flag flag-jp"></div>Япония</div>
+    <div class="chart-item" onclick="loadChart('korea',this);closeSidebarSheet()"><div class="chart-flag flag-kr"></div>Корея</div>
+    <div class="chart-item" onclick="loadChart('india',this);closeSidebarSheet()"><div class="chart-flag flag-in"></div>Индия</div>
+    <div class="chart-item" onclick="loadChart('mexico',this);closeSidebarSheet()"><div class="chart-flag flag-mx"></div>Мексика</div>
+    <div class="chart-item" onclick="loadChart('australia',this);closeSidebarSheet()"><div class="chart-flag flag-au"></div>Австралия</div>
+  </div>
+</div>
+
+<!-- DESKTOP SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
+    Wavr
+  </div>
+  <div class="sec-label">Меню</div>
+  <div class="nav-item active" onclick="showTab('home',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Главная</div>
+  <div class="nav-item" onclick="showTab('search-tab',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Поиск</div>
+  <div class="nav-item" onclick="showTab('history',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>История</div>
+  <div class="nav-item" onclick="showTab('liked',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Лайки</div>
+  <div class="sec-label">Чарты</div>
+  <div class="chart-item active" onclick="loadChart('world',this)"><div class="chart-flag flag-world"></div>Весь мир</div>
+  <div class="chart-item" onclick="loadChart('usa',this)"><div class="chart-flag flag-us"></div>США</div>
+  <div class="chart-item" onclick="loadChart('uk',this)"><div class="chart-flag flag-gb"></div>Великобритания</div>
+  <div class="chart-item" onclick="loadChart('france',this)"><div class="chart-flag flag-fr"></div>Франция</div>
+  <div class="chart-item" onclick="loadChart('germany',this)"><div class="chart-flag flag-de"></div>Германия</div>
+  <div class="chart-item" onclick="loadChart('brazil',this)"><div class="chart-flag flag-br"></div>Бразилия</div>
+  <div class="chart-item" onclick="loadChart('russia',this)"><div class="chart-flag flag-ru"></div>Россия</div>
+  <div class="chart-item" onclick="loadChart('japan',this)"><div class="chart-flag flag-jp"></div>Япония</div>
+  <div class="chart-item" onclick="loadChart('korea',this)"><div class="chart-flag flag-kr"></div>Корея</div>
+  <div class="chart-item" onclick="loadChart('india',this)"><div class="chart-flag flag-in"></div>Индия</div>
+  <div class="chart-item" onclick="loadChart('mexico',this)"><div class="chart-flag flag-mx"></div>Мексика</div>
+  <div class="chart-item" onclick="loadChart('australia',this)"><div class="chart-flag flag-au"></div>Австралия</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- MOBILE TOPBAR -->
+  <header class="topbar-mobile">
+    <div class="logo-small">
+      <div class="logo-mark-sm"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
+      Wavr
+    </div>
+    <div class="search-pill-mobile">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input-mob" placeholder="Артисты, треки…" onkeydown="if(event.key==='Enter')doSearchMob()">
+    </div>
+    <button onclick="doSearchMob()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">Найти</button>
+  </header>
+
+  <!-- DESKTOP TOPBAR -->
+  <header class="topbar topbar-desktop">
+    <div class="search-pill">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Артисты, треки, альбомы…" onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <button class="search-go" onclick="doSearch()">Найти</button>
+    <div class="topbar-right">
+      <div class="avatar" onclick="toggleProfile()">M</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- HOME -->
+    <div class="tab-content active" id="tab-home">
+      <div class="page-header">
+        <div class="page-eyebrow">Чарт</div>
+        <div class="page-title" id="chart-title">Весь мир</div>
+        <div class="page-meta" id="chart-meta">Загрузка...</div>
+      </div>
+      <!-- Горизонтальный скролл чартов на мобиле -->
+      <div class="chart-scroll-wrap" id="chart-scroll-wrap">
+        <div class="chart-scroll" id="chart-chips"></div>
+      </div>
+      <div class="feat-grid" id="featured-grid">
+        <div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>
+      </div>
+      <div class="col-headers">
+        <span class="col-h" style="text-align:right">#</span>
+        <span class="col-h"></span>
+        <span class="col-h">Трек</span>
+        <span class="col-h"></span>
+        <span class="col-h" style="text-align:right">—</span>
+      </div>
+      <div class="tracklist" id="all-songs">
+        <div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="tab-content" id="tab-search-tab">
+      <div class="page-header">
+        <div class="page-eyebrow">Поиск</div>
+        <div class="page-title">Найти музыку</div>
+      </div>
+      <div class="search-big">
+        <div class="search-big-pill">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="search-input-2" placeholder="Drake, BTS, Imagine Dragons…" onkeydown="if(event.key==='Enter')doSearch2()">
+        </div>
+        <button class="search-go" onclick="doSearch2()">Найти</button>
+      </div>
+      <div class="tracklist" id="search-results"><div class="empty-state">Введи имя артиста или название песни</div></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="tab-content" id="tab-history">
+      <div class="page-header">
+        <div class="page-eyebrow">Активность</div>
+        <div class="page-title">Недавно слушал</div>
+        <div class="page-meta" id="history-meta">Слушай музыку — история появится здесь</div>
+      </div>
+      <div class="tracklist" id="history-list"><div class="empty-state">Нажми на любой трек, чтобы начать</div></div>
+    </div>
+
+    <!-- LIKED -->
+    <div class="tab-content" id="tab-liked">
+      <div class="page-header">
+        <div class="page-eyebrow">Коллекция</div>
+        <div class="page-title">Понравившиеся</div>
+      </div>
+      <div class="tracklist" id="liked-list"><div class="empty-state">Ставь лайки любимым трекам</div></div>
     </div>
   </div>
+</main>
 
-  <div class="name-section">
-    <span class="name-lbl">Придумай кличку</span>
-    <input class="name-field" id="name-field" type="text" placeholder="Имя питомца..." maxlength="12">
-  </div>
-  <button class="begin-btn" id="begin-btn" onclick="startGame()">Начать приключение →</button>
-</div>
-
-<!-- ══ GAME ══ -->
-<div class="screen" id="game-screen">
-
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div class="top-left">
-      <span class="top-pet-name" id="g-name">—</span>
-      <span class="top-stage" id="g-stage">Малыш</span>
-      <span class="top-trait" id="g-trait" style="color:var(--yellow);border-color:var(--yellow);">☀️ Весёлый</span>
-      <span class="top-level" id="g-level">Ур. 1</span>
+<!-- DESKTOP PLAYER -->
+<footer class="player-desktop" style="display:none">
+  <div class="p-track">
+    <div class="p-art" id="p-art"></div>
+    <div class="p-info">
+      <div class="p-name" id="pname">Выбери трек</div>
+      <div class="p-sub" id="psub">WAVR Music</div>
     </div>
-    <div class="top-right">
-      <span class="top-time"><span class="tod-icon" id="tod-icon">☀️</span><span id="game-clock">00:00:00</span></span>
-      <span class="top-coins">🪙 <span id="coins-val">0</span></span>
-      <span class="top-mood" id="g-mood">😊</span>
+    <button class="p-like" id="plike" onclick="toggleLikeFromPlayer()">&#9825;</button>
+  </div>
+  <div class="p-center">
+    <div class="p-controls">
+      <button class="p-btn" onclick="prevSong()"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg></button>
+      <button class="p-play" id="pbtn" onclick="togglePlay()"><svg id="play-icon" width="14" height="14" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      <button class="p-btn" onclick="nextSong()"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg></button>
+      <button class="p-btn on" id="shuf" onclick="toggleShuffle()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+    </div>
+    <div class="p-progress">
+      <span class="p-time" id="curr-time">0:00</span>
+      <div class="p-bar" id="progress-bar" onclick="seekTo(event)">
+        <div class="p-bar-fill" id="progress-fill"></div>
+        <div class="p-bar-thumb" id="progress-thumb"></div>
+      </div>
+      <span class="p-time" id="total-time">0:00</span>
     </div>
   </div>
-
-  <div class="game-wrap">
-
-    <!-- LEFT -->
-    <div style="display:flex;flex-direction:column;gap:10px;">
-
-      <!-- STATS -->
-      <div class="g-panel">
-        <div class="g-panel-title">Статистика</div>
-        <div class="stats-list">
-          <div class="stat-row"><span class="s-ico">🍖</span><span class="s-lbl">Голод</span><div class="s-track"><div class="s-fill sf-h" id="sf-h"></div></div><span class="s-num" id="sv-h">100</span></div>
-          <div class="stat-row"><span class="s-ico">😄</span><span class="s-lbl">Радость</span><div class="s-track"><div class="s-fill sf-p" id="sf-p"></div></div><span class="s-num" id="sv-p">100</span></div>
-          <div class="stat-row"><span class="s-ico">⚡</span><span class="s-lbl">Энергия</span><div class="s-track"><div class="s-fill sf-e" id="sf-e"></div></div><span class="s-num" id="sv-e">100</span></div>
-          <div class="stat-row"><span class="s-ico">🛁</span><span class="s-lbl">Чистота</span><div class="s-track"><div class="s-fill sf-c" id="sf-c"></div></div><span class="s-num" id="sv-c">100</span></div>
-          <div class="stat-row"><span class="s-ico">❤️</span><span class="s-lbl">Здоровье</span><div class="s-track"><div class="s-fill sf-hp" id="sf-hp"></div></div><span class="s-num" id="sv-hp">100</span></div>
-        </div>
-        <!-- XP -->
-        <div class="xp-section">
-          <div class="xp-label-row">
-            <span class="xp-lv-txt" id="xp-lv-txt">Ур. 1</span>
-            <span class="xp-num-txt" id="xp-num-txt">0 / 100 XP</span>
-          </div>
-          <div class="s-track"><div class="s-fill sf-xp" id="sf-xp" style="width:0%"></div></div>
-        </div>
-      </div>
-
-      <!-- MOOD CARD -->
-      <div class="g-panel" style="padding:14px;">
-        <div class="g-panel-title">Настроение</div>
-        <div class="mood-card">
-          <div class="mood-big" id="mood-big">😊</div>
-          <div class="mood-txt" id="mood-txt">Счастлив</div>
-          <div class="mood-personality" id="mood-personality">☀️ Весёлый</div>
-        </div>
-      </div>
-
-      <!-- ACTIONS -->
-      <div class="g-panel">
-        <div class="g-panel-title">Действия</div>
-        <div class="act-grid">
-          <button class="ab feed-b"  onclick="doAct('feed')"><span class="aico">🍖</span>Кормить</button>
-          <button class="ab play-b"  onclick="doAct('play')"><span class="aico">🎮</span>Играть</button>
-          <button class="ab sleep-b" onclick="doAct('sleep')"><span class="aico">😴</span>Спать</button>
-          <button class="ab heal-b"  onclick="doAct('heal')"><span class="aico">💊</span>Лечить<span class="acost">15🪙</span></button>
-          <button class="ab bath-b"  onclick="doAct('bath')"><span class="aico">🛁</span>Купать</button>
-          <button class="ab walk-b"  onclick="doAct('walk')"><span class="aico">🦮</span>Гулять</button>
-        </div>
-      </div>
-
-    </div><!-- /LEFT -->
-
-    <!-- CENTER -->
-    <div class="center-col">
-      <div class="pet-window" id="pet-window">
-        <div class="pet-bg-aura" id="pet-bg-aura"></div>
-        <div class="weather-layer" id="weather-layer"></div>
-        <div class="pet-skin-layer" id="pet-skin-layer"></div>
-        <div class="pet-activity-bubble" id="pet-bubble"></div>
-        <div class="pet-big state-idle" id="pet-big" onclick="petPat()">🐶</div>
-        <div class="pet-activity-text" id="pet-act-text"></div>
-      </div>
-      <div class="pet-status-row" id="pet-status-row"></div>
-      <!-- achievements -->
-      <div class="ach-strip" id="ach-strip"></div>
-      <div style="font-size:.7rem;color:var(--text3);font-weight:600;">Нажми на питомца 🤍</div>
+  <div class="p-right">
+    <div class="vol-row">
+      <span class="vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span>
+      <div class="vol-bar" onclick="setVolClick(event,this)"><div class="vol-fill" id="vfill" style="width:70%"></div></div>
     </div>
+  </div>
+</footer>
 
-    <!-- RIGHT -->
-    <div class="right-col">
-      <div class="g-panel" style="padding-bottom:12px;">
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('minigame')">Игры</button>
-          <button class="tab-btn" onclick="switchTab('shop')">Магазин</button>
-          <button class="tab-btn" onclick="switchTab('skins')">Скины</button>
-          <button class="tab-btn" onclick="switchTab('diary')">Дневник</button>
-          <button class="tab-btn" onclick="switchTab('log')">Лог</button>
-        </div>
-
-        <div class="tab-content active" id="tab-minigame">
-          <div class="g-panel-title">Мини-игры</div>
-          <div class="mg-area"><div class="mg-display" id="mg-display">
-            <div style="font-size:.72rem;font-weight:700;color:var(--text2);margin-bottom:8px;">Выбери игру:</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-              <button class="mg-btn" onclick="startMG('guess')">🔢 Угадай</button>
-              <button class="mg-btn" onclick="startMG('reaction')">⚡ Реакция</button>
-              <button class="mg-btn" onclick="startMG('memory')">🧠 Память</button>
-              <button class="mg-btn" onclick="startMG('fish')">🎣 Рыбалка</button>
-              <button class="mg-btn" style="grid-column:1/-1" onclick="startMG('type')">⌨️ Печатай</button>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="tab-content" id="tab-shop">
-          <div class="g-panel-title">Магазин</div>
-          <div class="shop-items" id="shop-items"></div>
-        </div>
-
-        <div class="tab-content" id="tab-skins">
-          <div class="g-panel-title">Лутбоксы</div>
-          <div class="lootbox-section"><div class="lootbox-row" id="lootbox-row"></div></div>
-          <div class="lb-divider">── Коллекция ──</div>
-          <div class="skins-grid" id="skins-grid"></div>
-        </div>
-
-        <div class="tab-content" id="tab-diary">
-          <div class="g-panel-title">Дневник питомца</div>
-          <div class="diary-list" id="diary-list">
-            <div style="font-size:.75rem;color:var(--text3);text-align:center;padding:16px;">Записи появятся по мере взросления...</div>
-          </div>
-        </div>
-
-        <div class="tab-content" id="tab-log">
-          <div class="g-panel-title">Журнал событий</div>
-          <div class="log-list" id="log-list"></div>
-        </div>
-
-      </div>
-    </div><!-- /RIGHT -->
-
-  </div><!-- /GAME WRAP -->
-</div><!-- /GAME SCREEN -->
-
-<!-- SLEEP -->
-<div class="sleep-ov" id="sleep-ov">
-  <div class="sleep-big" id="sleep-big">💤</div>
-  <div class="sleep-txt">Питомец спит...</div>
-  <div class="sleep-bar-wrap"><div class="sleep-bar" id="sleep-bar"></div></div>
-</div>
-
-<!-- LOOTBOX OVERLAY -->
-<div class="lb-overlay" id="lb-overlay">
-  <div class="lb-stars" id="lb-stars"></div>
-  <div class="lb-box-anim" id="lb-box-anim">📦</div>
-  <div class="lb-reveal" id="lb-reveal">
-    <div class="lb-win-ico" id="lb-win-ico">🎩</div>
-    <div class="lb-win-name" id="lb-win-name">???</div>
-    <div class="lb-win-desc" id="lb-win-desc"></div>
-    <div class="lb-dup-note" id="lb-dup-note"></div>
-    <button class="lb-close-btn" onclick="closeLootbox()">Забрать!</button>
+<!-- MOBILE PLAYER (mini bar) -->
+<div class="player-mobile" id="player-mobile">
+  <div class="player-mini">
+    <div class="pm-art" id="pm-art" onclick="openFullPlayer()"></div>
+    <div class="pm-info" onclick="openFullPlayer()">
+      <div class="pm-name" id="pm-name">Выбери трек</div>
+      <div class="pm-sub" id="pm-sub">WAVR Music</div>
+    </div>
+    <div class="pm-controls">
+      <button class="pm-btn" onclick="prevSong()">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
+      </button>
+      <button class="pm-play" id="pm-pbtn" onclick="togglePlay()">
+        <svg id="pm-play-icon" width="16" height="16" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <button class="pm-btn" onclick="nextSong()">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
+      </button>
+    </div>
+    <button class="pm-like" id="pm-like" onclick="toggleLikeFromPlayer()">&#9825;</button>
+  </div>
+  <div class="pm-progress">
+    <span class="pm-time" id="pm-curr">0:00</span>
+    <div class="pm-bar" id="pm-bar" onclick="seekTo3(event)">
+      <div class="pm-bar-fill" id="pm-fill"></div>
+      <div class="pm-bar-thumb" id="pm-thumb"></div>
+    </div>
+    <span class="pm-time" id="pm-total">0:00</span>
   </div>
 </div>
 
-<!-- DANGER -->
-<div class="danger-ov" id="danger-ov">
-  <div class="danger-icon" id="danger-icon">☠️</div>
-  <div class="danger-title" id="danger-title">Опасность!</div>
-  <div class="danger-desc" id="danger-desc"></div>
-  <div class="danger-timer-wrap">
-    <div class="danger-timer-label">Времени осталось</div>
-    <div class="danger-timer-bar-bg"><div class="danger-timer-bar" id="danger-bar"></div></div>
-    <div class="danger-timer-num" id="danger-timer-num">15</div>
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mnav-btn active" id="mnav-home" onclick="mnavClick('home',this)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span class="mnav-label">Главная</span>
+    </button>
+    <button class="mnav-btn" id="mnav-search" onclick="mnavClick('search-tab',this)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span class="mnav-label">Поиск</span>
+    </button>
+    <button class="mnav-btn" id="mnav-charts" onclick="openSidebarSheet()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span class="mnav-label">Чарты</span>
+    </button>
+    <button class="mnav-btn" id="mnav-history" onclick="mnavClick('history',this)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="mnav-label">История</span>
+    </button>
+    <button class="mnav-btn" id="mnav-liked" onclick="mnavClick('liked',this)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      <span class="mnav-label">Лайки</span>
+    </button>
   </div>
-  <div class="danger-actions" id="danger-actions"></div>
-</div>
+</nav>
 
-<!-- EVO FLASH -->
-<div class="evo-flash" id="evo-flash">
-  <div class="evo-txt">✦ Эволюция! ✦</div>
-  <div class="evo-pet" id="evo-pet">🐱</div>
-  <div class="evo-txt" id="evo-stage-txt"></div>
-</div>
+<div class="toast" id="toast"></div>
 
-<!-- GAME OVER -->
-<div class="go-screen" id="go-screen">
-  <div style="font-size:4rem">💔</div>
-  <div class="go-title">Питомец погиб...</div>
-  <div class="go-info" id="go-info"></div>
-  <button class="go-restart" onclick="restartGame()">Играть снова</button>
-</div>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-/* ═══════════ DATA ═══════════ */
-const ANIMALS = [
-  {
-    name:'Кошка', type:'Домашнее',
-    stages:[
-      {min:0,  evo:'🥚', label:'ЯЙЦО'},
-      {min:5,  evo:'🐱', label:'КОТЁНОК'},
-      {min:20, evo:'😸', label:'КОТ'},
-      {min:50, evo:'🦁', label:'ЛЕВ'},
-    ]
-  },
-  {
-    name:'Собака', type:'Домашнее',
-    stages:[
-      {min:0,  evo:'🥚', label:'ЯЙЦО'},
-      {min:5,  evo:'🐶', label:'ЩЕНОК'},
-      {min:20, evo:'🐕', label:'СОБАКА'},
-      {min:50, evo:'🐺', label:'ВОЛК'},
-    ]
-  },
-  {
-    name:'Кролик', type:'Пушистое',
-    stages:[
-      {min:0,  evo:'🥚', label:'ЯЙЦО'},
-      {min:5,  evo:'🐰', label:'КРОЛЬЧОНОК'},
-      {min:20, evo:'🐇', label:'КРОЛИК'},
-      {min:50, evo:'🦊', label:'МАСТЕР'},
-    ]
-  },
-  {
-    name:'Хомяк', type:'Грызун',
-    stages:[
-      {min:0,  evo:'🥚', label:'ЯЙЦО'},
-      {min:5,  evo:'🐹', label:'ХОМЯЧОК'},
-      {min:20, evo:'🐭', label:'ХОМЯК'},
-      {min:50, evo:'🐾', label:'ЛЕГЕНДА'},
-    ]
-  },
-];
+// ═══════════════════════════════════════════════
+//  WAVR — Mobile-first adaptive version
+// ═══════════════════════════════════════════════
 
-const SHOP_ITEMS = [
-  {id:'food_boost', ico:'🍗', name:'ДЕЛИКАТЕС',  price:30, desc:'+40 голод', type:'consumable'},
-  {id:'toy',        ico:'🪀', name:'ИГРУШКА',    price:50, desc:'+30 радость', type:'consumable'},
-  {id:'vitamin',    ico:'💉', name:'ВИТАМИН',    price:40, desc:'+30 здоровье', type:'consumable'},
-  {id:'shampoo',    ico:'🧴', name:'ШАМПУНЬ',    price:25, desc:'+50 чистота', type:'consumable'},
-  {id:'medal',      ico:'🏅', name:'МЕДАЛЬ',     price:100, desc:'Трофей', type:'trophy'},
-  {id:'crown',      ico:'👑', name:'КОРОНА',     price:200, desc:'Элита', type:'trophy'},
-];
-
-const SKINS = [
-  {id:'sk_cap',    ico:'🧢', name:'КЕПКА',       price:40},
-  {id:'sk_cowboy', ico:'🤠', name:'КОВБОЙ',      price:60},
-  {id:'sk_crown',  ico:'👑', name:'КОРОНА',      price:120},
-  {id:'sk_witch',  ico:'🧙', name:'ВЕДЬМА',      price:80},
-  {id:'sk_santa',  ico:'🎅', name:'САНТА',       price:90},
-  {id:'sk_ninja',  ico:'🥷', name:'НИНДЗЯ',      price:100},
-  {id:'sk_robot',  ico:'🤖', name:'РОБОТ',       price:150},
-  {id:'sk_alien',  ico:'👽', name:'ПРИШЕЛЕЦ',    price:130},
-  {id:'sk_glasses',ico:'🕶️', name:'ОЧКИ',        price:35},
-  {id:'sk_rainbow',ico:'🌈', name:'РАДУГА',      price:70},
-];
-
-const LOOTBOXES = [
-  {
-    id:'lb_common', ico:'📦', name:'ОБЫЧНЫЙ', rarity:'common', price:20,
-    pool:['sk_cap','sk_glasses','sk_rainbow']
-  },
-  {
-    id:'lb_rare', ico:'💎', name:'РЕДКИЙ', rarity:'rare', price:50,
-    pool:['sk_cowboy','sk_witch','sk_santa','sk_cap','sk_glasses']
-  },
-  {
-    id:'lb_epic', ico:'🔮', name:'ЭПИЧЕСКИЙ', rarity:'epic', price:90,
-    pool:['sk_ninja','sk_alien','sk_robot','sk_cowboy','sk_witch']
-  },
-  {
-    id:'lb_legend', ico:'⭐', name:'ЛЕГЕНД.', rarity:'legend', price:150,
-    pool:['sk_crown','sk_robot','sk_alien','sk_ninja','sk_santa']
-  },
-];
-
-/* ═══════════ STATE ═══════════ */
-let pet   = null;
-let gLoop = null;
-let clkIv = null;
-let chosen= null;
-let sleeping = false;
-let busy  = false;
-let lobbyIdx = 0;
-let mgState = null;
-let inventory = [];
-let startTime = null;
-let equippedSkin = null;
-let selectedPersonality = 0;
-let diaryEntries = [];
-let achievements = {};
-let todTimer = null;
-let weatherTimer = null;
-
-/* ═══════════ PERSONALITIES ═══════════ */
-const PERSONALITIES = [
-  { id:0, name:'Весёлый',     icon:'☀️', color:'var(--yellow)',
-    moodBonus:{play:8,feed:2,walk:4},  idleFavour:'dance',
-    phrases:['Давай играть!','Хочу бегать!','Весело же!','Ура, монетка!'] },
-  { id:1, name:'Спокойный',   icon:'🌊', color:'var(--blue)',
-    moodBonus:{sleep:10,bath:8,feed:5}, idleFavour:'sit',
-    phrases:['Всё хорошо...','Тихо и уютно','Немного устал','Умиротворение'] },
-  { id:2, name:'Ласковый',    icon:'🌸', color:'var(--pink)',
-    moodBonus:{pat:6,heal:8,feed:6},  idleFavour:'sneeze',
-    phrases:['Обними меня!','Ты лучший!','Люблю тебя~','Не уходи!'] },
-  { id:3, name:'Энергичный',  icon:'⚡', color:'var(--green)',
-    moodBonus:{walk:12,play:10,feed:3}, idleFavour:'flip',
-    phrases:['ПОЕХАЛИ!!','Быстрее!','Ещё раз!','Я полон сил!'] },
-];
-
-/* ═══════════ ACHIEVEMENTS ═══════════ */
-const ACHIEV_LIST = [
-  { id:'first_feed',  ico:'🍖', name:'Первый обед',     desc:'Покорми питомца впервые',      cond: ()=> pet && pet.hunger>=50 },
-  { id:'rich',        ico:'💰', name:'Богатей',          desc:'Накопи 200 монет',             cond: ()=> pet && pet.coins>=200 },
-  { id:'healthy',     ico:'💪', name:'Здоровяк',         desc:'Здоровье 100 пять тиков подряд',cond: ()=> pet && pet.health>=100 },
-  { id:'evolved',     ico:'✨', name:'Первая эволюция',  desc:'Вырасти до второй стадии',     cond: ()=> pet && pet.evoStage>=2 },
-  { id:'max_evolved', ico:'🦁', name:'Легенда',          desc:'Достичь максимальной стадии',  cond: ()=> pet && pet.evoStage>=3 },
-  { id:'level10',     ico:'🏆', name:'Ветеран',          desc:'Достичь 10 уровня',            cond: ()=> pet && pet.level>=10 },
-  { id:'skinned',     ico:'🎩', name:'Модник',           desc:'Надень скин',                  cond: ()=> !!equippedSkin },
-  { id:'survivor',    ico:'⚔️', name:'Выживший',         desc:'Пережить 3 опасности',         cond: ()=> (pet&&pet.dangersBeaten||0)>=3 },
-];
-
-/* ═══════════ LOBBY STATS ═══════════ */
-function buildLobbyStats() {
-  const row = document.getElementById('lobby-stats-row');
-  if(!row) return;
-  const earned = ACHIEV_LIST.filter(a=>achievements[a.id]);
-  row.innerHTML = earned.length ?
-    earned.map(a=>`<div class="lobby-stat-chip">${a.ico} ${a.name}</div>`).join('') :
-    '<div class="lobby-stat-chip">🎮 Начни игру!</div>';
-}
-
-/* ═══════════ XP SYSTEM ═══════════ */
-function xpNeeded(lv) { return lv * 100; }
-
-function addXP(amount) {
-  if(!pet) return;
-  pet.xp = (pet.xp||0) + amount;
-  const needed = xpNeeded(pet.level||1);
-  if(pet.xp >= needed) {
-    pet.xp -= needed;
-    pet.level = (pet.level||1) + 1;
-    pet.coins += pet.level * 10;
-    showNotif('⬆️ Уровень ' + pet.level + '! +' + (pet.level*10) + ' монет');
-    addLog('Новый уровень: ' + pet.level, 'good');
-    fx('⬆️');
-    renderXP();
-    checkAchievements();
-  }
-  renderXP();
-}
-
-function renderXP() {
-  if(!pet) return;
-  const lv = pet.level||1;
-  const xp = pet.xp||0;
-  const need = xpNeeded(lv);
-  const el = document.getElementById('sf-xp');
-  if(el) el.style.width = Math.min(100,(xp/need*100)) + '%';
-  const lt = document.getElementById('xp-lv-txt');
-  if(lt) lt.textContent = 'Ур. ' + lv;
-  const nt = document.getElementById('xp-num-txt');
-  if(nt) nt.textContent = xp + ' / ' + need + ' XP';
-  const gl = document.getElementById('g-level');
-  if(gl) gl.textContent = 'Ур. ' + lv;
-}
-
-/* ═══════════ ACHIEVEMENTS ═══════════ */
-function checkAchievements() {
-  ACHIEV_LIST.forEach(a => {
-    if(!achievements[a.id] && a.cond()) {
-      achievements[a.id] = true;
-      showAchievPop(a);
-      addLog('🏆 Достижение: ' + a.name, 'good');
-    }
-  });
-  renderAchievStrip();
-}
-
-function showAchievPop(a) {
-  const pop = document.getElementById('ach-pop');
-  document.getElementById('ach-pop-ico').textContent = a.ico;
-  document.getElementById('ach-pop-name').textContent = a.name;
-  pop.classList.add('show');
-  setTimeout(() => pop.classList.remove('show'), 3500);
-}
-
-function renderAchievStrip() {
-  const strip = document.getElementById('ach-strip');
-  if(!strip) return;
-  strip.innerHTML = ACHIEV_LIST.map(a => {
-    const e = achievements[a.id];
-    return `<div class="ach-badge ${e?'earned':''}" data-tip="${a.name}: ${a.desc}">${a.ico}</div>`;
-  }).join('');
-}
-
-/* ═══════════ DIARY SYSTEM ═══════════ */
-const DIARY_EVENTS = {
-  day1:   (nm,p)=>`Сегодня я появился на свет! Меня назвали ${nm}. Я ${p.icon} ${p.name} питомец. Мир такой большой...`,
-  evo2:   (nm,s)=>`Я вырос! Теперь я ${s.evo} ${s.label}. Чувствую себя сильнее!`,
-  evo3:   (nm,s)=>`Невероятно! Я снова эволюционировал — ${s.evo} ${s.label}. Я становлюсь настоящей легендой!`,
-  evo4:   (nm,s)=>`Финальная форма достигнута! Я — ${s.evo} ${s.label}. Больше некуда расти... но я счастлив!`,
-  sick:   (nm)  =>`Плохой день. Я заболел и чувствую себя ужасно. Надеюсь, хозяин меня вылечит...`,
-  healed: (nm)  =>`Я снова здоров! Хозяин позаботился обо мне. Люблю его!`,
-  danger: (nm,d)=>`Сегодня произошло кое-что страшное: ${d}. Хозяин спас меня. Я так благодарен!`,
-  rich:   (nm)  =>`У нас теперь много монет! Богатая жизнь — это хорошо.`,
-  level5: (nm)  =>`Я достиг 5 уровня! Хозяин хорошо за мной ухаживает.`,
+const CHARTS = {
+  world: ['top hits 2024','best songs 2024','viral hits 2024','pop hits 2024','dance hits 2024','taylor swift','drake','the weeknd','billie eilish','ariana grande','bruno mars','dua lipa','post malone','kendrick lamar','olivia rodrigo','harry styles','doja cat','justin bieber','beyonce','eminem','lady gaga','ed sheeran','adele','coldplay','imagine dragons','twenty one pilots','marshmello','calvin harris','charlie puth','shawn mendes'],
+  usa: ['top hits usa 2024','billboard hot 100','american pop 2024','us rap 2024','country hits 2024','taylor swift','drake','kendrick lamar','post malone','travis scott','cardi b','nicki minaj','lil baby','juice wrld','morgan wallen','chris brown','usher','j cole','future','21 savage'],
+  uk: ['uk top hits 2024','british pop 2024','uk rap 2024','uk grime 2024','ed sheeran','adele','coldplay','sam smith','dua lipa','harry styles','stormzy','little simz','skepta','lewis capaldi','central cee','fred again','disclosure','amy winehouse','george michael'],
+  france: ['french hits 2024','french rap 2024','french pop 2024','aya nakamura','stromae','angele','nekfeu','jul','ninho','booba','damso','daft punk','david guetta','zaho de sagazan','clara luciani','slimane','vitaa'],
+  germany: ['german hits 2024','german rap 2024','german pop 2024','capital bra','apache 207','rammstein','sido','bushido','ufo361','farid bang','kollegah','mark forster','zoe wees','kraftwerk','scooter','paul kalkbrenner','robin schulz'],
+  brazil: ['brazilian hits 2024','sertanejo 2024','funk brasil 2024','anitta','mc kevinho','gusttavo lima','ivete sangalo','luisa sonza','wesley safadão','marilia mendonca','mc fioti','caetano veloso','seu jorge'],
+  russia: ['russian hits 2024','russian pop 2024','russian rap 2024','bakr','ulukmanapo','xcho','скриптонит','morgenshtern','face rap','little big','monetochka','IC3PEAK','gone fludd','bumble beezy','saluki','oxxxymiron','noize mc','земфира','би-2','jony','niletto','artik and asti'],
+  japan: ['j-pop 2024','anime songs 2024','j-rock 2024','yoasobi','ado singer','fujii kaze','kenshi yonezu','official hige dandism','king gnu','one ok rock','radwimps','eve jpop','yorushika'],
+  korea: ['kpop hits 2024','korean pop 2024','bts','blackpink','stray kids','twice','aespa','newjeans','ive kpop','seventeen','nct 127','gidle','red velvet'],
+  india: ['bollywood hits 2024','hindi songs 2024','punjabi hits 2024','arijit singh','shreya ghoshal','neha kakkar','diljit dosanjh','badshah rapper','ap dhillon','ar rahman','pritam','lata mangeshkar'],
+  mexico: ['mexican hits 2024','reggaeton 2024','latin pop 2024','corridos 2024','bad bunny','j balvin','maluma','ozuna','karol g','peso pluma','natanael cano','grupo frontera','shakira','daddy yankee'],
+  australia: ['australian hits 2024','aussie pop 2024','australian rock 2024','tones and i','flume','the kid laroi','sia','troye sivan','vance joy','chet faker','rüfüs du sol','ac dc','inxs','crowded house'],
 };
 
-function addDiaryEntry(key, ...args) {
-  const fn = DIARY_EVENTS[key];
-  if(!fn) return;
-  const text = fn(...args);
-  const personality = PERSONALITIES[selectedPersonality];
-  const entry = {
-    day: pet ? pet.age : 0,
-    text,
-    mood: document.getElementById('g-mood')?.textContent || '😊',
-    time: new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),
-  };
-  diaryEntries.unshift(entry);
-  renderDiary();
+const CHART_NAMES = {world:'🌍 Весь мир',usa:'🇺🇸 США',uk:'🇬🇧 Великобритания',france:'🇫🇷 Франция',germany:'🇩🇪 Германия',brazil:'🇧🇷 Бразилия',russia:'🇷🇺 Россия',japan:'🇯🇵 Япония',korea:'🇰🇷 Корея',india:'🇮🇳 Индия',mexico:'🇲🇽 Мексика',australia:'🇦🇺 Австралия'};
+const CHART_KEYS = Object.keys(CHART_NAMES);
+
+let songs = [], currentIdx = -1, isPlaying = false, isShuffle = false;
+let likedSongs = new Set(), favSongs = new Set(), playedCount = 0, activeTab = 'home';
+let ytPlayer = null, ytReady = false, progressTimer = null;
+const isMobile = () => window.innerWidth <= 700;
+
+// ── Build mobile chart chips ──
+function buildChartChips() {
+  const wrap = document.getElementById('chart-chips');
+  wrap.innerHTML = CHART_KEYS.map(k => `
+    <div class="chart-chip${k==='world'?' active':''}" data-key="${k}" onclick="loadChartFromChip('${k}',this)">
+      ${CHART_NAMES[k]}
+    </div>
+  `).join('');
 }
 
-function renderDiary() {
-  const list = document.getElementById('diary-list');
-  if(!list) return;
-  if(!diaryEntries.length) {
-    list.innerHTML = '<div style="font-size:.75rem;color:var(--text3);text-align:center;padding:16px;">Записи появятся по мере взросления...</div>';
+function loadChartFromChip(key, el) {
+  document.querySelectorAll('.chart-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.chart-item').forEach(c => c.classList.remove('active'));
+  const name = CHART_NAMES[key]||key;
+  document.getElementById('chart-title').textContent = name;
+  loadChartData(key);
+}
+
+// ── YouTube ──
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('yt-player', {
+    width:'200', height:'113',
+    playerVars:{autoplay:1,controls:0,mute:1,rel:0,modestbranding:1,playsinline:1},
+    events:{
+      onReady:(e)=>{ ytReady=true; e.target.setVolume(70); showToast('Плеер готов — нажми на трек!'); },
+      onStateChange:onYTState,
+      onError:onYTError
+    }
+  });
+}
+function onYTState(e) {
+  if (e.data===YT.PlayerState.PLAYING) {
+    isPlaying=true;
+    updatePlayIcons(true);
+    document.querySelectorAll('.bar').forEach(b=>b.style.animationPlayState='running');
+    startProgress();
+  } else if (e.data===YT.PlayerState.PAUSED) {
+    isPlaying=false;
+    updatePlayIcons(false);
+    document.querySelectorAll('.bar').forEach(b=>b.style.animationPlayState='paused');
+    stopProgress();
+  } else if (e.data===YT.PlayerState.ENDED) {
+    stopProgress(); nextSong();
+  }
+}
+function onYTError(e) {
+  stopProgress();
+  if (e.data===100||e.data===101||e.data===150) setTimeout(()=>nextSong(),300);
+}
+function updatePlayIcons(playing) {
+  const pauseIcon = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  const playIcon = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  const svg = playing ? pauseIcon : playIcon;
+  ['play-icon','fp-play-icon','pm-play-icon'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = svg;
+  });
+  const fpArt = document.getElementById('fp-art');
+  if (fpArt) fpArt.classList.toggle('playing', playing);
+}
+
+function startProgress() {
+  stopProgress();
+  progressTimer = setInterval(()=>{
+    if (!ytPlayer||!ytReady) return;
+    const cur=ytPlayer.getCurrentTime()||0, dur=ytPlayer.getDuration()||0;
+    if (dur>0) {
+      const pct = cur/dur*100;
+      const pctStr = pct+'%';
+      // Desktop
+      setById('progress-fill','style.width',pctStr);
+      setById('progress-thumb','style.left',pctStr);
+      setById('curr-time','textContent',fmtTime(cur));
+      setById('total-time','textContent',fmtTime(dur));
+      // Full player
+      setById('fp-fill','style.width',pctStr);
+      setById('fp-thumb','style.left',pctStr);
+      setById('fp-curr','textContent',fmtTime(cur));
+      setById('fp-total','textContent',fmtTime(dur));
+      // Mini player
+      setById('pm-fill','style.width',pctStr);
+      setById('pm-thumb','style.left',pctStr);
+      setById('pm-curr','textContent',fmtTime(cur));
+      setById('pm-total','textContent',fmtTime(dur));
+    }
+  },500);
+}
+function setById(id, prop, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (prop.includes('.')) {
+    const [obj, key] = prop.split('.');
+    el[obj][key] = val;
+  } else { el[prop] = val; }
+}
+function stopProgress(){if(progressTimer){clearInterval(progressTimer);progressTimer=null;}}
+function fmtTime(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
+
+// ── YouTube API Keys ──
+const YT_API_KEYS = [
+  'AIzaSyDlGzSATY27ti9w7GUSj4NIaSbslsdbuc8',
+  'AIzaSyDpekcSlMTiWCnuf6QIo6F8T1S_W1I9QgI',
+  'AIzaSyCwsdBcfZdsN7z-xdgnp_SuhNVafmU-BG0',
+  'AIzaSyCzJtEsUqtZlukRO7jJJRfx8n-eEpireg8',
+  'AIzaSyC6SOLiWIjkLzKkAWaw2nhXWvumWa11NVI',
+  'AIzaSyDniJUADTejn8jOVvc7moo8ndPOUPBeExY',
+  'AIzaSyCu1oavlcGBPa9KV4vhDmFJ7gdQiBZtH4M',
+  'AIzaSyDczButEiwS4pOSw6m4BSb5dTXXkI0PmRw',
+  'AIzaSyB6oJMWhiR3b-2AnxnSjjxBGqOZx2uz-jc',
+  'AIzaSyDQnpA99WPVqmgZPL5VaFNCD8iPNcitWFg',
+];
+let ytKeyIdx = 0;
+async function findYTVideoId(query) {
+  for (let i=0;i<YT_API_KEYS.length;i++) {
+    const key = YT_API_KEYS[ytKeyIdx % YT_API_KEYS.length];
+    try {
+      const url = `https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=${encodeURIComponent(query)}&key=${key}&maxResults=5`;
+      const res = await fetch(url,{signal:AbortSignal.timeout(8000)});
+      const data = await res.json();
+      if (data.error) { if(data.error.code===403){ytKeyIdx++;continue;} return null; }
+      for (const item of (data.items||[])) { if(item.id&&item.id.videoId) return item.id.videoId; }
+      return null;
+    } catch(e) { return null; }
+  }
+  return null;
+}
+
+// ── iTunes ──
+async function itunesFetch(term, limit=50) {
+  const target = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=${limit}&explicit=No`;
+  try {
+    const res = await fetch(target, {signal:AbortSignal.timeout(6000)});
+    if (res.ok) { const d = await res.json(); if(d.results) return d; }
+  } catch(e) {}
+  try {
+    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+    const res2 = await fetch(proxy, {signal:AbortSignal.timeout(10000)});
+    if (res2.ok) { const d = await res2.json(); if(d.results) return d; }
+  } catch(e) {}
+  try {
+    const proxy2 = `https://corsproxy.io/?${encodeURIComponent(target)}`;
+    const res3 = await fetch(proxy2, {signal:AbortSignal.timeout(10000)});
+    if (res3.ok) { const d = await res3.json(); if(d.results) return d; }
+  } catch(e) {}
+  return {results:[]};
+}
+function itunesTrack(t) {
+  return {
+    id: String(t.trackId),
+    title: t.trackName||'Без названия',
+    artist: t.artistName||'Неизвестный',
+    album: t.collectionName||'',
+    cover: (t.artworkUrl100||'').replace('100x100','300x300'),
+    ytQuery: `${t.artistName} - ${t.trackName} official audio`,
+  };
+}
+
+// ── Load Chart ──
+async function loadChart(key, el) {
+  document.querySelectorAll('.chart-item').forEach(c=>c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  // Sync chips
+  document.querySelectorAll('.chart-chip').forEach(c => c.classList.toggle('active', c.dataset.key===key));
+  if(activeTab!=='home') showTab('home', null);
+  document.getElementById('chart-title').textContent = CHART_NAMES[key]||key;
+  loadChartData(key);
+}
+
+async function loadChartData(key) {
+  document.getElementById('chart-meta').textContent = 'Загрузка...';
+  document.getElementById('featured-grid').innerHTML='<div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div><div class="loader-text">Загрузка треков...</div></div>';
+  document.getElementById('all-songs').innerHTML='<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>';
+
+  const queries=CHARTS[key]||CHARTS.world;
+  const seenIds=new Set();
+  songs=[];
+
+  const mob = isMobile();
+  const batchSize = mob ? 1 : 5;
+  const delay = mob ? 200 : 50;
+
+  const firstBatch = queries.slice(0, mob ? 1 : 3);
+  const firstResults = await Promise.allSettled(firstBatch.map(q=>itunesFetch(q,50)));
+  for (const r of firstResults) {
+    if(r.status==='fulfilled') {
+      for (const t of (r.value.results||[])) {
+        const track=itunesTrack(t);
+        if(!seenIds.has(track.id)){seenIds.add(track.id);songs.push(track);}
+      }
+    }
+  }
+  if(songs.length){
+    renderFeatured(); renderSongList();
+    document.getElementById('chart-meta').textContent=songs.length+' треков · загружаем ещё...';
+  }
+
+  const startIdx = mob ? 1 : 3;
+  for (let i=startIdx; i<queries.length; i+=batchSize) {
+    const batch = queries.slice(i, i+batchSize);
+    const results = await Promise.allSettled(batch.map(q=>itunesFetch(q,50)));
+    for (const r of results) {
+      if(r.status==='fulfilled') {
+        for (const t of (r.value.results||[])) {
+          const track=itunesTrack(t);
+          if(!seenIds.has(track.id)){seenIds.add(track.id);songs.push(track);}
+        }
+      }
+    }
+    renderSongList();
+    document.getElementById('chart-meta').textContent=songs.length+' треков...';
+    await new Promise(r=>setTimeout(r,delay));
+  }
+
+  if(!songs.length){
+    document.getElementById('featured-grid').innerHTML='<div class="empty-state">Ошибка загрузки</div>';
+    document.getElementById('all-songs').innerHTML='<div class="empty-state">Ошибка загрузки</div>';
     return;
   }
-  list.innerHTML = diaryEntries.map(e=>`
-    <div class="diary-entry">
-      <div class="diary-day">День ${e.day} · ${e.time}</div>
-      <div class="diary-text">${e.text}</div>
-      <div class="diary-mood">${e.mood}</div>
+  renderFeatured(); renderSongList();
+  document.getElementById('chart-meta').textContent=songs.length+' треков';
+}
+
+// ── Ambient ──
+function setAmbient(r,g,b){
+  document.getElementById('ambient').style.background=`radial-gradient(ellipse 65% 55% at 68% 35%, rgba(${r},${g},${b},0.1) 0%, transparent 70%)`;
+}
+
+// ── Render ──
+function renderFeatured(){
+  const count = isMobile() ? 8 : 12;
+  document.getElementById('featured-grid').innerHTML=songs.slice(0,count).map((s,i)=>`
+    <div class="feat-card" onclick="playSong(${i})">
+      <div class="feat-cover">
+        ${s.cover?`<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">`:'<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>'}
+        <div class="feat-overlay"><div class="feat-play"><svg width="12" height="12" fill="var(--accent)" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+      </div>
+      <div class="feat-info"><div class="feat-title">${xss(s.title)}</div><div class="feat-artist">${xss(s.artist)}</div></div>
     </div>`).join('');
 }
 
-/* ═══════════ TIME OF DAY ═══════════ */
-function updateTimeOfDay() {
-  const h = new Date().getHours();
-  let icon, tint, label;
-  if(h>=6&&h<10)       { icon='🌅'; tint='rgba(255,180,80,.04)';  label='Утро'; }
-  else if(h>=10&&h<17) { icon='☀️'; tint='rgba(255,255,100,.02)'; label='День'; }
-  else if(h>=17&&h<20) { icon='🌆'; tint='rgba(255,120,40,.05)';  label='Вечер'; }
-  else if(h>=20&&h<23) { icon='🌃'; tint='rgba(40,50,120,.08)';   label='Ночь'; }
-  else                  { icon='🌙'; tint='rgba(20,30,100,.12)';   label='Глубокая ночь'; }
-
-  const todIcon = document.getElementById('tod-icon');
-  if(todIcon) todIcon.textContent = icon;
-  const todOv = document.getElementById('tod-overlay');
-  if(todOv) todOv.style.background = tint;
-  // Night mode on pet window
-  const pw = document.getElementById('pet-window');
-  if(pw) pw.classList.toggle('night-mode', h<6||h>=22);
-  // boost sleep during night
-  if(pet && (h<6||h>=23)) {
-    pet._nightBonus = true;
-  } else if(pet) {
-    pet._nightBonus = false;
+function songRow(s,idx){
+  const liked=likedSongs.has(s.id), playing=idx===currentIdx&&isPlaying;
+  const mob = isMobile();
+  const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
+  const artHtml = s.cover?`<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">`:'<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
+  if (mob) {
+    // Mobile: [art] [info] [like] [video]
+    return `<div class="track${playing?' now':''}" id="sr-${idx}" onclick="playSong(${idx})" data-idx="${idx}">
+      <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
+      <div style="position:relative;flex-shrink:0">
+        <div class="t-art">${artHtml}</div>
+      </div>
+      <div class="t-info">
+        <div class="t-name">${xss(s.title)}</div>
+        <div class="t-sub">${xss(s.artist)}</div>
+      </div>
+      <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${idx})">${liked?'&#9829;':'&#9825;'}</button>
+      <span class="t-dur" onclick="event.stopPropagation();openVideo(${idx})" title="Смотреть клип" style="cursor:pointer;color:var(--accent);font-size:15px;text-align:center;display:flex;align-items:center;justify-content:center">▶</span>
+    </div>`;
   }
+  return `<div class="track${playing?' now':''}" id="sr-${idx}" onclick="playSong(${idx})" data-idx="${idx}">
+    <span class="t-num">${playing?barsHtml:idx+1}</span>
+    <span class="t-play">&#9654;</span>
+    <div style="position:relative">
+      <div class="t-art">${artHtml}</div>
+      <div class="t-art-shadow"></div>
+    </div>
+    <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
+    <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${idx})">${liked?'&#9829;':'&#9825;'}</button>
+    <span class="t-dur" onclick="event.stopPropagation();openVideo(${idx})" title="Смотреть клип" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
+  </div>`;
 }
 
-/* ═══════════ WEATHER ═══════════ */
-const WEATHERS = [
-  {id:'none',  particles:[]},
-  {id:'rain',  particles:['💧','🌧️']},
-  {id:'snow',  particles:['❄️','🌨️']},
-  {id:'stars', particles:['⭐','✨','🌟']},
-];
-let currentWeather = 0;
-
-function triggerRandomWeather() {
-  const w = Math.floor(Math.random()*WEATHERS.length);
-  setWeather(w);
-  setTimeout(()=>setWeather(0), 20000);
+function renderSongList(){
+  document.getElementById('all-songs').innerHTML=songs.map((s,i)=>songRow(s,i)).join('');
+  if (!isMobile()) initTrack3D();
+}
+function renderFavList(){
+  const arr=songs.filter(s=>favSongs.has(s.id));
+  document.getElementById('fav-list').innerHTML=arr.length?arr.map(s=>songRow(s,songs.indexOf(s))).join(''):'<div class="empty-state">Добавь треки в избранное</div>';
+  if (!isMobile()) initTrack3D();
+}
+function renderLikedList(){
+  const arr=songs.filter(s=>likedSongs.has(s.id));
+  document.getElementById('liked-list').innerHTML=arr.length?arr.map(s=>songRow(s,songs.indexOf(s))).join(''):'<div class="empty-state">Ставь лайки любимым трекам</div>';
+  if (!isMobile()) initTrack3D();
 }
 
-function setWeather(idx) {
-  currentWeather = idx;
-  const layer = document.getElementById('weather-layer');
-  if(!layer) return;
-  layer.innerHTML='';
-  if(idx===0){layer.classList.remove('on');return;}
-  layer.classList.add('on');
-  const w = WEATHERS[idx];
-  for(let i=0;i<6;i++){
-    const p = document.createElement('div');
-    p.className='w-particle';
-    p.textContent = w.particles[Math.floor(Math.random()*w.particles.length)];
-    p.style.left = (Math.random()*90)+'%';
-    p.style.animationDuration = (1+Math.random()*2)+'s';
-    p.style.animationDelay = (Math.random()*2)+'s';
-    layer.appendChild(p);
+// ── History ──
+let history = []; // [{...songObj}] — последние прослушанные, новые в начале
+
+function addToHistory(s) {
+  // Убираем дубликат если уже есть
+  history = history.filter(h => h.id !== s.id);
+  // Добавляем в начало
+  history.unshift({...s});
+  // Храним максимум 50
+  if (history.length > 50) history = history.slice(0, 50);
+  // Обновляем вкладку если открыта
+  if (activeTab === 'history') renderHistoryList();
+  // Обновляем счётчик в заголовке
+  const meta = document.getElementById('history-meta');
+  if (meta) meta.textContent = history.length + ' треков';
+}
+
+function renderHistoryList() {
+  const el = document.getElementById('history-list');
+  if (!el) return;
+  if (!history.length) {
+    el.innerHTML = '<div class="empty-state">Нажми на любой трек, чтобы начать</div>';
+    return;
   }
-}
-
-/* ═══════════ PERSONALITY SELECT ═══════════ */
-function pickPersonality(idx) {
-  selectedPersonality = idx;
-  document.querySelectorAll('.p-chip').forEach((b,i)=>{
-    b.classList.toggle('sel', i===idx);
-  });
-}
-
-/* ═══════════ LOBBY ═══════════ */
-function lobbyPick(i) {
-  lobbyIdx = i;
-  document.querySelectorAll('.pet-dot').forEach((d,j) => d.classList.toggle('active', j===i));
-  document.querySelectorAll('.pet-sel-btn').forEach((b,j) => b.classList.toggle('active', j===i));
-  document.getElementById('lobby-emo').textContent = ANIMALS[i].stages[1].evo;
-}
-
-/* ═══════════ SCREENS ═══════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='select-screen') buildGrid();
-  if(id==='lobby') buildLobbyStats();
-}
-
-/* ═══════════ SELECT ═══════════ */
-function buildGrid() {
-  const g = document.getElementById('animal-grid');
-  g.innerHTML = '';
-  ANIMALS.forEach((a,i) => {
-    const d = document.createElement('div');
-    d.className = 'a-card';
-    if(chosen && chosen.name === a.name) d.classList.add('selected');
-    const traitNames=['Весёлый','Спокойный','Ласковый','Энергичный'];
-    d.innerHTML = `<span class="a-emo">${a.stages[1].evo}</span><div class="a-nm">${a.name}</div><div class="a-type">${a.type}</div>`;
-    d.style.animationDelay = (i * 0.08) + 's';
-    d.style.animation = 'cardAppear 0.4s ease both';
-    d.onclick = () => pickAnimal(i, d);
-    g.appendChild(d);
-  });
-  document.getElementById('name-field').oninput = checkBegin;
-}
-
-function pickAnimal(i, el) {
-  document.querySelectorAll('.a-card').forEach(c => {
-    c.classList.remove('selected');
-    c.style.animation = '';
-  });
-  el.classList.add('selected');
-  // bounce effect
-  el.style.animation = 'cardSelect 0.3s ease';
-  setTimeout(() => el.style.animation = '', 300);
-  chosen = ANIMALS[i];
-
-  // Preview in lobby pet
-  document.getElementById('lobby-emo').textContent = ANIMALS[i].stages[1].evo;
-  checkBegin();
-}
-
-function checkBegin() {
-  const ok = chosen && document.getElementById('name-field').value.trim();
-  document.getElementById('begin-btn').classList.toggle('on', !!ok);
-}
-
-/* ═══════════ START GAME ═══════════ */
-function startGame() {
-  const nm = document.getElementById('name-field').value.trim();
-  if(!nm || !chosen) return;
-
-  pet = {
-    name: nm,
-    animal: chosen,
-    hunger: 80, happy: 80, energy: 80, clean: 80, health: 90,
-    coins: 10, age: 5, evoStage: 1, sick: false, sickTurns: 0,
-    xp: 0, level: 1, dangersBeaten: 0,
-    personality: selectedPersonality,
-    _nightBonus: false,
-  };
-  inventory = [];
-  diaryEntries = [];
-  achievements = {};
-  startTime = Date.now();
-
-  // update new top bar
-  const gnm = document.getElementById('g-name');
-  if(gnm) gnm.textContent = nm;
-  document.getElementById('pet-big').textContent = chosen.stages[1].evo;
-  document.getElementById('sleep-big').textContent = chosen.stages[1].evo;
-  showScreen('game-screen');
-  buildShop();
-  buildSkins();
-  buildLootboxes();
-  render();
-  addLog('Игра началась! ' + nm + ' появился на свет.', 'good');
-
-  clearInterval(gLoop);
-  gLoop = setInterval(tick, 4000);
-  startIdleLoop();
-  startIdleAnimLoop();
-  startDangerLoop();
-
-  clearInterval(clkIv);
-  clkIv = setInterval(updateClock, 1000);
-  setInterval(diseaseCheck, 30000);
-
-  // new systems
-  updateTimeOfDay();
-  clearInterval(todTimer);
-  todTimer = setInterval(updateTimeOfDay, 60000);
-  clearInterval(weatherTimer);
-  weatherTimer = setInterval(triggerRandomWeather, 45000);
-
-  // personality display
-  const p = PERSONALITIES[selectedPersonality];
-  const gt = document.getElementById('g-trait');
-  if(gt) { gt.textContent = p.icon+' '+p.name; gt.style.color=p.color; gt.style.borderColor=p.color; }
-  const mp = document.getElementById('mood-personality');
-  if(mp) mp.textContent = p.icon+' '+p.name;
-
-  renderXP();
-  renderAchievStrip();
-
-  // first diary entry
-  setTimeout(()=>addDiaryEntry('day1', nm, p), 500);
-}
-
-/* ═══════════ TICK ═══════════ */
-function tick() {
-  if(!pet || sleeping) return;
-  pet.hunger = cl(pet.hunger - 3);
-  pet.happy  = cl(pet.happy  - 2);
-  pet.energy = cl(pet.energy - 1.5);
-  pet.clean  = cl(pet.clean  - 1);
-  pet.age++;
-
-  if(pet.sick) {
-    pet.health = cl(pet.health - 4);
-    pet.sickTurns++;
-    if(pet.sickTurns > 8) { gameOver('болезнь'); return; }
-  }
-  if(pet.hunger < 15 || pet.energy < 8) {
-    pet.health = cl(pet.health - 3);
-  }
-  if(pet.clean < 15) pet.health = cl(pet.health - 1.5);
-  if(pet.health <= 0) { gameOver('истощение'); return; }
-
-  checkEvo();
-  render();
-  autoAlerts();
-  checkAchievements();
-
-  // XP for surviving each tick
-  addXP(5 + (pet.level||1));
-
-  // coin for staying alive
-  if(pet.age % 5 === 0) {
-    pet.coins += 3;
-    addLog('+3 монеты за выживание!', 'good');
-  }
-
-  // Level 5 diary
-  if((pet.level||1)===5 && !achievements._diary5) {
-    achievements._diary5=true; addDiaryEntry('level5', pet.name);
-  }
-  if(pet.coins>=200 && !achievements._diaryRich) {
-    achievements._diaryRich=true; addDiaryEntry('rich', pet.name);
-  }
-}
-
-/* ═══════════ ALERTS ═══════════ */
-function autoAlerts() {
-  if(pet.sick)           { showNotif('🤒 ' + pet.name + ' болен! Лечи!', 'bad'); sndAlert(); }
-  else if(pet.hunger<20) showNotif('🍖 ' + pet.name + ' умирает с голода!', 'bad');
-  else if(pet.health<25) showNotif('❤️ Критическое здоровье!', 'bad');
-  else if(pet.energy<15) showNotif('😴 ' + pet.name + ' валится с ног!', 'warn');
-  else if(pet.happy<20)  showNotif('😢 ' + pet.name + ' очень грустит!', 'warn');
-  else if(pet.clean<20)  showNotif('🛁 ' + pet.name + ' грязный!', 'warn');
-}
-
-/* ═══════════ DISEASE ═══════════ */
-function diseaseCheck() {
-  if(!pet || sleeping || pet.sick) return;
-  const chance = pet.clean < 30 ? 0.35 : pet.health < 50 ? 0.2 : 0.08;
-  if(Math.random() < chance) {
-    pet.sick = true;
-    pet.sickTurns = 0;
-    showNotif('🤒 ' + pet.name + ' заболел!', 'bad');
-    addLog(pet.name + ' заболел! Используй лечение.', 'bad');
-    render();
-    setTimeout(()=>addDiaryEntry('sick',pet.name),300);
-  }
-}
-
-/* ═══════════ EVOLUTION ═══════════ */
-function checkEvo() {
-  const stages = pet.animal.stages;
-  let newStage = 0;
-  stages.forEach((s,i) => { if(pet.age >= s.min) newStage = i; });
-  if(newStage > pet.evoStage) {
-    pet.evoStage = newStage;
-    triggerEvo(stages[newStage]);
-  }
-}
-
-function triggerEvo(stage) {
-  const flash = document.getElementById('evo-flash');
-  document.getElementById('evo-pet').textContent = stage.evo;
-  document.getElementById('evo-stage-txt').textContent = stage.label;
-  document.getElementById('sleep-big').textContent = stage.evo;
-  flash.classList.add('on');
-  sndEvo(); addXP(50);
-  addLog('✦ ЭВОЛЮЦИЯ! Теперь ' + stage.label, 'good');
-  const key = ['','','evo2','evo3','evo4'][pet.evoStage]||'evo2';
-  setTimeout(()=>addDiaryEntry(key, pet.name, stage), 800);
-  setTimeout(() => flash.classList.remove('on'), 3000);
-  checkAchievements();
-}
-
-/* ═══════════ RENDER ═══════════ */
-function render() {
-  if(!pet) return;
-  const stats = ['h','p','e','c','hp'];
-  const keys  = ['hunger','happy','energy','clean','health'];
-  stats.forEach((s,i) => {
-    document.getElementById('sf-'+s).style.width = pet[keys[i]] + '%';
-    document.getElementById('sv-'+s).textContent = Math.round(pet[keys[i]]);
-  });
-
-  document.getElementById('coins-val').textContent = pet.coins;
-  // top bar updates
-  const gnm2 = document.getElementById('g-name'); if(gnm2) gnm2.textContent = pet.name;
-  const gst = document.getElementById('g-stage');
-  if(gst) gst.textContent = pet.animal.stages[pet.evoStage].label;
-  // mood emoji for top bar
-  const avg = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
-  const moodEl = document.getElementById('g-mood');
-  if(moodEl) moodEl.textContent = pet.sick ? '🤒' : avg>70 ? '😄' : avg>45 ? '😊' : avg>25 ? '😕' : '😢';
-
-  const stage = pet.animal.stages[pet.evoStage];
-  document.getElementById('pet-big').textContent = stage.evo;
-  const evoEl = document.getElementById('pet-evo'); if(evoEl) evoEl.textContent = '● ' + stage.label;
-  const gst2 = document.getElementById('g-stage'); if(gst2) gst2.textContent = stage.label;
-
-  // Mood animation
-  const pb = document.getElementById('pet-big');
-  pb.classList.remove('pet-sad','pet-sick','pet-sleep');
-  if(pet.sick) pb.classList.add('pet-sick');
-  else {
-    const avg = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
-    if(avg < 30) pb.classList.add('pet-sad');
-  }
-
-  // Keep skin layer visible if equipped
-  if(equippedSkin) {
-    const layer = document.getElementById('pet-skin-layer');
-    if(layer) layer.style.display = 'block';
-  }
-
-  // Status tags
-  const sr = document.getElementById('pet-status-row');
-  sr.innerHTML = '';
-  if(pet.sick)            sr.innerHTML += '<span class="s-tag tag-sick">БОЛЕН</span>';
-  if(pet.hunger < 25)     sr.innerHTML += '<span class="s-tag tag-hungry">ГОЛОДЕН</span>';
-  if(pet.energy < 25)     sr.innerHTML += '<span class="s-tag tag-tired">УСТАЛ</span>';
-  if(pet.clean < 25)      sr.innerHTML += '<span class="s-tag tag-dirty">ГРЯЗНЫЙ</span>';
-  if(pet.happy > 70 && !pet.sick) sr.innerHTML += '<span class="s-tag tag-happy">СЧАСТЛИВ</span>';
-  if(pet.level>=5)        sr.innerHTML += '<span class="s-tag tag-max">ВЕТ.</span>';
-
-  // Mood card
-  const avg2 = (pet.hunger+pet.happy+pet.energy+pet.health)/4;
-  const moodBig = document.getElementById('mood-big');
-  const moodTxt = document.getElementById('mood-txt');
-  if(moodBig && moodTxt) {
-    if(pet.sick){ moodBig.textContent='🤒'; moodTxt.textContent='Болеет'; }
-    else if(avg2>80){ moodBig.textContent='🤩'; moodTxt.textContent='В восторге!'; }
-    else if(avg2>65){ moodBig.textContent='😄'; moodTxt.textContent='Счастлив'; }
-    else if(avg2>50){ moodBig.textContent='😊'; moodTxt.textContent='Доволен'; }
-    else if(avg2>35){ moodBig.textContent='😐'; moodTxt.textContent='Так себе'; }
-    else if(avg2>20){ moodBig.textContent='😕'; moodTxt.textContent='Грустит'; }
-    else            { moodBig.textContent='😢'; moodTxt.textContent='Очень плохо'; }
-  }
-
-  // Pet aura
-  const aura = document.getElementById('pet-bg-aura');
-  if(aura){
-    aura.className='pet-bg-aura';
-    if(pet.sick) aura.classList.add('sick');
-    else if(avg2>65) aura.classList.add('happy');
-    else if(avg2<30) aura.classList.add('sad');
-  }
-}
-
-/* ═══════════ ACTIONS ═══════════ */
-function doAct(type) {
-  if(!pet || sleeping || busy) return;
-  busy = true; setTimeout(()=>busy=false, 700);
-  const pb = document.getElementById('pet-big');
-
-  switch(type) {
-    case 'feed':
-      if(pet.hunger>=95){ showNotif('😋 Уже сыт!'); busy=false; return; }
-      pet.hunger = Math.min(100, pet.hunger+25);
-      pet.coins = Math.max(0, pet.coins-2);
-      sndFeed(); fx('🍖'); addLog('Покормил ' + pet.name, 'good');
-      break;
-    case 'play':
-      if(pet.energy<15){ showNotif('😴 Нет сил!','warn'); busy=false; return; }
-      const pBonus = PERSONALITIES[pet.personality||0].moodBonus.play||0;
-      pet.happy  = Math.min(100, pet.happy+20+pBonus);
-      pet.energy = cl(pet.energy-15);
-      pet.hunger = cl(pet.hunger-8);
-      pet.coins += 5;
-      addXP(15);
-      sndPlay(); fx('🎮'); addLog('Поиграл с ' + pet.name + ' +5 монет', 'good');
-      break;
-    case 'sleep':
-      sndSleep(); doSleep(); return;
-    case 'heal':
-      if(!pet.sick && pet.health>=90){ showNotif('💊 Питомец здоров!'); busy=false; return; }
-      if(pet.coins < 15){ showNotif('🪙 Нужно 15 монет!','warn'); busy=false; return; }
-      const wasSick = pet.sick;
-      pet.sick = false; pet.sickTurns = 0;
-      pet.health = Math.min(100, pet.health+30);
-      pet.coins -= 15;
-      addXP(20);
-      sndHeal(); fx('💊'); addLog(pet.name + ' вылечен!', 'good');
-      if(wasSick) setTimeout(()=>addDiaryEntry('healed',pet.name),300);
-      break;
-    case 'bath':
-      if(pet.clean>=95){ showNotif('🛁 Уже чистый!'); busy=false; return; }
-      pet.clean = Math.min(100, pet.clean+45);
-      pet.happy = Math.min(100, pet.happy+5);
-      sndBath(); fx('🛁'); addLog('Искупал ' + pet.name, 'good');
-      break;
-    case 'walk':
-      if(pet.energy<20){ showNotif('😴 Слишком устал!','warn'); busy=false; return; }
-      const wBonus = PERSONALITIES[pet.personality||0].moodBonus.walk||0;
-      pet.happy  = Math.min(100, pet.happy+15+wBonus);
-      pet.health = Math.min(100, pet.health+5);
-      pet.energy = cl(pet.energy-20);
-      pet.hunger = cl(pet.hunger-10);
-      pet.coins += 8;
-      addXP(10);
-      sndWalk(); fx('🦮'); addLog('Прогулка! +8 монет', 'good');
-      break;
-  }
-
-  pb.classList.add('pet-happy');
-  setTimeout(()=>pb.classList.remove('pet-happy'),2000);
-  render();
-}
-
-/* ═══════════ SLEEP ═══════════ */
-function doSleep() {
-  sleeping = true;
-  const ov = document.getElementById('sleep-ov');
-  const bar = document.getElementById('sleep-bar');
-  ov.classList.add('on');
-  bar.style.width = '0%';
-
-  let t = 0;
-  const total = 5;
-  const iv = setInterval(() => {
-    t++;
-    bar.style.width = (t/total*100) + '%';
-    pet.energy = Math.min(100, pet.energy+12);
-    pet.health = Math.min(100, pet.health+3);
-    pet.happy  = Math.min(100, pet.happy+4);
-    render();
-    if(t >= total) {
-      clearInterval(iv);
-      sleeping = false; busy = false;
-      ov.classList.remove('on');
-      showNotif('☀️ ' + pet.name + ' проснулся!');
-      addLog(pet.name + ' выспался', 'good');
-    }
-  }, 1000);
-}
-
-/* ═══════════ PAT ═══════════ */
-function petPat() {
-  if(!pet) return;
-  const patBonus = PERSONALITIES[pet.personality||0].moodBonus.pat||0;
-  pet.happy = Math.min(100, pet.happy+4+patBonus);
-  sndPat();
-  fx(['💕','✨','💖','🌟','⭐'][Math.random()*5|0]);
-  addXP(3);
-  // personality phrase occasionally
-  if(Math.random()<.35) {
-    const p = PERSONALITIES[pet.personality||0];
-    const phrase = p.phrases[Math.floor(Math.random()*p.phrases.length)];
-    showBubble('💬', phrase);
-  }
-  render();
-}
-
-/* ═══════════ SHOP ═══════════ */
-function buildShop() {
-  const c = document.getElementById('shop-items');
-  c.innerHTML = '';
-  SHOP_ITEMS.forEach(item => {
-    const d = document.createElement('div');
-    const owned = inventory.includes(item.id) && item.type==='trophy';
-    d.className = 'shop-item' + (owned?' owned':'');
-    d.innerHTML = `<span class="si-ico">${item.ico}</span><span class="si-name">${item.name}</span><span class="si-desc">${item.desc||''}</span><span class="si-price">🪙 ${item.price}</span>`;
-    if(!owned) d.onclick = () => buyItem(item);
-    c.appendChild(d);
-  });
-}
-
-function buyItem(item) {
-  if(!pet) return;
-  if(pet.coins < item.price) { showNotif('🪙 Недостаточно монет!','warn'); return; }
-  pet.coins -= item.price;
-  inventory.push(item.id);
-
-  switch(item.id) {
-    case 'food_boost': pet.hunger = Math.min(100, pet.hunger+40); fx('🍗'); break;
-    case 'toy':        pet.happy  = Math.min(100, pet.happy+30);  fx('🪀'); break;
-    case 'vitamin':    pet.health = Math.min(100, pet.health+30); pet.sick=false; fx('💉'); break;
-    case 'shampoo':    pet.clean  = Math.min(100, pet.clean+50);  fx('🧴'); break;
-    case 'medal':      fx('🏅'); break;
-    case 'crown':      fx('👑'); break;
-  }
-  addLog('Куплено: ' + item.name, 'good');
-  buildShop();
-  buildSkins();
-  buildLootboxes();
-  render();
-}
-
-/* ═══════════ SKINS ═══════════ */
-function buildSkins() {
-  const g = document.getElementById('skins-grid');
-  if(!g) return;
-  g.innerHTML = '';
-  SKINS.forEach(skin => {
-    const owned = inventory.includes(skin.id);
-    const isEquipped = equippedSkin === skin.id;
-    const d = document.createElement('div');
-    d.className = 'skin-card' + (owned ? ' owned' : '') + (isEquipped ? ' equipped' : '');
-    const priceOrOwned = owned
-      ? `<span class="sk-eq">${isEquipped ? '▼ СНЯТЬ' : '▶ НАДЕТЬ'}</span>`
-      : `<span class="sk-price">🪙 ${skin.price}</span>`;
-    d.innerHTML = `<span class="sk-ico">${skin.ico}</span><span class="sk-name">${skin.name}</span>${priceOrOwned}`;
-    d.onclick = () => owned ? toggleSkin(skin) : buySkin(skin);
-    g.appendChild(d);
-  });
-}
-
-function buySkin(skin) {
-  if(!pet) return;
-  if(pet.coins < skin.price) { showNotif('🪙 Нужно ' + skin.price + ' монет!', 'warn'); return; }
-  pet.coins -= skin.price;
-  inventory.push(skin.id);
-  equipSkin(skin);
-  addLog('Куплен скин: ' + skin.name, 'good');
-  buildSkins();
-  buildShop();
-  render();
-  fx(skin.ico);
-}
-
-function toggleSkin(skin) {
-  if(equippedSkin === skin.id) {
-    equippedSkin = null;
-    const layer = document.getElementById('pet-skin-layer');
-    layer.style.display = 'none';
-    layer.classList.remove('skin-pop');
-    addLog('Скин снят', 'good');
-    showNotif('👗 Скин снят');
-  } else {
-    equipSkin(skin);
-    addLog('Надет скин: ' + skin.name, 'good');
-  }
-  buildSkins();
-}
-
-function equipSkin(skin) {
-  equippedSkin = skin.id;
-  const layer = document.getElementById('pet-skin-layer');
-  layer.textContent = skin.ico;
-  layer.style.display = 'block';
-  // pop animation
-  layer.classList.remove('skin-pop');
-  void layer.offsetWidth; // reflow
-  layer.classList.add('skin-pop');
-  showNotif('✨ Надет скин: ' + skin.name);
-}
-
-/* ═══════════ LOOTBOXES ═══════════ */
-function buildLootboxes() {
-  const row = document.getElementById('lootbox-row');
-  if(!row) return;
-  row.innerHTML = '';
-  LOOTBOXES.forEach(lb => {
-    const d = document.createElement('div');
-    d.className = 'lootbox ' + lb.rarity;
-    d.innerHTML = `
-      <span class="lb-badge">${lb.rarity.toUpperCase()}</span>
-      <span class="lb-ico">${lb.ico}</span>
-      <span class="lb-name">${lb.name}</span>
-      <span class="lb-price">🪙 ${lb.price}</span>`;
-    d.onclick = () => openLootbox(lb);
-    row.appendChild(d);
-  });
-}
-
-function openLootbox(lb) {
-  if(!pet) return;
-  if(pet.coins < lb.price) { showNotif('🪙 Нужно ' + lb.price + ' монет!', 'warn'); return; }
-  pet.coins -= lb.price;
-  render();
-
-  // pick random skin from pool
-  const skinId = lb.pool[Math.floor(Math.random() * lb.pool.length)];
-  const skin = SKINS.find(s => s.id === skinId);
-  const isDup = inventory.includes(skinId);
-  if(!isDup) {
-    inventory.push(skinId);
-    // auto-equip new skin from lootbox
-    setTimeout(() => equipSkin(skin), 1600);
-  }
-
-  // show overlay
-  const ov = document.getElementById('lb-overlay');
-  const boxAnim = document.getElementById('lb-box-anim');
-  const reveal = document.getElementById('lb-reveal');
-  ov.classList.add('on');
-  boxAnim.style.display = 'block';
-  boxAnim.textContent = lb.ico;
-  reveal.classList.remove('show');
-
-  // shake then reveal
-  setTimeout(() => {
-    boxAnim.style.display = 'none';
-    document.getElementById('lb-win-ico').textContent = skin.ico;
-    const nameEl = document.getElementById('lb-win-name');
-    nameEl.textContent = skin.name;
-    nameEl.className = 'lb-win-name ' + lb.rarity;
-    document.getElementById('lb-win-desc').textContent = isDup ? 'УЖЕ ЕСТЬ В КОЛЛЕКЦИИ' : 'НОВЫЙ ПРЕДМЕТ!';
-    document.getElementById('lb-dup-note').textContent = isDup ? '+10 монет компенсация' : '';
-    if(isDup) pet.coins += 10;
-    reveal.classList.add('show');
-    sndLootbox();
-    spawnLbStars(lb.rarity);
-    addLog('Лутбокс ' + lb.name + ': выпало ' + skin.name + (isDup?' (дубль)':''), isDup?'warn':'good');
-    buildSkins();
-    buildLootboxes();
-    render();
-  }, 1400);
-}
-
-function spawnLbStars(rarity) {
-  const container = document.getElementById('lb-stars');
-  container.innerHTML = '';
-  const emojis = rarity==='legend' ? ['⭐','✨','💫','🌟'] : rarity==='epic' ? ['💜','✨','🔮'] : rarity==='rare' ? ['💙','✨','💎'] : ['✨','⚪'];
-  for(let i=0;i<16;i++) {
-    const s = document.createElement('div');
-    s.className = 'lb-star';
-    s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    const angle = (i/16)*360;
-    const dist = 100 + Math.random()*120;
-    s.style.cssText = `left:50%;top:50%;--tx:${Math.cos(angle*Math.PI/180)*dist}px;--ty:${Math.sin(angle*Math.PI/180)*dist}px;animation-delay:${Math.random()*0.3}s`;
-    container.appendChild(s);
-  }
-}
-
-function closeLootbox() {
-  document.getElementById('lb-overlay').classList.remove('on');
-  document.getElementById('lb-reveal').classList.remove('show');
-  document.getElementById('lb-box-anim').style.display = 'block';
-}
-
-/* ═══════════ SOUND (Web Audio API) ═══════════ */
-let audioCtx = null;
-let soundOn = true;
-
-function getAudio() {
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-function playTone(freq, type, duration, vol=0.18, delay=0) {
-  if(!soundOn) return;
-  try {
-    const ctx = getAudio();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
-    osc.start(ctx.currentTime + delay);
-    osc.stop(ctx.currentTime + delay + duration + 0.05);
-  } catch(e) {}
-}
-
-function playJingle(notes) {
-  // notes: [{f, t, d}] freq, type, duration
-  notes.forEach(n => playTone(n.f, n.t||'square', n.d||0.1, n.v||0.15, n.delay||0));
-}
-
-function sndFeed()    { playJingle([{f:440,delay:0,d:.12},{f:554,delay:.13,d:.12},{f:659,delay:.26,d:.18}]); }
-function sndPlay()    { playJingle([{f:523,delay:0,d:.08,t:'triangle'},{f:659,delay:.09,d:.08,t:'triangle'},{f:784,delay:.18,d:.08,t:'triangle'},{f:1047,delay:.27,d:.15,t:'triangle'}]); }
-function sndSleep()   { playJingle([{f:330,delay:0,d:.2,t:'sine'},{f:294,delay:.22,d:.2,t:'sine'},{f:262,delay:.44,d:.3,t:'sine'}]); }
-function sndHeal()    { playJingle([{f:523,delay:0,d:.1,t:'sine'},{f:784,delay:.12,d:.1,t:'sine'},{f:1047,delay:.24,d:.15,t:'sine'}]); }
-function sndBath()    { playJingle([{f:800,delay:0,d:.05,t:'triangle'},{f:900,delay:.06,d:.05,t:'triangle'},{f:1000,delay:.12,d:.08,t:'triangle'}]); }
-function sndWalk()    { playJingle([{f:392,delay:0,d:.1},{f:440,delay:.11,d:.1},{f:392,delay:.22,d:.1},{f:523,delay:.33,d:.15}]); }
-function sndPat()     { playTone(660,'sine',0.08,0.12); }
-function sndAlert()   { playJingle([{f:220,delay:0,d:.15,t:'sawtooth'},{f:180,delay:.18,d:.2,t:'sawtooth'}]); }
-function sndEvo()     { playJingle([{f:523,delay:0,d:.1,t:'square'},{f:659,delay:.12,d:.1,t:'square'},{f:784,delay:.24,d:.1,t:'square'},{f:1047,delay:.36,d:.2,t:'square'},{f:1319,delay:.58,d:.3,t:'sine'}]); }
-function sndLootbox() { playJingle([{f:440,delay:0,d:.08,t:'square'},{f:554,delay:.09,d:.08,t:'square'},{f:659,delay:.18,d:.08,t:'square'},{f:880,delay:.27,d:.08,t:'square'},{f:1108,delay:.36,d:.15,t:'sine'}]); }
-function sndCoin()    { playJingle([{f:880,delay:0,d:.08,t:'sine'},{f:1108,delay:.1,d:.1,t:'sine'}]); }
-function sndDeath()   { playJingle([{f:294,delay:0,d:.3,t:'sawtooth'},{f:220,delay:.35,d:.3,t:'sawtooth'},{f:175,delay:.7,d:.5,t:'sawtooth'}]); }
-
-function toggleSound() {
-  soundOn = !soundOn;
-  document.getElementById('sound-btn').textContent = soundOn ? '🔊' : '🔇';
-}
-
-/* ═══════════ PET IDLE ACTIVITY ═══════════ */
-const IDLE_ACTIONS = [
-  { text:'играет с мячом', bubble:'⚽', sound:'play', weight:3 },
-  { text:'прыгает', bubble:'✨', sound:'pat', weight:3 },
-  { text:'чешет ухо', bubble:'🐾', sound:null, weight:4 },
-  { text:'смотрит в окно', bubble:'🌙', sound:null, weight:3 },
-  { text:'нашёл монетку!', bubble:'🪙', sound:'coin', coins:2, weight:2 },
-  { text:'зевает', bubble:'😪', sound:'sleep', weight:3 },
-  { text:'танцует', bubble:'🎵', sound:'play', weight:2 },
-  { text:'нюхает цветок', bubble:'🌸', sound:null, weight:2 },
-  { text:'копает ямку', bubble:'⛏️', sound:null, weight:2 },
-  { text:'нашёл угощение!', bubble:'🍬', sound:'feed', hunger:5, weight:2 },
-  { text:'сделал сальто', bubble:'🤸', sound:'play', weight:1 },
-  { text:'мечтает', bubble:'💭', sound:null, weight:2 },
-];
-
-let idleLoop = null;
-
-/* ═══════════ DANGERS ═══════════ */
-const DANGERS = [
-  {
-    id:'poison',
-    icon:'☠️', title:'ПИТОМЕЦ ОТРАВЛЕН!',
-    desc:'Кто-то подбросил ядовитую еду! Срочно дай антидот!',
-    timeLimit:15,
-    effect: ()=>{ pet.health = cl(pet.health-40); pet.sick=true; pet.sickTurns=5; },
-    penalty: ()=>{ pet.health = cl(pet.health-55); },
-    actions:[
-      { label:'💊 АНТИДОТ', cost:20, key:'antidote',
-        resolve: ()=>{ pet.sick=false; pet.health=Math.min(100,pet.health+20); pet.sickTurns=0; } }
-    ]
-  },
-  {
-    id:'thief',
-    icon:'🦹', title:'ВОР КРАДЁТ МОНЕТЫ!',
-    desc:'Вор залез в копилку! Прогони его или потеряешь монеты!',
-    timeLimit:12,
-    effect: ()=>{ },
-    penalty: ()=>{ pet.coins=Math.max(0, pet.coins-Math.floor(pet.coins*.5)); },
-    actions:[
-      { label:'🪃 ПРОГНАТЬ', cost:0, key:'chase',
-        resolve: ()=>{ pet.coins+=15; pet.happy=Math.min(100,pet.happy+10); } }
-    ]
-  },
-  {
-    id:'storm',
-    icon:'⛈️', title:'НАДВИГАЕТСЯ ГРОЗА!',
-    desc:'Страшная буря! Питомец в панике — успокой его или он заболеет!',
-    timeLimit:18,
-    effect: ()=>{ pet.happy=cl(pet.happy-30); pet.energy=cl(pet.energy-20); },
-    penalty: ()=>{ pet.sick=true; pet.sickTurns=3; pet.health=cl(pet.health-25); },
-    actions:[
-      { label:'🤗 ОБНЯТЬ', cost:0, key:'hug',
-        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+35); pet.energy=Math.min(100,pet.energy+10); } },
-      { label:'🍫 ШОКОЛАД', cost:15, key:'chocolate',
-        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+50); pet.hunger=Math.min(100,pet.hunger+10); } }
-    ]
-  },
-  {
-    id:'fire',
-    icon:'🔥', title:'ПОЖАР!',
-    desc:'Загорелся угол комнаты! Туши огонь — иначе питомец получит ожоги!',
-    timeLimit:10,
-    effect: ()=>{ pet.health=cl(pet.health-20); pet.clean=cl(pet.clean-30); },
-    penalty: ()=>{ pet.health=cl(pet.health-45); pet.clean=0; },
-    actions:[
-      { label:'🪣 ТУШИТЬ', cost:0, key:'extinguish',
-        resolve: ()=>{ pet.health=Math.min(100,pet.health+15); showNotif('🔥 Пожар потушен!'); } }
-    ]
-  },
-  {
-    id:'alien',
-    icon:'👾', title:'НЛО ПОХИЩАЕТ ПИТОМЦА!',
-    desc:'Инопланетяне пытаются похитить твоего питомца! Скорей!',
-    timeLimit:14,
-    effect: ()=>{ pet.happy=cl(pet.happy-25); },
-    penalty: ()=>{ pet.coins=Math.max(0,pet.coins-30); pet.happy=cl(pet.happy-40); },
-    actions:[
-      { label:'📡 ОТОГНАТЬ', cost:10, key:'signal',
-        resolve: ()=>{ pet.happy=Math.min(100,pet.happy+40); pet.coins+=20; } }
-    ]
-  },
-  {
-    id:'plague',
-    icon:'🦠', title:'ЭПИДЕМИЯ!',
-    desc:'В округе эпидемия! Сделай питомцу прививку пока не поздно!',
-    timeLimit:20,
-    effect: ()=>{ },
-    penalty: ()=>{ pet.sick=true; pet.sickTurns=6; pet.health=cl(pet.health-30); pet.clean=cl(pet.clean-20); },
-    actions:[
-      { label:'💉 ПРИВИВКА', cost:25, key:'vaccine',
-        resolve: ()=>{ pet.health=Math.min(100,pet.health+25); pet.sick=false; } }
-    ]
-  },
-];
-
-let activeDanger = null;
-let dangerTimerIv = null;
-let dangerTimeLeft = 0;
-let dangerLoop = null;
-
-function startIdleLoop() {
-  clearInterval(idleLoop);
-  clearInterval(idleStateLoop);
-  clearInterval(dangerLoop);
-  clearInterval(dangerTimerIv);
-  activeDanger = null;
-  document.getElementById('danger-ov').classList.remove('on');
-  idleLoop = setInterval(doPetIdle, 7000);
-}
-
-function doPetIdle() {
-  if(!pet || sleeping) return;
-  if(pet.energy < 10 || pet.health < 10) return; // too weak to play
-
-  // weighted random pick
-  const total = IDLE_ACTIONS.reduce((s,a) => s + a.weight, 0);
-  let r = Math.random() * total, action = IDLE_ACTIONS[0];
-  for(const a of IDLE_ACTIONS) { r -= a.weight; if(r <= 0) { action = a; break; } }
-
-  // apply effects
-  if(action.coins) { pet.coins += action.coins; sndCoin(); render(); }
-  if(action.hunger) { pet.hunger = Math.min(100, pet.hunger + action.hunger); render(); }
-
-  // show bubble
-  showBubble(action.bubble, action.text);
-
-  // play sound
-  if(action.sound === 'play') sndPlay();
-  else if(action.sound === 'pat') sndPat();
-  else if(action.sound === 'feed') sndFeed();
-  else if(action.sound === 'sleep') sndSleep();
-
-  // animate pet
-  const pb = document.getElementById('pet-big');
-  pb.classList.add('pet-happy');
-  setTimeout(() => pb.classList.remove('pet-happy'), 1500);
-
-  addLog(pet.name + ' ' + action.text, 'good');
-}
-
-function showBubble(emoji, text) {
-  const bubble = document.getElementById('pet-bubble');
-  const actText = document.getElementById('pet-act-text');
-  if(!bubble || !actText) return;
-
-  bubble.textContent = emoji;
-  bubble.classList.add('show');
-  actText.textContent = text;
-  actText.classList.add('show');
-
-  setTimeout(() => {
-    bubble.classList.remove('show');
-    actText.classList.remove('show');
-  }, 4000);
-}
-
-/* ═══════════ DANGER SYSTEM ═══════════ */
-function startDangerLoop() {
-  clearInterval(dangerLoop);
-  // random danger every 45-90 sec
-  dangerLoop = setInterval(() => {
-    if(!pet || sleeping || activeDanger) return;
-    if(Math.random() < 0.6) triggerRandomDanger();
-  }, 45000 + Math.random()*45000);
-}
-
-function triggerRandomDanger() {
-  const d = DANGERS[Math.floor(Math.random() * DANGERS.length)];
-  triggerDanger(d);
-}
-
-function triggerDanger(danger) {
-  if(!pet || activeDanger) return;
-  activeDanger = danger;
-
-  // apply immediate effect
-  danger.effect();
-  render();
-
-  // show overlay
-  document.getElementById('danger-icon').textContent  = danger.icon;
-  document.getElementById('danger-title').textContent = danger.title;
-  document.getElementById('danger-desc').textContent  = danger.desc;
-
-  // build action buttons
-  const actDiv = document.getElementById('danger-actions');
-  actDiv.innerHTML = '';
-  danger.actions.forEach(act => {
-    const btn = document.createElement('button');
-    btn.className = 'danger-btn primary';
-    btn.innerHTML = act.cost > 0
-      ? act.label + '<br><span style="font-size:.35rem;color:var(--accent3)">🪙 ' + act.cost + '</span>'
-      : act.label;
-    btn.onclick = () => resolveDanger(act);
-    actDiv.appendChild(btn);
-  });
-  // ignore button
-  const skipBtn = document.createElement('button');
-  skipBtn.className = 'danger-btn secondary';
-  skipBtn.textContent = '❌ ИГНОРИРОВАТЬ';
-  skipBtn.onclick = () => ignoreDanger();
-  actDiv.appendChild(skipBtn);
-
-  // start countdown
-  dangerTimeLeft = danger.timeLimit;
-  document.getElementById('danger-timer-num').textContent = dangerTimeLeft;
-  document.getElementById('danger-bar').style.width = '100%';
-  document.getElementById('danger-ov').classList.add('on');
-  document.body.classList.add('danger-flash');
-  setTimeout(() => document.body.classList.remove('danger-flash'), 1200);
-
-  // flicker pet
-  const pb = document.getElementById('pet-big');
-  pb.classList.add('pet-danger');
-
-  // sound
-  playJingle([{f:150,delay:0,d:.2,t:'sawtooth'},{f:120,delay:.25,d:.2,t:'sawtooth'},{f:150,delay:.5,d:.4,t:'sawtooth'}]);
-
-  clearInterval(dangerTimerIv);
-  dangerTimerIv = setInterval(() => {
-    dangerTimeLeft--;
-    const pct = (dangerTimeLeft / danger.timeLimit * 100);
-    document.getElementById('danger-timer-num').textContent = dangerTimeLeft;
-    document.getElementById('danger-bar').style.width = pct + '%';
-    // bar color urgency
-    document.getElementById('danger-bar').style.background =
-      pct > 50 ? 'linear-gradient(90deg,#ff3333,#ff8800)'
-      : pct > 25 ? 'linear-gradient(90deg,#cc0000,#ff3333)'
-      : '#cc0000';
-    if(dangerTimeLeft <= 0) timeoutDanger();
-  }, 1000);
-
-  addLog('⚠️ ' + danger.title, 'bad');
-}
-
-function resolveDanger(act) {
-  if(pet) { pet.dangersBeaten=(pet.dangersBeaten||0)+1; addXP(30); checkAchievements(); }
-  if(pet && activeDanger) setTimeout(()=>addDiaryEntry('danger',pet.name,activeDanger.title),400);
-  if(!activeDanger || !pet) return;
-  if(act.cost > 0 && pet.coins < act.cost) {
-    showNotif('🪙 Нужно ' + act.cost + ' монет!', 'warn'); return;
-  }
-  if(act.cost > 0) pet.coins -= act.cost;
-  act.resolve();
-  closeDangerOv();
-  showNotif('✅ ' + activeDanger.title.replace('!','') + ' — спасён!');
-  addLog('✅ Опасность устранена!', 'good');
-  sndHeal();
-  activeDanger = null;
-  render();
-}
-
-function ignoreDanger() {
-  if(!activeDanger) return;
-  timeoutDanger();
-}
-
-function timeoutDanger() {
-  if(!activeDanger) return;
-  activeDanger.penalty();
-  closeDangerOv();
-  showNotif('💀 Слишком поздно! Питомец пострадал!', 'bad');
-  addLog('💀 ' + activeDanger.title + ' — не успел!', 'bad');
-  sndDeath();
-  activeDanger = null;
-  if(pet.health <= 0) gameOver('опасность');
-  else render();
-}
-
-function closeDangerOv() {
-  clearInterval(dangerTimerIv);
-  document.getElementById('danger-ov').classList.remove('on');
-  const pb = document.getElementById('pet-big');
-  pb.classList.remove('pet-danger');
-  setIdleAnimation();
-}
-
-/* ═══════════ IDLE ANIMATION CYCLE ═══════════ */
-const IDLE_STATES = ['state-idle','state-walk','state-scratch','state-spin','state-sit','state-sneeze','state-blink'];
-let idleStateLoop = null;
-
-function startIdleAnimLoop() {
-  clearInterval(idleStateLoop);
-  setIdleAnimation();
-  idleStateLoop = setInterval(setIdleAnimation, 4000);
-}
-
-function setIdleAnimation() {
-  if(!pet) return;
-  const pb = document.getElementById('pet-big');
-  if(!pb) return;
-  // don't override reactive states
-  const reactive = ['pet-sad','pet-happy','pet-sick','pet-sleep','pet-danger','pet-run'];
-  if(reactive.some(c => pb.classList.contains(c))) return;
-
-  // weight idle more than others
-  const pick = Math.random();
-  let state;
-  if(pick < 0.4)      state = 'state-idle';
-  else if(pick < 0.6) state = 'state-walk';
-  else if(pick < 0.72) state = 'state-scratch';
-  else if(pick < 0.82) state = 'state-spin';
-  else if(pick < 0.9)  state = 'state-sit';
-  else if(pick < 0.95) state = 'state-sneeze';
-  else                 state = 'state-blink';
-
-  IDLE_STATES.forEach(s => pb.classList.remove(s));
-  pb.classList.add(state);
-}
-
-/* ═══════════ MINI-GAMES ═══════════ */
-function startMG(type) {
-  const d = document.getElementById('mg-display');
-  if(type==='guess') {
-    mgState = { type:'guess', number: Math.floor(Math.random()*10)+1, tries:3 };
-    d.innerHTML = `
-      <div style="font-family:var(--pixel);font-size:.5rem;color:var(--muted);margin-bottom:8px;">УГАДАЙ ЧИСЛО 1-10</div>
-      <div style="font-family:var(--pixel);font-size:.45rem;color:var(--accent4);">ПОПЫТКИ: <span id="mg-tries">3</span></div>
-      <div style="font-family:var(--vt);font-size:1rem;color:var(--muted);margin:6px 0;" id="mg-hint">—</div>
-      <div class="mg-input-row">
-        <input class="mg-inp" id="mg-guess" type="number" min="1" max="10" placeholder="?">
-        <button class="mg-btn" onclick="checkGuess()">ОК</button>
+  // Рендерим с нумерацией от 1 (история — отдельный массив)
+  el.innerHTML = history.map((s, i) => {
+    const liked = likedSongs.has(s.id);
+    const playing = songs[currentIdx] && songs[currentIdx].id === s.id && isPlaying;
+    const mob = isMobile();
+    const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
+    const artHtml = s.cover ? `<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
+    const globalIdx = songs.findIndex(x => x.id === s.id);
+    const clickIdx = globalIdx >= 0 ? globalIdx : (() => { songs.push(s); return songs.length - 1; })();
+    if (mob) {
+      return `<div class="track${playing?' now':''}" onclick="playSong(${clickIdx})">
+        <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
+        <div style="position:relative;flex-shrink:0"><div class="t-art">${artHtml}</div></div>
+        <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}</div></div>
+        <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${clickIdx})">${liked?'&#9829;':'&#9825;'}</button>
+        <span class="t-dur" onclick="event.stopPropagation();openVideo(${clickIdx})" style="cursor:pointer;color:var(--accent);font-size:15px;display:flex;align-items:center;justify-content:center">▶</span>
       </div>`;
-    document.getElementById('mg-guess').onkeydown = e => { if(e.key==='Enter') checkGuess(); };
-  } else if(type==='reaction') {
-    mgState = { type:'reaction', active:false, score:0, round:0 };
-    d.innerHTML = `
-      <div style="font-family:var(--pixel);font-size:.45rem;color:var(--muted);margin-bottom:8px;">НАЖМИ КОГДА ЗЕЛЁНЫЙ!</div>
-      <div style="font-family:var(--pixel);font-size:.5rem;color:var(--accent3);margin-bottom:10px;">СЧЁТ: <span id="mg-score">0</span></div>
-      <div class="reaction-circle" id="reaction-circle" onclick="reactionClick()">⏳</div>
-      <div style="font-family:var(--vt);font-size:1.1rem;color:var(--muted);margin-top:8px;" id="react-msg">ЖДИ...</div>`;
-    setTimeout(reactionNext, 1500);
-  } else if(type==='memory') {
-    startMemoryGame();
-  } else if(type==='fish') {
-    startFishGame();
-  } else if(type==='type') {
-    startTypeGame();
-  }
-}
-
-function checkGuess() {
-  if(!mgState || mgState.type!=='guess') return;
-  const v = parseInt(document.getElementById('mg-guess').value);
-  if(!v || v<1 || v>10) return;
-  mgState.tries--;
-  document.getElementById('mg-tries').textContent = mgState.tries;
-  const hint = document.getElementById('mg-hint');
-  if(v === mgState.number) {
-    hint.style.color = 'var(--accent)';
-    hint.textContent = '✔ ВЕРНО! +15 монет +20 радость';
-    pet.coins += 15;
-    pet.happy = Math.min(100, pet.happy+20);
-    addLog('Мини-игра: угадал! +15 монет', 'good');
-    render();
-    setTimeout(()=>resetMG(), 2000);
-  } else if(mgState.tries<=0) {
-    hint.style.color = 'var(--accent2)';
-    hint.textContent = '✘ Было: ' + mgState.number;
-    addLog('Мини-игра: проиграл. Было ' + mgState.number, 'bad');
-    setTimeout(()=>resetMG(), 2500);
-  } else {
-    hint.style.color = 'var(--accent3)';
-    hint.textContent = v < mgState.number ? '▲ БОЛЬШЕ' : '▼ МЕНЬШЕ';
-  }
-  document.getElementById('mg-guess').value='';
-}
-
-function reactionNext() {
-  if(!mgState || mgState.type!=='reaction') return;
-  const circle = document.getElementById('reaction-circle');
-  if(!circle) return;
-  mgState.active = false;
-  circle.className = 'reaction-circle';
-  circle.textContent = '⏳';
-  document.getElementById('react-msg').textContent = 'ЖДЁМ...';
-  const delay = 1000 + Math.random()*2500;
-  setTimeout(() => {
-    if(!mgState || mgState.type!=='reaction') return;
-    const c2 = document.getElementById('reaction-circle');
-    if(!c2) return;
-    mgState.active = true;
-    c2.className = 'reaction-circle GO';
-    c2.textContent = '🟢';
-    mgState.startTime = Date.now();
-    setTimeout(()=>{ if(mgState&&mgState.active){ mgState.active=false; const c3=document.getElementById('reaction-circle'); if(c3){c3.className='reaction-circle';c3.textContent='❌';} document.getElementById('react-msg').textContent='ПОЗДНО! -1 ОЧКО'; mgState.score=Math.max(0,mgState.score-1); document.getElementById('mg-score').textContent=mgState.score; mgState.round++; if(mgState.round<6) setTimeout(reactionNext,1200); else endReaction(); } }, 900);
-  }, delay);
-}
-
-function reactionClick() {
-  if(!mgState || mgState.type!=='reaction') return;
-  const c = document.getElementById('reaction-circle');
-  if(!c) return;
-  if(mgState.active) {
-    const rt = Date.now() - mgState.startTime;
-    mgState.active = false;
-    c.className = 'reaction-circle'; c.textContent = '✅';
-    const pts = rt < 300 ? 3 : rt < 600 ? 2 : 1;
-    mgState.score += pts;
-    document.getElementById('mg-score').textContent = mgState.score;
-    document.getElementById('react-msg').textContent = rt+'мс! +'+pts;
-    mgState.round++;
-    if(mgState.round < 6) setTimeout(reactionNext, 1000);
-    else setTimeout(endReaction, 800);
-  } else {
-    document.getElementById('react-msg').textContent = 'РАНО! Жди зелёного';
-  }
-}
-
-function endReaction() {
-  if(!mgState) return;
-  const score = mgState.score;
-  const coins = score * 8;
-  const happy = Math.min(30, score * 5);
-  pet.coins += coins; pet.happy = Math.min(100, pet.happy+happy);
-  addLog('Реакция: '+score+' очков! +'+coins+' монет', 'good');
-  render();
-  resetMG();
-  showNotif('🎮 Результат: '+score+' очков! +'+coins+' монет');
-}
-
-/* ── MEMORY GAME ── */
-function startMemoryGame() {
-  const emojis = ['🐱','🐶','🐹','🐰','🦊','🐸','🌟','🎮'];
-  const pairs = [...emojis,...emojis];
-  // shuffle
-  for(let i=pairs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[pairs[i],pairs[j]]=[pairs[j],pairs[i]]; }
-  mgState = { type:'memory', pairs, revealed:[], matched:[], busy:false };
-  const d = document.getElementById('mg-display');
-  d.innerHTML = `
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:4px;">НАЙДИ ПАРЫ! +20🪙 за каждую</div>
-    <div class="mem-grid" id="mem-grid"></div>
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent3);margin-top:4px;">ПАРЫ: <span id="mem-pairs">0</span>/8</div>`;
-  renderMemGrid();
-}
-
-function renderMemGrid() {
-  const g = document.getElementById('mem-grid');
-  if(!g) return;
-  g.innerHTML='';
-  mgState.pairs.forEach((emoji,i)=>{
-    const c = document.createElement('div');
-    c.className='mem-cell' + (mgState.matched.includes(i)?' matched':'');
-    c.textContent = mgState.revealed.includes(i)||mgState.matched.includes(i) ? emoji : '❓';
-    c.onclick = ()=>memClick(i);
-    g.appendChild(c);
-  });
-}
-
-function memClick(i) {
-  if(!mgState||mgState.type!=='memory'||mgState.busy) return;
-  if(mgState.matched.includes(i)||mgState.revealed.includes(i)) return;
-  mgState.revealed.push(i);
-  renderMemGrid();
-  sndPat();
-  if(mgState.revealed.length===2) {
-    mgState.busy=true;
-    const [a,b]=mgState.revealed;
-    setTimeout(()=>{
-      if(mgState.pairs[a]===mgState.pairs[b]){
-        mgState.matched.push(a,b);
-        pet.coins+=20; pet.happy=Math.min(100,pet.happy+5);
-        sndCoin(); render();
-        document.getElementById('mem-pairs').textContent=mgState.matched.length/2;
-        if(mgState.matched.length===16){
-          showNotif('🧠 Всё угадал! +50 монет бонус');
-          pet.coins+=50; render();
-          addLog('Память: все пары! +50 бонус','good');
-          setTimeout(resetMG,1800);
-        }
-      } else {
-        // mark wrong briefly
-        const cells=document.querySelectorAll('.mem-cell');
-        [a,b].forEach(idx=>{ if(cells[idx]) cells[idx].classList.add('wrong'); });
-        setTimeout(()=>{ [a,b].forEach(idx=>{ if(cells[idx]) cells[idx].classList.remove('wrong'); }); },400);
-      }
-      mgState.revealed=[];
-      mgState.busy=false;
-      renderMemGrid();
-    },700);
-  }
-}
-
-/* ── FISHING GAME ── */
-let fishTimers=[];
-function startFishGame() {
-  fishTimers.forEach(t=>clearInterval(t));fishTimers=[];
-  mgState={type:'fish',score:0,timeLeft:20,hookY:50};
-  const d=document.getElementById('mg-display');
-  d.innerHTML=`
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:4px;">ПОЙМАЙ РЫБУ! Кликни на неё🎣</div>
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent3);">УЛОВ: <span id="fish-score">0</span> | ⏱ <span id="fish-time">20</span>с</div>
-    <div class="fish-area" id="fish-area">
-      <div class="fish-hook" id="fish-hook" style="left:50%;top:10%">🪝</div>
+    }
+    return `<div class="track${playing?' now':''}" onclick="playSong(${clickIdx})">
+      <span class="t-num">${playing ? barsHtml : i + 1}</span>
+      <span class="t-play">&#9654;</span>
+      <div style="position:relative"><div class="t-art">${artHtml}</div></div>
+      <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
+      <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${clickIdx})">${liked?'&#9829;':'&#9825;'}</button>
+      <span class="t-dur" onclick="event.stopPropagation();openVideo(${clickIdx})" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
     </div>`;
-
-  // spawn fish every 1.5s
-  const spawnT=setInterval(()=>{
-    if(!mgState||mgState.type!=='fish'){clearInterval(spawnT);return;}
-    spawnFish();
-  },1500);
-  fishTimers.push(spawnT);
-
-  // countdown
-  const countT=setInterval(()=>{
-    if(!mgState||mgState.type!=='fish'){clearInterval(countT);return;}
-    mgState.timeLeft--;
-    const el=document.getElementById('fish-time');
-    if(el) el.textContent=mgState.timeLeft;
-    if(mgState.timeLeft<=0){
-      clearInterval(countT);
-      endFish();
-    }
-  },1000);
-  fishTimers.push(countT);
-
-  // move hook with mouse/touch over area
-  setTimeout(()=>{
-    const area=document.getElementById('fish-area');
-    if(area){
-      area.onmousemove=e=>{
-        if(!mgState||mgState.type!=='fish') return;
-        const r=area.getBoundingClientRect();
-        const px=Math.max(5,Math.min(90,((e.clientX-r.left)/r.width)*100));
-        const hook=document.getElementById('fish-hook');
-        if(hook) hook.style.left=px+'%';
-      };
-    }
-  },100);
+  }).join('');
+  if (!isMobile()) initTrack3D();
 }
-
-function spawnFish(){
-  const area=document.getElementById('fish-area');
-  if(!area) return;
-  const fishes=['🐟','🐠','🐡','🦈','🦑'];
-  const rarity=[5,5,5,2,1];
-  const coins=[5,8,10,25,40];
-  let r=Math.random()*18,fi=0;
-  for(let i=0;i<rarity.length;i++){r-=rarity[i];if(r<=0){fi=i;break;}}
-  const f=document.createElement('div');
-  f.className='fish-emoji';
-  f.textContent=fishes[fi];
-  const lane=10+Math.floor(Math.random()*3)*28;
-  f.style.top=lane+'px';
-  f.style.left='-10%';
-  f.dataset.coins=coins[fi];
-  area.appendChild(f);
-  f.onclick=()=>catchFish(f,coins[fi]);
-  // move fish across
-  let pos=-10;
-  const dir=Math.random()<.5?1:-1;
-  if(dir===-1){f.style.left='110%';f.style.transform='scaleX(-1)';}
-  const mv=setInterval(()=>{
-    if(!mgState||mgState.type!=='fish'||!f.parentNode){clearInterval(mv);return;}
-    pos+=(dir*1.5);
-    f.style.left=pos+'%';
-    if(pos>110||pos<-10){clearInterval(mv);if(f.parentNode)f.remove();}
-  },50);
-  fishTimers.push(mv);
-  setTimeout(()=>{if(f.parentNode)f.remove();},6000);
-}
-
-function catchFish(el,coins){
-  if(!mgState||mgState.type!=='fish') return;
-  el.remove();
-  mgState.score+=coins;
-  pet.coins+=coins;
-  sndCoin(); render();
-  fx(coins>=25?'🦈':'🐟');
-  const sc=document.getElementById('fish-score');
-  if(sc) sc.textContent=mgState.score;
-}
-
-function endFish(){
-  fishTimers.forEach(t=>clearInterval(t));fishTimers=[];
-  const score=mgState?mgState.score:0;
-  pet.happy=Math.min(100,pet.happy+15);
-  addLog('Рыбалка: +'+score+' монет','good');
-  showNotif('🎣 Рыбалка окончена! +'+score+' монет');
-  render();
-  setTimeout(resetMG,1500);
-}
-
-/* ── TYPING GAME ── */
-const TYPE_WORDS=['ТАМАГОЧИ','ПИТОМЕЦ','МОНЕТЫ','ЭВОЛЮЦИЯ','ЗДОРОВЬЕ','РАДОСТЬ','ПОБЕДА','МАГАЗИН','СКИНЫ','ОПАСНОСТЬ'];
-function startTypeGame(){
-  const word=TYPE_WORDS[Math.floor(Math.random()*TYPE_WORDS.length)];
-  mgState={type:'type',word,typed:'',timeLeft:15,done:false};
-  const d=document.getElementById('mg-display');
-  d.innerHTML=`
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:6px;">НАБЕРИ СЛОВО БЫСТРЕЕ!</div>
-    <div class="type-word"><span class="type-chars" id="type-chars">${word.split('').map(c=>`<span>${c}</span>`).join('')}</span></div>
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--accent4);margin-bottom:6px;">⏱ <span id="type-time">15</span>с</div>
-    <input class="type-input" id="type-input" type="text" placeholder="ПЕЧАТАЙ ЗДЕСЬ..." maxlength="${word.length}" autocomplete="off">`;
-  const inp=document.getElementById('type-input');
-  inp.focus();
-  inp.oninput=typeCheck;
-
-  const tv=setInterval(()=>{
-    if(!mgState||mgState.type!=='type'||mgState.done){clearInterval(tv);return;}
-    mgState.timeLeft--;
-    const el=document.getElementById('type-time');
-    if(el) el.textContent=mgState.timeLeft;
-    if(mgState.timeLeft<=0){
-      clearInterval(tv);
-      if(!mgState.done){
-        showNotif('⌨️ Время вышло!','warn');
-        addLog('Печать: не успел','bad');
-        setTimeout(resetMG,1200);
-      }
-    }
-  },1000);
-}
-
-function typeCheck(){
-  if(!mgState||mgState.type!=='type') return;
-  const inp=document.getElementById('type-input');
-  if(!inp) return;
-  const val=inp.value.toUpperCase();
-  const chars=document.querySelectorAll('#type-chars span');
-  chars.forEach((c,i)=>{
-    c.classList.remove('done','wrong-char');
-    if(i<val.length){
-      if(val[i]===mgState.word[i]) c.classList.add('done');
-      else c.classList.add('wrong-char');
-    }
+function initTrack3D(){
+  document.querySelectorAll('.track').forEach(track=>{
+    track.addEventListener('mouseenter',function(){this.classList.add('hovered');});
+    track.addEventListener('mouseleave',function(){this.classList.remove('hovered');});
   });
-  if(val===mgState.word){
-    mgState.done=true;
-    const bonus=mgState.timeLeft*3+20;
-    pet.coins+=bonus; pet.happy=Math.min(100,pet.happy+20);
-    sndPlay(); render();
-    showNotif('⌨️ Молодец! +'+bonus+' монет');
-    addLog('Печать: слово набрано! +'+bonus+' монет','good');
-    setTimeout(resetMG,1500);
+}
+
+// ── Update all player UIs ──
+function updatePlayerUI(s) {
+  const art = s.cover ? `<img src="${s.cover}" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
+  // Desktop
+  document.getElementById('p-art').innerHTML = art;
+  document.getElementById('pname').textContent = s.title;
+  document.getElementById('psub').textContent = s.artist + (s.album?' — '+s.album:'');
+  document.getElementById('plike').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
+  document.getElementById('plike').classList.toggle('on', likedSongs.has(s.id));
+  // Mini
+  document.getElementById('pm-art').innerHTML = art;
+  document.getElementById('pm-name').textContent = s.title;
+  document.getElementById('pm-sub').textContent = s.artist;
+  document.getElementById('pm-like').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
+  document.getElementById('pm-like').classList.toggle('on', likedSongs.has(s.id));
+  // Full player
+  document.getElementById('fp-art').innerHTML = art;
+  document.getElementById('fp-name').textContent = s.title;
+  document.getElementById('fp-sub').textContent = s.artist + (s.album?' — '+s.album:'');
+  document.getElementById('fp-like').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
+  document.getElementById('fp-like').classList.toggle('on', likedSongs.has(s.id));
+  // Reset progress
+  ['progress-fill','fp-fill','pm-fill'].forEach(id => setById(id,'style.width','0%'));
+  ['curr-time','fp-curr','pm-curr'].forEach(id => setById(id,'textContent','0:00'));
+  ['total-time','fp-total','pm-total'].forEach(id => setById(id,'textContent','0:00'));
+}
+
+// ── Play ──
+async function playSong(idx){
+  if(idx<0||idx>=songs.length) return;
+  const s=songs[idx];
+  currentIdx=idx; playedCount++;
+  addToHistory(s);
+  updatePlayerUI(s);
+  updatePlayIcons(false);
+  setAmbient(232,82,10);
+  renderSongList();
+
+  const videoId=await findYTVideoId(s.ytQuery);
+  if(!videoId){showToast('Не найдено на YouTube');return;}
+  showToast('▶ '+s.title);
+  if(ytReady&&ytPlayer&&ytPlayer.loadVideoById){
+    ytPlayer.loadVideoById(videoId);
+    ytPlayer.mute();
+    setTimeout(()=>{ytPlayer.unMute();ytPlayer.setVolume(70);},1500);
+  } else {
+    let attempts=0;
+    const wait=setInterval(()=>{
+      attempts++;
+      if(ytPlayer&&ytPlayer.loadVideoById){
+        clearInterval(wait);
+        ytPlayer.loadVideoById(videoId);
+        ytPlayer.mute();
+        setTimeout(()=>{ytPlayer.unMute();ytPlayer.setVolume(70);},1500);
+      } else if(attempts>20){clearInterval(wait);}
+    },500);
   }
 }
 
-function resetMG() {
-  mgState = null;
-  document.getElementById('mg-display').innerHTML = `
-    <div style="font-family:var(--pixel);font-size:.4rem;color:var(--muted);margin-bottom:10px;">ВЫБЕРИ ИГРУ:</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-      <button class="mg-btn" onclick="startMG('guess')">🔢 УГАДАЙ</button>
-      <button class="mg-btn" onclick="startMG('reaction')">⚡ РЕАКЦИЯ</button>
-      <button class="mg-btn" onclick="startMG('memory')">🧠 ПАМЯТЬ</button>
-      <button class="mg-btn" onclick="startMG('fish')">🎣 РЫБАЛКА</button>
-      <button class="mg-btn" style="grid-column:1/-1" onclick="startMG('type')">⌨️ ПЕЧАТАЙ</button>
-    </div>`;
+function togglePlay(){
+  if(currentIdx===-1){showToast('Выбери трек');return;}
+  if(!ytReady||!ytPlayer) return;
+  isPlaying?ytPlayer.pauseVideo():ytPlayer.playVideo();
+}
+function prevSong(){if(songs.length)playSong((currentIdx-1+songs.length)%songs.length);}
+function nextSong(){if(!songs.length)return;playSong(isShuffle?Math.floor(Math.random()*songs.length):(currentIdx+1)%songs.length);}
+function toggleShuffle(){
+  isShuffle=!isShuffle;
+  document.getElementById('shuf').classList.toggle('on',isShuffle);
+  document.getElementById('fp-shuf').classList.toggle('on',isShuffle);
+  showToast(isShuffle?'Перемешивание вкл':'Перемешивание выкл');
 }
 
-/* ═══════════ TABS ═══════════ */
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    const tabs=['minigame','shop','skins','diary','log'];
-    b.classList.toggle('active', tabs[i]===tab);
-  });
+function seekTo(e){
+  if(!ytReady||!ytPlayer) return;
+  const dur=ytPlayer.getDuration(); if(!dur) return;
+  const r=document.getElementById('progress-bar').getBoundingClientRect();
+  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
+}
+function seekTo2(e){
+  if(!ytReady||!ytPlayer) return;
+  const dur=ytPlayer.getDuration(); if(!dur) return;
+  const r=document.getElementById('fp-bar').getBoundingClientRect();
+  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
+}
+function seekTo3(e){
+  if(!ytReady||!ytPlayer) return;
+  const dur=ytPlayer.getDuration(); if(!dur) return;
+  const r=document.getElementById('pm-bar').getBoundingClientRect();
+  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
+}
+function setVolClick(e,bar){
+  const p=Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
+  document.getElementById('vfill').style.width=(p*100)+'%';
+  if(ytReady&&ytPlayer)ytPlayer.setVolume(Math.round(p*100));
+}
+function setFpVolClick(e,bar){
+  const p=Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
+  document.getElementById('fp-vfill').style.width=(p*100)+'%';
+  if(ytReady&&ytPlayer)ytPlayer.setVolume(Math.round(p*100));
+}
+
+// ── Mobile full player ──
+function openFullPlayer(){
+  document.getElementById('full-player').classList.add('open');
+}
+function closeFullPlayer(){
+  document.getElementById('full-player').classList.remove('open');
+}
+
+// ── Mobile sidebar sheet ──
+function openSidebarSheet(){
+  document.getElementById('sidebar-sheet').classList.add('open');
+}
+function closeSidebarSheet(){
+  document.getElementById('sidebar-sheet').classList.remove('open');
+}
+
+// ── Search ──
+function doSearch(){
+  const q=document.getElementById('search-input').value.trim();
+  if(!q){showToast('Введи запрос');return;}
+  document.getElementById('search-input-2').value=q;
+  showTab('search-tab',null);
+  runSearch(q);
+}
+function doSearch2(){
+  const q=document.getElementById('search-input-2').value.trim();
+  if(!q){showToast('Введи запрос');return;}
+  runSearch(q);
+}
+function doSearchMob(){
+  const q=document.getElementById('search-input-mob').value.trim();
+  if(!q){showToast('Введи запрос');return;}
+  document.getElementById('search-input-2').value=q;
+  mnavClick('search-tab', document.getElementById('mnav-search'));
+  runSearch(q);
+}
+async function runSearch(q){
+  const el=document.getElementById('search-results');
+  el.innerHTML='<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Поиск...</div></div>';
+  try {
+    const data=await itunesFetch(q,50);
+    const found=(data.results||[]).map(itunesTrack);
+    if(!found.length){el.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
+    // Добавляем новые треки в глобальный массив
+    found.forEach(f=>{if(!songs.find(s=>s.id===f.id))songs.push(f);});
+    const mob = isMobile();
+    const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
+    // Рендерим с нумерацией 1,2,3... для результатов поиска
+    el.innerHTML = found.map((s, localI) => {
+      const globalIdx = songs.findIndex(x => x.id === s.id);
+      const liked = likedSongs.has(s.id);
+      const playing = globalIdx === currentIdx && isPlaying;
+      const artHtml = s.cover ? `<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
+      if (mob) {
+        return `<div class="track${playing?' now':''}" id="sr-${globalIdx}" onclick="playSong(${globalIdx})">
+          <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
+          <div style="position:relative;flex-shrink:0"><div class="t-art">${artHtml}</div></div>
+          <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}</div></div>
+          <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${globalIdx})">${liked?'&#9829;':'&#9825;'}</button>
+          <span class="t-dur" onclick="event.stopPropagation();openVideo(${globalIdx})" style="cursor:pointer;color:var(--accent);font-size:15px;display:flex;align-items:center;justify-content:center">▶</span>
+        </div>`;
+      }
+      return `<div class="track${playing?' now':''}" id="sr-${globalIdx}" onclick="playSong(${globalIdx})">
+        <span class="t-num">${playing ? barsHtml : localI + 1}</span>
+        <span class="t-play">&#9654;</span>
+        <div style="position:relative"><div class="t-art">${artHtml}</div><div class="t-art-shadow"></div></div>
+        <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
+        <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${globalIdx})">${liked?'&#9829;':'&#9825;'}</button>
+        <span class="t-dur" onclick="event.stopPropagation();openVideo(${globalIdx})" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
+      </div>`;
+    }).join('');
+    if (!isMobile()) initTrack3D();
+  } catch(e){el.innerHTML='<div class="empty-state">Ошибка поиска</div>';}
+}
+
+// ── Tabs ──
+function showTab(tab, el){
+  activeTab=tab;
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='diary') renderDiary();
+  document.querySelectorAll('.nav-item').forEach(s=>s.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(tab==='history') renderHistoryList();
+  if(tab==='liked') renderLikedList();
+  if(tab==='search-tab') setTimeout(()=>document.getElementById('search-input-2').focus(),50);
 }
 
-/* ═══════════ CLOCK ═══════════ */
-function updateClock() {
-  if(!startTime) return;
-  const el = document.getElementById('game-clock');
-  const s = Math.floor((Date.now()-startTime)/1000);
-  const hh=String(Math.floor(s/3600)).padStart(2,'0');
-  const mm=String(Math.floor((s%3600)/60)).padStart(2,'0');
-  const ss=String(s%60).padStart(2,'0');
-  el.textContent = hh+':'+mm+':'+ss;
+function mnavClick(tab, el){
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  showTab(tab, null);
 }
 
-/* ═══════════ GAME OVER ═══════════ */
-function gameOver(reason) {
-  clearInterval(gLoop);
-  clearInterval(clkIv);
-  clearInterval(idleLoop);
-  clearInterval(idleStateLoop);
-  clearInterval(dangerLoop);
-  clearInterval(dangerTimerIv);
-  activeDanger = null;
-  document.getElementById('danger-ov').classList.remove('on');
-  sndDeath();
-  const el = document.getElementById('go-info');
-  el.innerHTML = pet.name + ' прожил <b style="color:var(--accent3)">' + pet.age + '</b> дней<br>Причина: ' + reason + '<br>Монет собрано: ' + pet.coins;
-  document.getElementById('go-screen').classList.add('on');
+// ── Likes ──
+function toggleLike(id,idx){
+  likedSongs.has(id)?(likedSongs.delete(id),showToast('Лайк убран')):(likedSongs.add(id),showToast('❤️ Лайк поставлен'));
+  const row=document.getElementById('sr-'+idx);
+  if(row){const lb=row.querySelector('.t-like');if(lb){lb.classList.toggle('on',likedSongs.has(id));lb.innerHTML=likedSongs.has(id)?'&#9829;':'&#9825;';}}
+  if(currentIdx===idx){
+    ['plike','fp-like','pm-like'].forEach(id2=>{
+      const el=document.getElementById(id2);
+      if(el){el.innerHTML=likedSongs.has(id)?'&#9829;':'&#9825;';el.classList.toggle('on',likedSongs.has(id));}
+    });
+  }
+  if(activeTab==='liked')renderLikedList();
+}
+function toggleLikeFromPlayer(){if(currentIdx>=0)toggleLike(songs[currentIdx].id,currentIdx);}
+
+// ── Profile ──
+function toggleProfile(){showToast('Профиль · '+playedCount+' прослушано');}
+
+// ── Video Modal ──
+async function openVideo(idx){
+  if(idx<0||idx>=songs.length) return;
+  const s=songs[idx];
+  document.getElementById('video-title').textContent=s.title;
+  document.getElementById('video-artist').textContent=s.artist;
+  document.getElementById('video-iframe-wrap').innerHTML='<div class="loader-wrap" style="background:#111;aspect-ratio:16/9"><div class="spinner" style="border-color:#333;border-top-color:#E8520A"></div><div class="loader-text" style="color:#888">Ищем клип...</div></div>';
+  document.getElementById('video-modal').classList.add('open');
+  const videoId = await findYTVideoId(s.artist+' '+s.title+' official video');
+  if(!videoId){
+    document.getElementById('video-iframe-wrap').innerHTML='<div class="loader-wrap" style="background:#111;aspect-ratio:16/9"><div class="loader-text" style="color:#888">Клип не найден</div></div>';
+    return;
+  }
+  document.getElementById('video-iframe-wrap').innerHTML=`<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+}
+function closeVideoBtn(){
+  document.getElementById('video-modal').classList.remove('open');
+  document.getElementById('video-iframe-wrap').innerHTML='';
+}
+function closeVideo(e){
+  if(e.target===document.getElementById('video-modal')) closeVideoBtn();
 }
 
-function restartGame() {
-  document.getElementById('go-screen').classList.remove('on');
-  pet=null; chosen=null; sleeping=false; busy=false; mgState=null; inventory=[]; equippedSkin=null;
-  clearInterval(idleLoop);
-  clearInterval(idleStateLoop);
-  clearInterval(dangerLoop);
-  clearInterval(dangerTimerIv);
-  activeDanger = null;
-  document.getElementById('danger-ov').classList.remove('on');
-  document.getElementById('lb-overlay').classList.remove('on');
-  document.getElementById('name-field').value='';
-  document.getElementById('begin-btn').classList.remove('on');
-  showScreen('lobby');
-}
+// ── Touch swipe down to close full player ──
+let touchStartY = 0;
+document.getElementById('full-player').addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+document.getElementById('full-player').addEventListener('touchend', e => {
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (dy > 80) closeFullPlayer();
+}, {passive:true});
 
-/* ═══════════ HELPERS ═══════════ */
-function cl(v) { return Math.max(0, Math.min(100, v)); }
+// ── Utils ──
+function xss(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let toastT;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2500);}
 
-let _nt;
-function showNotif(msg, type='') {
-  const el=document.getElementById('notif');
-  el.textContent=msg; el.className='notif '+type+' show';
-  clearTimeout(_nt);
-  _nt=setTimeout(()=>el.classList.remove('show'),3000);
-}
+document.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
+  if(e.code==='Space'){e.preventDefault();togglePlay();}
+  else if(e.code==='ArrowRight')nextSong();
+  else if(e.code==='ArrowLeft')prevSong();
+});
 
-function addLog(msg, cls='') {
-  const list = document.getElementById('log-list');
-  if(!list) return;
-  const e = document.createElement('div');
-  e.className = 'log-entry ' + cls;
-  const time = pet ? pet.age+'д' : '--';
-  e.textContent = '[' + time + '] ' + msg;
-  list.insertBefore(e, list.firstChild);
-  if(list.children.length > 30) list.removeChild(list.lastChild);
-}
-
-function fx(emoji) {
-  const el = document.createElement('div');
-  el.className='fx'; el.textContent=emoji;
-  const r = document.getElementById('pet-big').getBoundingClientRect();
-  el.style.left=(r.left+r.width/2-14)+'px';
-  el.style.top=r.top+'px';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),1000);
-}
+// ── Init ──
+setAmbient(110,40,190);
+buildChartChips();
+loadChart('world', document.querySelector('.chart-item.active'));
 </script>
-<!-- DANGER OVERLAY -->
-<div class="danger-ov" id="danger-ov">
-  <div class="danger-icon" id="danger-icon">☠️</div>
-  <div class="danger-title" id="danger-title">ОПАСНОСТЬ!</div>
-  <div class="danger-desc"  id="danger-desc">Описание опасности</div>
-  <div class="danger-timer-wrap">
-    <div class="danger-timer-label">ВРЕМЕНИ ОСТАЛОСЬ</div>
-    <div class="danger-timer-bar-bg"><div class="danger-timer-bar" id="danger-bar"></div></div>
-    <div class="danger-timer-num" id="danger-timer-num">15</div>
-  </div>
-  <div class="danger-actions" id="danger-actions"></div>
-</div>
-
-<button class="sound-btn"  id="sound-btn" onclick="toggleSound()" title="Звук">🔊</button>
 </body>
 </html>
