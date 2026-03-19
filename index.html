@@ -2,1469 +2,247 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>WAVR — Music</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тамагочи PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; }
 :root {
-  --bg: #F5F0E8;
-  --surface: rgba(255,255,255,0.82);
-  --border: rgba(0,0,0,0.07);
-  --accent: #E8520A;
-  --accent-soft: rgba(232,82,10,0.1);
-  --ink: #1C1C1E;
-  --ink2: #3A3A3C;
-  --ink3: #8E8E93;
-  --ink4: #C7C7CC;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-top: env(safe-area-inset-top, 0px);
-}
-
-/* ─── BASE ─── */
-html, body { height:100%; overflow:hidden; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: 'Inter', -apple-system, sans-serif;
-}
-
-/* ─── DESKTOP LAYOUT ─── */
-@media (min-width: 701px) {
-  body {
-    display: grid;
-    grid-template-rows: 1fr 80px;
-    grid-template-columns: 220px 1fr;
-    height: 100vh;
-    overflow: hidden;
-  }
-  .mobile-nav { display: none !important; }
-  .sidebar { display: flex !important; }
-  .player-desktop { display: grid !important; }
-  .player-mobile { display: none !important; }
-  .topbar { display: flex !important; }
-}
-
-/* ─── MOBILE LAYOUT ─── */
-@media (max-width: 700px) {
-  body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
-  }
-  .sidebar { display: none !important; }
-  .sidebar-overlay { display: none !important; }
-  .topbar-desktop { display: none !important; }
-  .player-desktop { display: none !important; }
-  .player-mobile { display: flex !important; }
-  .mobile-nav { display: flex !important; }
-  .main {
-    grid-row: unset !important;
-    grid-column: unset !important;
-    flex: 1;
-    min-height: 0;
-  }
-}
-
-/* ─── AMBIENT ─── */
-#ambient {
-  position:fixed; inset:0; pointer-events:none; z-index:0;
-  transition: background 1.4s cubic-bezier(.4,0,.2,1);
-  background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(110,40,190,0.08) 0%, transparent 70%);
-}
-
-@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
-.sidebar  { animation: fadeUp .5s ease both; }
-.topbar   { animation: fadeUp .45s .05s ease both; }
-.player-desktop { animation: fadeUp .45s .32s ease both; }
-
-/* ─── SIDEBAR ─── */
-.sidebar {
-  grid-row:1/2; grid-column:1/2;
-  padding:24px 10px; flex-direction:column;
-  overflow-y:auto; border-right:1px solid var(--border);
-  background:rgba(245,240,232,0.92); backdrop-filter:blur(20px);
-  position:relative; z-index:2;
-}
-.logo { font-size:20px; font-weight:700; letter-spacing:-0.6px; color:var(--ink); padding:4px 10px 22px; display:flex; align-items:center; gap:8px; }
-.logo-mark { width:26px; height:26px; background:var(--accent); border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 3px 10px rgba(232,82,10,0.35); }
-.logo-mark svg { width:14px; height:14px; }
-.sec-label { font-size:10px; font-weight:600; color:var(--ink4); letter-spacing:0.8px; text-transform:uppercase; padding:12px 10px 5px; }
-.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:500; color:var(--ink3); transition:all 0.15s; }
-.nav-item:hover { background:rgba(0,0,0,0.05); color:var(--ink2); }
-.nav-item.active { background:var(--surface); color:var(--accent); box-shadow:0 1px 4px rgba(0,0,0,0.07); }
-.chart-item { display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:7px; cursor:pointer; font-size:12.5px; color:var(--ink3); transition:all 0.15s; }
-.chart-item:hover { color:var(--ink2); background:rgba(0,0,0,0.04); }
-.chart-item.active { color:var(--accent); font-weight:500; }
-.chart-flag { width:18px; height:13px; border-radius:2px; flex-shrink:0; }
-.flag-world{background:linear-gradient(135deg,#4A90D9,#2E6DB4)}
-.flag-us{background:linear-gradient(180deg,#B22234 33%,white 33%,white 66%,#3C3B6E 66%)}
-.flag-gb{background:#012169}
-.flag-fr{background:linear-gradient(90deg,#002395 33%,white 33%,white 66%,#ED2939 66%)}
-.flag-de{background:linear-gradient(180deg,#000 33%,#D00 33%,#D00 66%,#FFCE00 66%)}
-.flag-br{background:#009C3B}
-.flag-ru{background:linear-gradient(180deg,white 33%,#0039A6 33%,#0039A6 66%,#D52B1E 66%)}
-.flag-jp{background:white}
-.flag-kr{background:white}
-.flag-in{background:linear-gradient(180deg,#FF9933 33%,white 33%,white 66%,#138808 66%)}
-.flag-mx{background:linear-gradient(90deg,#006847 33%,white 33%,white 66%,#CE1126 66%)}
-.flag-au{background:#012169}
-.flag-kz{background:#00AFCA}
-
-/* ─── MAIN ─── */
-.main { grid-row:1/2; grid-column:2/3; display:flex; flex-direction:column; overflow:hidden; position:relative; z-index:1; }
-
-/* ─── TOPBAR DESKTOP ─── */
-.topbar { height:62px; display:flex; align-items:center; padding:0 30px; gap:12px; background:rgba(245,240,232,0.88); backdrop-filter:blur(24px); border-bottom:1px solid var(--border); flex-shrink:0; }
-.search-pill { flex:1; max-width:420px; display:flex; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0 13px; gap:8px; height:35px; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:all 0.2s; }
-.search-pill:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); background:white; }
-.search-pill svg { color:var(--ink4); flex-shrink:0; }
-.search-pill input { flex:1; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:13.5px; color:var(--ink); outline:none; }
-.search-pill input::placeholder { color:var(--ink4); }
-.search-go { background:var(--accent); color:white; border:none; border-radius:8px; padding:7px 18px; font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer; transition:all 0.15s; }
-.search-go:hover { filter:brightness(1.08); transform:translateY(-1px); box-shadow:0 4px 14px rgba(232,82,10,0.28); }
-.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
-.avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#FF8C3A); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:white; cursor:pointer; box-shadow:0 2px 8px rgba(232,82,10,0.25); }
-
-/* ─── MOBILE TOPBAR ─── */
-.topbar-mobile {
-  display: none;
-  padding: 12px 16px 10px;
-  padding-top: calc(12px + var(--safe-top));
-  background: rgba(245,240,232,0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  gap: 10px;
-  align-items: center;
-  z-index: 10;
-
-  
-}
-@media (max-width: 700px) {
-  .topbar-mobile { display: flex; }
-}
-.topbar-mobile .logo-small {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 17px; font-weight: 700; letter-spacing: -0.5px;
-  flex-shrink: 0;
-}
-.topbar-mobile .logo-mark-sm {
-  width: 24px; height: 24px; background: var(--accent); border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(232,82,10,0.35);
-}
-.topbar-mobile .search-pill-mobile {
-  flex: 1; display: flex; align-items: center;
-  background: white; border: 1px solid var(--border);
-  border-radius: 10px; padding: 0 12px; gap: 8px; height: 36px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  transition: all 0.2s;
-}
-.topbar-mobile .search-pill-mobile:focus-within {
-  border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
-}
-.topbar-mobile .search-pill-mobile input {
-  flex: 1; border: none; background: transparent;
-  font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); outline: none;
-}
-.topbar-mobile .search-pill-mobile input::placeholder { color: var(--ink4); }
-
-/* ─── CONTENT ─── */
-.content {
-  flex:1; overflow-y:auto; padding:20px 16px 24px;
-  scrollbar-width:thin; scrollbar-color:var(--ink4) transparent;
-  -webkit-overflow-scrolling: touch;
-}
-@media (min-width: 701px) {
-  .content { padding: 26px 30px; }
-}
-.tab-content { display:none; }
-.tab-content.active { display:block; }
-.page-header { margin-bottom:18px; animation: fadeUp .4s .1s ease both; }
-.page-eyebrow { font-size:11px; font-weight:500; color:var(--accent); letter-spacing:0.7px; text-transform:uppercase; margin-bottom:4px; }
-.page-title { font-size:22px; font-weight:700; letter-spacing:-0.6px; }
-@media (min-width: 701px) { .page-title { font-size: 26px; } }
-.page-meta { font-size:12.5px; color:var(--ink3); margin-top:3px; }
-
-/* ─── FEATURED GRID ─── */
-.feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
-@media (min-width: 701px) { .feat-grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; margin-bottom:24px; } }
-/* На мобиле скрываем featured grid, оставляем только tracklist */
-@media (max-width: 700px) { .feat-grid { display: none; } }
-.feat-card { background:white; border-radius:12px; overflow:hidden; cursor:pointer; transition:all .3s cubic-bezier(.22,1,.36,1); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-.feat-card:active { transform:scale(0.96); }
-@media (min-width: 701px) { .feat-card:hover { transform:translateY(-4px); box-shadow:0 8px 24px rgba(0,0,0,0.12); } }
-.feat-cover { width:100%; aspect-ratio:1; background:var(--bg); position:relative; overflow:hidden; }
-.feat-cover img { width:100%; height:100%; object-fit:cover; display:block; }
-.feat-overlay { position:absolute; inset:0; background:rgba(0,0,0,0); display:flex; align-items:center; justify-content:center; transition:.2s; }
-@media (min-width: 701px) {
-  .feat-card:hover .feat-overlay { background:rgba(0,0,0,0.35); }
-  .feat-card:hover .feat-play { opacity:1; transform:scale(1); }
-}
-.feat-play { width:36px; height:36px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.7); transition:all .25s cubic-bezier(.34,1.56,.64,1); }
-.feat-info { padding:7px 9px; }
-.feat-title { font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.feat-artist { font-size:10.5px; color:var(--ink3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-/* ─── CHART SELECTOR MOBILE ─── */
-.chart-scroll-wrap {
-  display: none;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -16px 16px;
-  padding: 2px 16px 4px;
-}
-.chart-scroll-wrap::-webkit-scrollbar { display: none; }
-@media (max-width: 700px) { .chart-scroll-wrap { display: block; } }
-.chart-scroll { display: flex; gap: 8px; width: max-content; padding-right: 16px; }
-.chart-chip {
-  display: flex; align-items: center; gap: 5px;
-  padding: 6px 12px; border-radius: 20px;
-  background: white; border: 1px solid var(--border);
-  font-size: 12px; font-weight: 500; color: var(--ink3);
-  cursor: pointer; white-space: nowrap; transition: all 0.15s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.chart-chip.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 8px rgba(232,82,10,0.3); }
-.chart-chip-flag { width: 16px; height: 11px; border-radius: 2px; flex-shrink: 0; }
-
-/* ─── COL HEADERS ─── */
-.col-headers { display:grid; grid-template-columns:28px 48px 1fr 28px 40px; gap:10px; padding:0 12px 8px; border-bottom:1px solid var(--border); margin-bottom:6px; }
-@media (max-width: 700px) {
-  .col-headers { display: none; }
-}
-.col-h { font-size:10.5px; font-weight:500; color:var(--ink4); text-transform:uppercase; letter-spacing:0.6px; }
-
-/* ─── TRACK ─── */
-.tracklist { display:flex; flex-direction:column; gap:2px; }
-.track {
-  display:grid; grid-template-columns:28px 48px 1fr 28px 40px;
-  align-items:center; gap:10px; padding:7px 12px; border-radius:12px;
-  cursor:pointer; position:relative;
-  transition: box-shadow 0.25s ease, background 0.15s ease;
-  background:transparent;
-}
-@media (max-width: 700px) {
-  .track {
-    grid-template-columns: 52px 1fr 36px 36px;
-    padding: 7px 0;
-    border-radius: 10px;
-    gap: 12px;
-  }
-  .track:active { background: rgba(255,255,255,0.7); border-radius: 10px; }
-  .t-num { display: none !important; }
-  .t-play { left: 0; width: 52px; }
-}
-@media (min-width: 701px) {
-  .track.hovered { background:white; box-shadow:0 1px 1px rgba(0,0,0,0.04),0 4px 8px rgba(0,0,0,0.06),0 12px 28px rgba(0,0,0,0.09),0 0 0 1px rgba(0,0,0,0.04); }
-  .track.hovered .t-num { opacity:0; }
-  .track.hovered .t-play { opacity:1; }
-  .track.hovered .t-art { box-shadow:6px 10px 24px rgba(0,0,0,0.22); }
-  .track.hovered .t-like { opacity:1; }
-  .track.hovered .t-art-shadow { opacity:1; transform:scaleX(1.1) translateY(4px); }
-}
-.track.now { background:white; box-shadow:0 2px 12px rgba(0,0,0,0.08),0 0 0 1px rgba(232,82,10,0.15); }
-.track.now .t-num { opacity:0; }
-.track.now .t-play { opacity:1; }
-.track.now .t-like.on { opacity:1; }
-.t-num { font-size:12px; color:var(--ink3); text-align:right; font-variant-numeric:tabular-nums; transition:opacity 0.12s; }
-.t-play { position:absolute; left:4px; width:28px; text-align:center; font-size:10px; color:var(--accent); opacity:0; transition:opacity 0.12s; font-weight:700; }
-@media (min-width: 701px) { .t-play { left: 14px; width: 32px; } }
-.t-art { width:48px; height:48px; border-radius:8px; overflow:hidden; flex-shrink:0; box-shadow:0 2px 6px rgba(0,0,0,0.15); transition:all 0.3s cubic-bezier(.22,1,.36,1); position:relative; z-index:5; background:var(--bg); }
-.t-art img { width:100%; height:100%; object-fit:cover; display:block; }
-@media (max-width: 700px) {
-  .t-art { width:52px; height:52px; border-radius:9px; }
-}
-.track.now .t-art { box-shadow:0 0 0 2.5px var(--accent),4px 6px 16px rgba(232,82,10,0.3); }
-.t-art-shadow { position:absolute; width:48px; height:10px; background:radial-gradient(ellipse,rgba(0,0,0,0.3) 0%,transparent 70%); border-radius:50%; bottom:-6px; left:0; opacity:0; filter:blur(3px); transition:opacity 0.3s ease,transform 0.3s ease; pointer-events:none; }
-.t-info { min-width:0; }
-.t-name { font-size:13px; font-weight:600; letter-spacing:-0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); transition:color 0.2s; }
-.track.now .t-name { color:var(--accent); }
-.t-sub { font-size:11px; color:var(--ink3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-.t-like {
-  background:none; border:none; font-size:16px; color:var(--ink4);
-  cursor:pointer; padding:4px; border-radius:50%; transition:all 0.15s;
-  width:28px; height:28px; display:flex; align-items:center; justify-content:center;
-}
-@media (max-width: 700px) { .t-like { opacity: 1 !important; } }
-@media (min-width: 701px) { .t-like { opacity: 0; } }
-.t-like:active, .t-like:hover { color:var(--accent); background:var(--accent-soft); }
-.t-like.on { color:var(--accent); opacity:1 !important; }
-.t-dur { font-size:13px; color:var(--accent); text-align:right; font-variant-numeric:tabular-nums; cursor:pointer; }
-.t-dur:active { opacity: 0.6; }
-.bars { display:flex; align-items:flex-end; gap:2px; height:13px; justify-content:flex-end; }
-.bar { width:2px; background:var(--accent); border-radius:2px; animation:eq .8s ease-in-out infinite alternate; }
-.bar:nth-child(1){animation-delay:0s}.bar:nth-child(2){animation-delay:.2s}.bar:nth-child(3){animation-delay:.35s}.bar:nth-child(4){animation-delay:.1s}
-@keyframes eq { from{transform:scaleY(.2)} to{transform:scaleY(1)} }
-
-/* ─── LOADER ─── */
-.loader-wrap { display:flex; align-items:center; justify-content:center; padding:60px; flex-direction:column; gap:14px; }
-.spinner { width:32px; height:32px; border:2.5px solid var(--ink4); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader-text { font-size:13px; color:var(--ink3); }
-.empty-state { text-align:center; padding:48px 24px; color:var(--ink3); font-size:13px; }
-
-/* ─── SEARCH TAB ─── */
-.search-big { display:flex; gap:10px; margin-bottom:20px; }
-.search-big-pill { flex:1; display:flex; align-items:center; background:white; border:1px solid var(--border); border-radius:10px; padding:0 14px; gap:8px; height:42px; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:all .2s; }
-.search-big-pill:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
-.search-big-pill input { flex:1; border:none; background:transparent; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); outline:none; }
-
-/* ─── PLAYER DESKTOP ─── */
-.player-desktop {
-  grid-row:2/3; grid-column:1/3;
-  background:rgba(242,236,226,0.96); backdrop-filter:blur(30px) saturate(160%);
-  border-top:1px solid var(--border);
-  grid-template-columns:260px 1fr 260px;
-  align-items:center; padding:0 24px; gap:16px;
-  position:relative; z-index:2;
-}
-.p-track { display:flex; align-items:center; gap:11px; min-width:0; }
-.p-art { width:44px; height:44px; border-radius:7px; overflow:hidden; flex-shrink:0; box-shadow:0 3px 12px rgba(0,0,0,0.18); transition:all .3s cubic-bezier(.34,1.56,.64,1); cursor:pointer; background:var(--bg); }
-.p-art:hover { transform:scale(1.1) rotate(-3deg); box-shadow:6px 8px 20px rgba(0,0,0,0.22); }
-.p-art img { width:100%; height:100%; object-fit:cover; display:block; }
-.p-info { min-width:0; flex:1; }
-.p-name { font-size:12.5px; font-weight:600; color:var(--ink); letter-spacing:-0.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.p-sub { font-size:11px; color:var(--ink3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.p-like { background:none; border:none; font-size:17px; color:var(--ink4); cursor:pointer; padding:5px; border-radius:50%; transition:all .15s; flex-shrink:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
-.p-like:hover { color:var(--accent); background:var(--accent-soft); }
-.p-like.on { color:var(--accent); }
-.p-center { display:flex; flex-direction:column; align-items:center; gap:7px; }
-.p-controls { display:flex; align-items:center; gap:6px; }
-.p-btn { background:none; border:none; color:var(--ink3); cursor:pointer; padding:5px; border-radius:50%; transition:all .15s; width:32px; height:32px; display:flex; align-items:center; justify-content:center; }
-.p-btn:hover { color:var(--ink); background:rgba(0,0,0,0.06); }
-.p-btn.on { color:var(--accent); }
-.p-play { width:36px; height:36px; border-radius:50%; background:var(--ink); border:none; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
-.p-play:hover { transform:scale(1.09); box-shadow:0 4px 18px rgba(0,0,0,0.24); }
-.p-progress { width:100%; display:flex; align-items:center; gap:8px; }
-.p-time { font-size:10px; color:var(--ink3); font-variant-numeric:tabular-nums; white-space:nowrap; }
-.p-bar { flex:1; height:3px; background:var(--ink4); border-radius:3px; cursor:pointer; position:relative; transition:height .15s; }
-.p-bar:hover { height:5px; }
-.p-bar-fill { height:100%; width:0%; background:var(--ink); border-radius:3px; transition:background .2s; }
-.p-bar:hover .p-bar-fill { background:var(--accent); }
-.p-bar-thumb { position:absolute; top:50%; transform:translateY(-50%); width:12px; height:12px; background:white; border-radius:50%; border:2px solid var(--ink); opacity:0; transition:opacity .15s; pointer-events:none; margin-left:-6px; }
-.p-bar:hover .p-bar-thumb { opacity:1; }
-.p-right { display:flex; align-items:center; gap:12px; justify-content:flex-end; }
-.vol-row { display:flex; align-items:center; gap:7px; }
-.vol-icon { color:var(--ink3); display:flex; align-items:center; }
-.vol-bar { width:70px; height:3px; background:var(--ink4); border-radius:3px; cursor:pointer; overflow:hidden; }
-.vol-fill { height:100%; width:70%; background:var(--ink3); border-radius:3px; transition:background .15s; }
-.vol-row:hover .vol-fill { background:var(--ink); }
-
-/* ─── PLAYER MOBILE ─── */
-.player-mobile {
-  display: none;
-  flex-direction: column;
-  background: rgba(242,236,226,0.98);
-  backdrop-filter: blur(30px) saturate(160%);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-  z-index: 10;
-}
-.player-mini {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 14px 6px;
-}
-.pm-art {
-  width: 36px; height: 36px; border-radius: 7px; overflow: hidden;
-  flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  background: var(--bg); cursor: pointer;
-}
-.pm-art img { width:100%; height:100%; object-fit:cover; display:block; }
-.pm-info { flex: 1; min-width: 0; cursor: pointer; }
-.pm-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
-.pm-sub { font-size: 10.5px; color: var(--ink3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pm-controls { display: flex; align-items: center; gap: 2px; }
-.pm-btn { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 5px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
-.pm-btn:active { background: rgba(0,0,0,0.08); }
-.pm-play {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--ink); border: none; color: white; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.pm-play:active { transform: scale(0.94); }
-.pm-like { background: none; border: none; font-size: 15px; color: var(--ink4); cursor: pointer; padding: 4px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
-.pm-like.on { color: var(--accent); }
-.pm-progress {
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 14px 7px;
-}
-.pm-time { font-size: 9px; color: var(--ink4); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.pm-bar {
-  flex: 1; height: 2px; background: var(--ink4); border-radius: 3px;
-  cursor: pointer; position: relative;
-  touch-action: none;
-}
-.pm-bar-fill { height: 100%; width: 0%; background: var(--accent); border-radius: 3px; pointer-events: none; }
-.pm-bar-thumb { display: none; }
-
-/* ─── MOBILE BOTTOM NAV ─── */
-.mobile-nav {
-  display: none;
-  background: rgba(245,240,232,0.97);
-  backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border);
-  padding: 8px 0;
-  padding-bottom: calc(8px + var(--safe-bottom));
-  flex-shrink: 0;
-  z-index: 10;
-}
-.mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
-.mnav-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  background: none; border: none; cursor: pointer; padding: 4px 10px;
-  color: var(--ink4); transition: all 0.15s; border-radius: 10px;
-  flex: 1;
-}
-.mnav-btn.active { color: var(--accent); }
-.mnav-btn svg { flex-shrink: 0; }
-.mnav-label { font-size: 9.5px; font-weight: 500; }
-
-/* ─── SIDEBAR MOBILE SHEET ─── */
-.sidebar-sheet {
-  display: none;
-  position: fixed; inset: 0; z-index: 200;
-}
-.sidebar-sheet.open { display: flex; }
-.sidebar-sheet-overlay {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
-}
-.sidebar-sheet-panel {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 280px;
-  background: var(--bg); overflow-y: auto;
-  padding: 24px 10px; padding-top: calc(24px + var(--safe-top));
-  display: flex; flex-direction: column;
-  box-shadow: 4px 0 30px rgba(0,0,0,0.2);
-  animation: slideInLeft 0.28s cubic-bezier(.22,1,.36,1);
-}
-@keyframes slideInLeft { from{transform:translateX(-100%)} to{transform:none} }
-
-/* ─── FULL PLAYER SHEET (mobile) ─── */
-.full-player {
-  display: none;
-  position: fixed; inset: 0; z-index: 150;
-  background: var(--bg);
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 28px;
-  padding-top: calc(20px + var(--safe-top));
-  padding-bottom: calc(20px + var(--safe-bottom));
-  animation: slideUpFull 0.32s cubic-bezier(.22,1,.36,1);
-}
-.full-player.open { display: flex; }
-@keyframes slideUpFull { from{transform:translateY(100%)} to{transform:none} }
-.fp-header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-.fp-close { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 6px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
-.fp-title { font-size: 13px; font-weight: 600; color: var(--ink3); }
-.fp-art {
-  width: min(280px, 80vw); aspect-ratio: 1; border-radius: 20px;
-  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-  margin-bottom: 32px; flex-shrink: 0; background: var(--bg);
-  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-}
-.fp-art.playing { transform: scale(1.04); }
-.fp-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.fp-info { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.fp-texts { min-width: 0; flex: 1; }
-.fp-name { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fp-sub { font-size: 14px; color: var(--ink3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fp-like { background: none; border: none; font-size: 22px; color: var(--ink4); cursor: pointer; padding: 8px; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.fp-like.on { color: var(--accent); }
-.fp-progress { width: 100%; display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-.fp-time { font-size: 11px; color: var(--ink3); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.fp-bar {
-  flex: 1; height: 4px; background: var(--ink4); border-radius: 4px;
-  cursor: pointer; position: relative; touch-action: none;
-}
-.fp-bar-fill { height: 100%; width: 0%; background: var(--ink); border-radius: 4px; pointer-events: none; }
-.fp-bar-thumb {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  width: 16px; height: 16px; background: white; border-radius: 50%;
-  border: 2.5px solid var(--ink); pointer-events: none; margin-left: -8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-}
-.fp-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 28px; }
-.fp-btn { background: none; border: none; color: var(--ink3); cursor: pointer; padding: 8px; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
-.fp-btn.on { color: var(--accent); }
-.fp-play {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: var(--ink); border: none; color: white; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.22);
-  transition: transform 0.15s;
-}
-.fp-play:active { transform: scale(0.94); }
-.fp-vol { width: 100%; display: flex; align-items: center; gap: 10px; }
-.fp-vol-icon { color: var(--ink3); display: flex; align-items: center; }
-.fp-vol-bar { flex: 1; height: 3px; background: var(--ink4); border-radius: 3px; cursor: pointer; overflow: hidden; }
-.fp-vol-fill { height: 100%; width: 70%; background: var(--ink3); border-radius: 3px; }
-
-/* ─── TOAST ─── */
-.toast { position:fixed; bottom:170px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:9px 18px; border-radius:20px; font-size:12.5px; opacity:0; transition:all .3s; pointer-events:none; z-index:999; white-space:nowrap; }
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-@media (max-width: 700px) { .toast { bottom: 140px; max-width: calc(100vw - 40px); white-space: normal; text-align: center; } }
-
-/* ─── VIDEO MODAL ─── */
-.video-modal { display:none; position:fixed; inset:0; z-index:300; align-items:center; justify-content:center; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); padding: 16px; }
-.video-modal.open { display:flex; }
-.video-box { background:#111; border-radius:16px; overflow:hidden; width:min(760px,100%); box-shadow:0 30px 80px rgba(0,0,0,0.6); animation:fadeUp .3s ease; position:relative; }
-.video-box iframe { display:block; width:100%; aspect-ratio:16/9; border:none; }
-.video-close { position:absolute; top:10px; right:10px; width:32px; height:32px; background:rgba(0,0,0,0.6); border:none; border-radius:50%; color:white; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; z-index:10; transition:.15s; }
-.video-close:hover, .video-close:active { background:rgba(255,255,255,0.2); }
-.video-info { padding:14px 18px; display:flex; align-items:center; justify-content:space-between; }
-.video-title { font-size:13.5px; font-weight:600; color:white; }
-.video-artist { font-size:11.5px; color:rgba(255,255,255,0.5); margin-top:2px; }
-
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--ink4);border-radius:4px}
-</style>
-</head>
-<body>
-
-<div id="ambient"></div>
-<div id="yt-player" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"></div>
-
-<!-- VIDEO MODAL -->
-<div class="video-modal" id="video-modal" onclick="closeVideo(event)">
-  <div class="video-box">
-    <button class="video-close" onclick="closeVideoBtn()">✕</button>
-    <div id="video-iframe-wrap"></div>
-    <div class="video-info">
-      <div>
-        <div class="video-title" id="video-title">—</div>
-        <div class="video-artist" id="video-artist">—</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FULL PLAYER SHEET (mobile) -->
-<div class="full-player" id="full-player">
-  <div class="fp-header">
-    <button class="fp-close" onclick="closeFullPlayer()">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <span class="fp-title">Воспроизводится</span>
-    <div style="width:36px"></div>
-  </div>
-  <div class="fp-art" id="fp-art"></div>
-  <div class="fp-info">
-    <div class="fp-texts">
-      <div class="fp-name" id="fp-name">Выбери трек</div>
-      <div class="fp-sub" id="fp-sub">WAVR Music</div>
-    </div>
-    <button class="fp-like" id="fp-like" onclick="toggleLikeFromPlayer()">&#9825;</button>
-  </div>
-  <div class="fp-progress">
-    <span class="fp-time" id="fp-curr">0:00</span>
-    <div class="fp-bar" id="fp-bar" onclick="seekTo2(event)">
-      <div class="fp-bar-fill" id="fp-fill"></div>
-      <div class="fp-bar-thumb" id="fp-thumb"></div>
-    </div>
-    <span class="fp-time" id="fp-total">0:00</span>
-  </div>
-  <div class="fp-controls">
-    <button class="fp-btn" onclick="prevSong()">
-      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
-    </button>
-    <button class="fp-play" id="fp-pbtn" onclick="togglePlay()">
-      <svg id="fp-play-icon" width="20" height="20" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    </button>
-    <button class="fp-btn" onclick="nextSong()">
-      <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
-    </button>
-    <button class="fp-btn on" id="fp-shuf" onclick="toggleShuffle()">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-    </button>
-  </div>
-  <div class="fp-vol">
-    <span class="fp-vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg></span>
-    <div class="fp-vol-bar" onclick="setFpVolClick(event,this)"><div class="fp-vol-fill" id="fp-vfill" style="width:70%"></div></div>
-    <span class="fp-vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span>
-  </div>
-</div>
-
-<!-- SIDEBAR SHEET (mobile charts) -->
-<div class="sidebar-sheet" id="sidebar-sheet">
-  <div class="sidebar-sheet-overlay" onclick="closeSidebarSheet()"></div>
-  <div class="sidebar-sheet-panel" id="sidebar-sheet-panel">
-    <div class="logo" style="padding-bottom:16px">
-      <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
-      Wavr
-    </div>
-    <div class="sec-label">Чарты</div>
-    <div class="chart-item active" onclick="loadChart('world',this);closeSidebarSheet()"><div class="chart-flag flag-world"></div>Весь мир</div>
-    <div class="chart-item" onclick="loadChart('usa',this);closeSidebarSheet()"><div class="chart-flag flag-us"></div>США</div>
-    <div class="chart-item" onclick="loadChart('uk',this);closeSidebarSheet()"><div class="chart-flag flag-gb"></div>Великобритания</div>
-    <div class="chart-item" onclick="loadChart('france',this);closeSidebarSheet()"><div class="chart-flag flag-fr"></div>Франция</div>
-    <div class="chart-item" onclick="loadChart('germany',this);closeSidebarSheet()"><div class="chart-flag flag-de"></div>Германия</div>
-    <div class="chart-item" onclick="loadChart('brazil',this);closeSidebarSheet()"><div class="chart-flag flag-br"></div>Бразилия</div>
-    <div class="chart-item" onclick="loadChart('russia',this);closeSidebarSheet()"><div class="chart-flag flag-ru"></div>Россия</div>
-    <div class="chart-item" onclick="loadChart('japan',this);closeSidebarSheet()"><div class="chart-flag flag-jp"></div>Япония</div>
-    <div class="chart-item" onclick="loadChart('korea',this);closeSidebarSheet()"><div class="chart-flag flag-kr"></div>Корея</div>
-    <div class="chart-item" onclick="loadChart('india',this);closeSidebarSheet()"><div class="chart-flag flag-in"></div>Индия</div>
-    <div class="chart-item" onclick="loadChart('mexico',this);closeSidebarSheet()"><div class="chart-flag flag-mx"></div>Мексика</div>
-    <div class="chart-item" onclick="loadChart('australia',this);closeSidebarSheet()"><div class="chart-flag flag-au"></div>Австралия</div>
-  </div>
-</div>
-
-<!-- DESKTOP SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="logo">
-    <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
-    Wavr
-  </div>
-  <div class="sec-label">Меню</div>
-  <div class="nav-item active" onclick="showTab('home',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Главная</div>
-  <div class="nav-item" onclick="showTab('search-tab',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Поиск</div>
-  <div class="nav-item" onclick="showTab('history',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>История</div>
-  <div class="nav-item" onclick="showTab('liked',this)"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Лайки</div>
-  <div class="sec-label">Чарты</div>
-  <div class="chart-item active" onclick="loadChart('world',this)"><div class="chart-flag flag-world"></div>Весь мир</div>
-  <div class="chart-item" onclick="loadChart('usa',this)"><div class="chart-flag flag-us"></div>США</div>
-  <div class="chart-item" onclick="loadChart('uk',this)"><div class="chart-flag flag-gb"></div>Великобритания</div>
-  <div class="chart-item" onclick="loadChart('france',this)"><div class="chart-flag flag-fr"></div>Франция</div>
-  <div class="chart-item" onclick="loadChart('germany',this)"><div class="chart-flag flag-de"></div>Германия</div>
-  <div class="chart-item" onclick="loadChart('brazil',this)"><div class="chart-flag flag-br"></div>Бразилия</div>
-  <div class="chart-item" onclick="loadChart('russia',this)"><div class="chart-flag flag-ru"></div>Россия</div>
-  <div class="chart-item" onclick="loadChart('japan',this)"><div class="chart-flag flag-jp"></div>Япония</div>
-  <div class="chart-item" onclick="loadChart('korea',this)"><div class="chart-flag flag-kr"></div>Корея</div>
-  <div class="chart-item" onclick="loadChart('india',this)"><div class="chart-flag flag-in"></div>Индия</div>
-  <div class="chart-item" onclick="loadChart('mexico',this)"><div class="chart-flag flag-mx"></div>Мексика</div>
-  <div class="chart-item" onclick="loadChart('australia',this)"><div class="chart-flag flag-au"></div>Австралия</div>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-  <!-- MOBILE TOPBAR -->
-  <header class="topbar-mobile">
-    <div class="logo-small">
-      <div class="logo-mark-sm"><svg viewBox="0 0 14 14" fill="none"><path d="M2 10 Q7 2 12 10" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="7" cy="10" r="1.5" fill="white"/></svg></div>
-      Wavr
-    </div>
-    <div class="search-pill-mobile">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search-input-mob" placeholder="Артисты, треки…" onkeydown="if(event.key==='Enter')doSearchMob()">
-    </div>
-    <button onclick="doSearchMob()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap">Найти</button>
-  </header>
-
-  <!-- DESKTOP TOPBAR -->
-  <header class="topbar topbar-desktop">
-    <div class="search-pill">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="search-input" placeholder="Артисты, треки, альбомы…" onkeydown="if(event.key==='Enter')doSearch()">
-    </div>
-    <button class="search-go" onclick="doSearch()">Найти</button>
-    <div class="topbar-right">
-      <div class="avatar" onclick="toggleProfile()">M</div>
-    </div>
-  </header>
-
-  <div class="content">
-    <!-- HOME -->
-    <div class="tab-content active" id="tab-home">
-      <div class="page-header">
-        <div class="page-eyebrow">Чарт</div>
-        <div class="page-title" id="chart-title">Весь мир</div>
-        <div class="page-meta" id="chart-meta">Загрузка...</div>
-      </div>
-      <!-- Горизонтальный скролл чартов на мобиле -->
-      <div class="chart-scroll-wrap" id="chart-scroll-wrap">
-        <div class="chart-scroll" id="chart-chips"></div>
-      </div>
-      <div class="feat-grid" id="featured-grid">
-        <div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>
-      </div>
-      <div class="col-headers">
-        <span class="col-h" style="text-align:right">#</span>
-        <span class="col-h"></span>
-        <span class="col-h">Трек</span>
-        <span class="col-h"></span>
-        <span class="col-h" style="text-align:right">—</span>
-      </div>
-      <div class="tracklist" id="all-songs">
-        <div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>
-      </div>
-    </div>
-
-    <!-- SEARCH -->
-    <div class="tab-content" id="tab-search-tab">
-      <div class="page-header">
-        <div class="page-eyebrow">Поиск</div>
-        <div class="page-title">Найти музыку</div>
-      </div>
-      <div class="search-big">
-        <div class="search-big-pill">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="search-input-2" placeholder="Drake, BTS, Imagine Dragons…" onkeydown="if(event.key==='Enter')doSearch2()">
-        </div>
-        <button class="search-go" onclick="doSearch2()">Найти</button>
-      </div>
-      <div class="tracklist" id="search-results"><div class="empty-state">Введи имя артиста или название песни</div></div>
-    </div>
-
-    <!-- HISTORY -->
-    <div class="tab-content" id="tab-history">
-      <div class="page-header">
-        <div class="page-eyebrow">Активность</div>
-        <div class="page-title">Недавно слушал</div>
-        <div class="page-meta" id="history-meta">Слушай музыку — история появится здесь</div>
-      </div>
-      <div class="tracklist" id="history-list"><div class="empty-state">Нажми на любой трек, чтобы начать</div></div>
-    </div>
-
-    <!-- LIKED -->
-    <div class="tab-content" id="tab-liked">
-      <div class="page-header">
-        <div class="page-eyebrow">Коллекция</div>
-        <div class="page-title">Понравившиеся</div>
-      </div>
-      <div class="tracklist" id="liked-list"><div class="empty-state">Ставь лайки любимым трекам</div></div>
-    </div>
-  </div>
-</main>
-
-<!-- DESKTOP PLAYER -->
-<footer class="player-desktop" style="display:none">
-  <div class="p-track">
-    <div class="p-art" id="p-art"></div>
-    <div class="p-info">
-      <div class="p-name" id="pname">Выбери трек</div>
-      <div class="p-sub" id="psub">WAVR Music</div>
-    </div>
-    <button class="p-like" id="plike" onclick="toggleLikeFromPlayer()">&#9825;</button>
-  </div>
-  <div class="p-center">
-    <div class="p-controls">
-      <button class="p-btn" onclick="prevSong()"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg></button>
-      <button class="p-play" id="pbtn" onclick="togglePlay()"><svg id="play-icon" width="14" height="14" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
-      <button class="p-btn" onclick="nextSong()"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg></button>
-      <button class="p-btn on" id="shuf" onclick="toggleShuffle()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
-    </div>
-    <div class="p-progress">
-      <span class="p-time" id="curr-time">0:00</span>
-      <div class="p-bar" id="progress-bar" onclick="seekTo(event)">
-        <div class="p-bar-fill" id="progress-fill"></div>
-        <div class="p-bar-thumb" id="progress-thumb"></div>
-      </div>
-      <span class="p-time" id="total-time">0:00</span>
-    </div>
-  </div>
-  <div class="p-right">
-    <div class="vol-row">
-      <span class="vol-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span>
-      <div class="vol-bar" onclick="setVolClick(event,this)"><div class="vol-fill" id="vfill" style="width:70%"></div></div>
-    </div>
-  </div>
-</footer>
-
-<!-- MOBILE PLAYER (mini bar) -->
-<div class="player-mobile" id="player-mobile">
-  <div class="player-mini">
-    <div class="pm-art" id="pm-art" onclick="openFullPlayer()"></div>
-    <div class="pm-info" onclick="openFullPlayer()">
-      <div class="pm-name" id="pm-name">Выбери трек</div>
-      <div class="pm-sub" id="pm-sub">WAVR Music</div>
-    </div>
-    <div class="pm-controls">
-      <button class="pm-btn" onclick="prevSong()">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="19,20 9,12 19,4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
-      </button>
-      <button class="pm-play" id="pm-pbtn" onclick="togglePlay()">
-        <svg id="pm-play-icon" width="16" height="16" fill="white" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      </button>
-      <button class="pm-btn" onclick="nextSong()">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,4 15,12 5,20"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
-      </button>
-    </div>
-    <button class="pm-like" id="pm-like" onclick="toggleLikeFromPlayer()">&#9825;</button>
-  </div>
-  <div class="pm-progress">
-    <span class="pm-time" id="pm-curr">0:00</span>
-    <div class="pm-bar" id="pm-bar" onclick="seekTo3(event)">
-      <div class="pm-bar-fill" id="pm-fill"></div>
-      <div class="pm-bar-thumb" id="pm-thumb"></div>
-    </div>
-    <span class="pm-time" id="pm-total">0:00</span>
-  </div>
-</div>
-
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav" id="mobile-nav">
-  <div class="mobile-nav-inner">
-    <button class="mnav-btn active" id="mnav-home" onclick="mnavClick('home',this)">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-      <span class="mnav-label">Главная</span>
-    </button>
-    <button class="mnav-btn" id="mnav-search" onclick="mnavClick('search-tab',this)">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <span class="mnav-label">Поиск</span>
-    </button>
-    <button class="mnav-btn" id="mnav-charts" onclick="openSidebarSheet()">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span class="mnav-label">Чарты</span>
-    </button>
-    <button class="mnav-btn" id="mnav-history" onclick="mnavClick('history',this)">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span class="mnav-label">История</span>
-    </button>
-    <button class="mnav-btn" id="mnav-liked" onclick="mnavClick('liked',this)">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-      <span class="mnav-label">Лайки</span>
-    </button>
-  </div>
-</nav>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-// ═══════════════════════════════════════════════
-//  WAVR — Mobile-first adaptive version
-// ═══════════════════════════════════════════════
-
-const CHARTS = {
-  world: ['top hits 2024','best songs 2024','viral hits 2024','pop hits 2024','dance hits 2024','taylor swift','drake','the weeknd','billie eilish','ariana grande','bruno mars','dua lipa','post malone','kendrick lamar','olivia rodrigo','harry styles','doja cat','justin bieber','beyonce','eminem','lady gaga','ed sheeran','adele','coldplay','imagine dragons','twenty one pilots','marshmello','calvin harris','charlie puth','shawn mendes'],
-  usa: ['top hits usa 2024','billboard hot 100','american pop 2024','us rap 2024','country hits 2024','taylor swift','drake','kendrick lamar','post malone','travis scott','cardi b','nicki minaj','lil baby','juice wrld','morgan wallen','chris brown','usher','j cole','future','21 savage'],
-  uk: ['uk top hits 2024','british pop 2024','uk rap 2024','uk grime 2024','ed sheeran','adele','coldplay','sam smith','dua lipa','harry styles','stormzy','little simz','skepta','lewis capaldi','central cee','fred again','disclosure','amy winehouse','george michael'],
-  france: ['french hits 2024','french rap 2024','french pop 2024','aya nakamura','stromae','angele','nekfeu','jul','ninho','booba','damso','daft punk','david guetta','zaho de sagazan','clara luciani','slimane','vitaa'],
-  germany: ['german hits 2024','german rap 2024','german pop 2024','capital bra','apache 207','rammstein','sido','bushido','ufo361','farid bang','kollegah','mark forster','zoe wees','kraftwerk','scooter','paul kalkbrenner','robin schulz'],
-  brazil: ['brazilian hits 2024','sertanejo 2024','funk brasil 2024','anitta','mc kevinho','gusttavo lima','ivete sangalo','luisa sonza','wesley safadão','marilia mendonca','mc fioti','caetano veloso','seu jorge'],
-  russia: ['russian hits 2024','russian pop 2024','russian rap 2024','bakr','ulukmanapo','xcho','скриптонит','morgenshtern','face rap','little big','monetochka','IC3PEAK','gone fludd','bumble beezy','saluki','oxxxymiron','noize mc','земфира','би-2','jony','niletto','artik and asti'],
-  japan: ['j-pop 2024','anime songs 2024','j-rock 2024','yoasobi','ado singer','fujii kaze','kenshi yonezu','official hige dandism','king gnu','one ok rock','radwimps','eve jpop','yorushika'],
-  korea: ['kpop hits 2024','korean pop 2024','bts','blackpink','stray kids','twice','aespa','newjeans','ive kpop','seventeen','nct 127','gidle','red velvet'],
-  india: ['bollywood hits 2024','hindi songs 2024','punjabi hits 2024','arijit singh','shreya ghoshal','neha kakkar','diljit dosanjh','badshah rapper','ap dhillon','ar rahman','pritam','lata mangeshkar'],
-  mexico: ['mexican hits 2024','reggaeton 2024','latin pop 2024','corridos 2024','bad bunny','j balvin','maluma','ozuna','karol g','peso pluma','natanael cano','grupo frontera','shakira','daddy yankee'],
-  australia: ['australian hits 2024','aussie pop 2024','australian rock 2024','tones and i','flume','the kid laroi','sia','troye sivan','vance joy','chet faker','rüfüs du sol','ac dc','inxs','crowded house'],
-};
-
-const CHART_NAMES = {world:'🌍 Весь мир',usa:'🇺🇸 США',uk:'🇬🇧 Великобритания',france:'🇫🇷 Франция',germany:'🇩🇪 Германия',brazil:'🇧🇷 Бразилия',russia:'🇷🇺 Россия',japan:'🇯🇵 Япония',korea:'🇰🇷 Корея',india:'🇮🇳 Индия',mexico:'🇲🇽 Мексика',australia:'🇦🇺 Австралия'};
-const CHART_KEYS = Object.keys(CHART_NAMES);
-
-let songs = [], currentIdx = -1, isPlaying = false, isShuffle = false;
-let likedSongs = new Set(), favSongs = new Set(), playedCount = 0, activeTab = 'home';
-let ytPlayer = null, ytReady = false, progressTimer = null;
-const isMobile = () => window.innerWidth <= 700;
-
-// ── Build mobile chart chips ──
-function buildChartChips() {
-  const wrap = document.getElementById('chart-chips');
-  wrap.innerHTML = CHART_KEYS.map(k => `
-    <div class="chart-chip${k==='world'?' active':''}" data-key="${k}" onclick="loadChartFromChip('${k}',this)">
-      ${CHART_NAMES[k]}
-    </div>
-  `).join('');
-}
-
-function loadChartFromChip(key, el) {
-  document.querySelectorAll('.chart-chip').forEach(c => c.classList.remove('active'));
-  if (el) el.classList.add('active');
-  document.querySelectorAll('.chart-item').forEach(c => c.classList.remove('active'));
-  const name = CHART_NAMES[key]||key;
-  document.getElementById('chart-title').textContent = name;
-  loadChartData(key);
-}
-
-// ── YouTube ──
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('yt-player', {
-    width:'200', height:'113',
-    playerVars:{autoplay:1,controls:0,mute:1,rel:0,modestbranding:1,playsinline:1},
-    events:{
-      onReady:(e)=>{ ytReady=true; e.target.setVolume(70); showToast('Плеер готов — нажми на трек!'); },
-      onStateChange:onYTState,
-      onError:onYTError
-    }
-  });
-}
-function onYTState(e) {
-  if (e.data===YT.PlayerState.PLAYING) {
-    isPlaying=true;
-    updatePlayIcons(true);
-    document.querySelectorAll('.bar').forEach(b=>b.style.animationPlayState='running');
-    startProgress();
-  } else if (e.data===YT.PlayerState.PAUSED) {
-    isPlaying=false;
-    updatePlayIcons(false);
-    document.querySelectorAll('.bar').forEach(b=>b.style.animationPlayState='paused');
-    stopProgress();
-  } else if (e.data===YT.PlayerState.ENDED) {
-    stopProgress(); nextSong();
-  }
-}
-function onYTError(e) {
-  stopProgress();
-  if (e.data===100||e.data===101||e.data===150) setTimeout(()=>nextSong(),300);
-}
-function updatePlayIcons(playing) {
-  const pauseIcon = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
-  const playIcon = '<polygon points="5 3 19 12 5 21 5 3"/>';
-  const svg = playing ? pauseIcon : playIcon;
-  ['play-icon','fp-play-icon','pm-play-icon'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = svg;
-  });
-  const fpArt = document.getElementById('fp-art');
-  if (fpArt) fpArt.classList.toggle('playing', playing);
-}
-
-function startProgress() {
-  stopProgress();
-  progressTimer = setInterval(()=>{
-    if (!ytPlayer||!ytReady) return;
-    const cur=ytPlayer.getCurrentTime()||0, dur=ytPlayer.getDuration()||0;
-    if (dur>0) {
-      const pct = cur/dur*100;
-      const pctStr = pct+'%';
-      // Desktop
-      setById('progress-fill','style.width',pctStr);
-      setById('progress-thumb','style.left',pctStr);
-      setById('curr-time','textContent',fmtTime(cur));
-      setById('total-time','textContent',fmtTime(dur));
-      // Full player
-      setById('fp-fill','style.width',pctStr);
-      setById('fp-thumb','style.left',pctStr);
-      setById('fp-curr','textContent',fmtTime(cur));
-      setById('fp-total','textContent',fmtTime(dur));
-      // Mini player
-      setById('pm-fill','style.width',pctStr);
-      setById('pm-thumb','style.left',pctStr);
-      setById('pm-curr','textContent',fmtTime(cur));
-      setById('pm-total','textContent',fmtTime(dur));
-    }
-  },500);
-}
-function setById(id, prop, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (prop.includes('.')) {
-    const [obj, key] = prop.split('.');
-    el[obj][key] = val;
-  } else { el[prop] = val; }
-}
-function stopProgress(){if(progressTimer){clearInterval(progressTimer);progressTimer=null;}}
-function fmtTime(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
-
-// ── YouTube API Keys ──
-const YT_API_KEYS = [
-  'AIzaSyDlGzSATY27ti9w7GUSj4NIaSbslsdbuc8',
-  'AIzaSyDpekcSlMTiWCnuf6QIo6F8T1S_W1I9QgI',
-  'AIzaSyCwsdBcfZdsN7z-xdgnp_SuhNVafmU-BG0',
-  'AIzaSyCzJtEsUqtZlukRO7jJJRfx8n-eEpireg8',
-  'AIzaSyC6SOLiWIjkLzKkAWaw2nhXWvumWa11NVI',
-  'AIzaSyDniJUADTejn8jOVvc7moo8ndPOUPBeExY',
-  'AIzaSyCu1oavlcGBPa9KV4vhDmFJ7gdQiBZtH4M',
-  'AIzaSyDczButEiwS4pOSw6m4BSb5dTXXkI0PmRw',
-  'AIzaSyB6oJMWhiR3b-2AnxnSjjxBGqOZx2uz-jc',
-  'AIzaSyDQnpA99WPVqmgZPL5VaFNCD8iPNcitWFg',
-];
-let ytKeyIdx = 0;
-async function findYTVideoId(query) {
-  for (let i=0;i<YT_API_KEYS.length;i++) {
-    const key = YT_API_KEYS[ytKeyIdx % YT_API_KEYS.length];
-    try {
-      const url = `https://www.googleapis.com/youtube/v3/search?part=id&type=video&q=${encodeURIComponent(query)}&key=${key}&maxResults=5`;
-      const res = await fetch(url,{signal:AbortSignal.timeout(8000)});
-      const data = await res.json();
-      if (data.error) { if(data.error.code===403){ytKeyIdx++;continue;} return null; }
-      for (const item of (data.items||[])) { if(item.id&&item.id.videoId) return item.id.videoId; }
-      return null;
-    } catch(e) { return null; }
-  }
-  return null;
-}
-
-// ── iTunes ──
-async function itunesFetch(term, limit=50) {
-  const target = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=${limit}&explicit=No`;
-  try {
-    const res = await fetch(target, {signal:AbortSignal.timeout(6000)});
-    if (res.ok) { const d = await res.json(); if(d.results) return d; }
-  } catch(e) {}
-  try {
-    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
-    const res2 = await fetch(proxy, {signal:AbortSignal.timeout(10000)});
-    if (res2.ok) { const d = await res2.json(); if(d.results) return d; }
-  } catch(e) {}
-  try {
-    const proxy2 = `https://corsproxy.io/?${encodeURIComponent(target)}`;
-    const res3 = await fetch(proxy2, {signal:AbortSignal.timeout(10000)});
-    if (res3.ok) { const d = await res3.json(); if(d.results) return d; }
-  } catch(e) {}
-  return {results:[]};
-}
-function itunesTrack(t) {
-  return {
-    id: String(t.trackId),
-    title: t.trackName||'Без названия',
-    artist: t.artistName||'Неизвестный',
-    album: t.collectionName||'',
-    cover: (t.artworkUrl100||'').replace('100x100','300x300'),
-    ytQuery: `${t.artistName} - ${t.trackName} official audio`,
-  };
-}
-
-// ── Load Chart ──
-async function loadChart(key, el) {
-  document.querySelectorAll('.chart-item').forEach(c=>c.classList.remove('active'));
-  if(el) el.classList.add('active');
-  // Sync chips
-  document.querySelectorAll('.chart-chip').forEach(c => c.classList.toggle('active', c.dataset.key===key));
-  if(activeTab!=='home') showTab('home', null);
-  document.getElementById('chart-title').textContent = CHART_NAMES[key]||key;
-  loadChartData(key);
-}
-
-async function loadChartData(key) {
-  document.getElementById('chart-meta').textContent = 'Загрузка...';
-  document.getElementById('featured-grid').innerHTML='<div class="loader-wrap" style="grid-column:1/-1"><div class="spinner"></div><div class="loader-text">Загрузка треков...</div></div>';
-  document.getElementById('all-songs').innerHTML='<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Загрузка...</div></div>';
-
-  const queries=CHARTS[key]||CHARTS.world;
-  const seenIds=new Set();
-  songs=[];
-
-  const mob = isMobile();
-  const batchSize = mob ? 1 : 5;
-  const delay = mob ? 200 : 50;
-
-  const firstBatch = queries.slice(0, mob ? 1 : 3);
-  const firstResults = await Promise.allSettled(firstBatch.map(q=>itunesFetch(q,50)));
-  for (const r of firstResults) {
-    if(r.status==='fulfilled') {
-      for (const t of (r.value.results||[])) {
-        const track=itunesTrack(t);
-        if(!seenIds.has(track.id)){seenIds.add(track.id);songs.push(track);}
-      }
-    }
-  }
-  if(songs.length){
-    renderFeatured(); renderSongList();
-    document.getElementById('chart-meta').textContent=songs.length+' треков · загружаем ещё...';
-  }
-
-  const startIdx = mob ? 1 : 3;
-  for (let i=startIdx; i<queries.length; i+=batchSize) {
-    const batch = queries.slice(i, i+batchSize);
-    const results = await Promise.allSettled(batch.map(q=>itunesFetch(q,50)));
-    for (const r of results) {
-      if(r.status==='fulfilled') {
-        for (const t of (r.value.results||[])) {
-          const track=itunesTrack(t);
-          if(!seenIds.has(track.id)){seenIds.add(track.id);songs.push(track);}
-        }
-      }
-    }
-    renderSongList();
-    document.getElementById('chart-meta').textContent=songs.length+' треков...';
-    await new Promise(r=>setTimeout(r,delay));
-  }
-
-  if(!songs.length){
-    document.getElementById('featured-grid').innerHTML='<div class="empty-state">Ошибка загрузки</div>';
-    document.getElementById('all-songs').innerHTML='<div class="empty-state">Ошибка загрузки</div>';
-    return;
-  }
-  renderFeatured(); renderSongList();
-  document.getElementById('chart-meta').textContent=songs.length+' треков';
-}
-
-// ── Ambient ──
-function setAmbient(r,g,b){
-  document.getElementById('ambient').style.background=`radial-gradient(ellipse 65% 55% at 68% 35%, rgba(${r},${g},${b},0.1) 0%, transparent 70%)`;
-}
-
-// ── Render ──
-function renderFeatured(){
-  const count = isMobile() ? 8 : 12;
-  document.getElementById('featured-grid').innerHTML=songs.slice(0,count).map((s,i)=>`
-    <div class="feat-card" onclick="playSong(${i})">
-      <div class="feat-cover">
-        ${s.cover?`<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">`:'<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>'}
-        <div class="feat-overlay"><div class="feat-play"><svg width="12" height="12" fill="var(--accent)" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
-      </div>
-      <div class="feat-info"><div class="feat-title">${xss(s.title)}</div><div class="feat-artist">${xss(s.artist)}</div></div>
-    </div>`).join('');
-}
-
-function songRow(s,idx){
-  const liked=likedSongs.has(s.id), playing=idx===currentIdx&&isPlaying;
-  const mob = isMobile();
-  const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
-  const artHtml = s.cover?`<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">`:'<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
-  if (mob) {
-    // Mobile: [art] [info] [like] [video]
-    return `<div class="track${playing?' now':''}" id="sr-${idx}" onclick="playSong(${idx})" data-idx="${idx}">
-      <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
-      <div style="position:relative;flex-shrink:0">
-        <div class="t-art">${artHtml}</div>
-      </div>
-      <div class="t-info">
-        <div class="t-name">${xss(s.title)}</div>
-        <div class="t-sub">${xss(s.artist)}</div>
-      </div>
-      <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${idx})">${liked?'&#9829;':'&#9825;'}</button>
-      <span class="t-dur" onclick="event.stopPropagation();openVideo(${idx})" title="Смотреть клип" style="cursor:pointer;color:var(--accent);font-size:15px;text-align:center;display:flex;align-items:center;justify-content:center">▶</span>
-    </div>`;
-  }
-  return `<div class="track${playing?' now':''}" id="sr-${idx}" onclick="playSong(${idx})" data-idx="${idx}">
-    <span class="t-num">${playing?barsHtml:idx+1}</span>
-    <span class="t-play">&#9654;</span>
-    <div style="position:relative">
-      <div class="t-art">${artHtml}</div>
-      <div class="t-art-shadow"></div>
-    </div>
-    <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
-    <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${idx})">${liked?'&#9829;':'&#9825;'}</button>
-    <span class="t-dur" onclick="event.stopPropagation();openVideo(${idx})" title="Смотреть клип" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
-  </div>`;
-}
-
-function renderSongList(){
-  document.getElementById('all-songs').innerHTML=songs.map((s,i)=>songRow(s,i)).join('');
-  if (!isMobile()) initTrack3D();
-}
-function renderFavList(){
-  const arr=songs.filter(s=>favSongs.has(s.id));
-  document.getElementById('fav-list').innerHTML=arr.length?arr.map(s=>songRow(s,songs.indexOf(s))).join(''):'<div class="empty-state">Добавь треки в избранное</div>';
-  if (!isMobile()) initTrack3D();
-}
-function renderLikedList(){
-  const arr=songs.filter(s=>likedSongs.has(s.id));
-  document.getElementById('liked-list').innerHTML=arr.length?arr.map(s=>songRow(s,songs.indexOf(s))).join(''):'<div class="empty-state">Ставь лайки любимым трекам</div>';
-  if (!isMobile()) initTrack3D();
-}
-
-// ── History ──
-let history = []; // [{...songObj}] — последние прослушанные, новые в начале
-
-function addToHistory(s) {
-  // Убираем дубликат если уже есть
-  history = history.filter(h => h.id !== s.id);
-  // Добавляем в начало
-  history.unshift({...s});
-  // Храним максимум 50
-  if (history.length > 50) history = history.slice(0, 50);
-  // Обновляем вкладку если открыта
-  if (activeTab === 'history') renderHistoryList();
-  // Обновляем счётчик в заголовке
-  const meta = document.getElementById('history-meta');
-  if (meta) meta.textContent = history.length + ' треков';
-}
-
-function renderHistoryList() {
-  const el = document.getElementById('history-list');
-  if (!el) return;
-  if (!history.length) {
-    el.innerHTML = '<div class="empty-state">Нажми на любой трек, чтобы начать</div>';
-    return;
-  }
-  // Рендерим с нумерацией от 1 (история — отдельный массив)
-  el.innerHTML = history.map((s, i) => {
-    const liked = likedSongs.has(s.id);
-    const playing = songs[currentIdx] && songs[currentIdx].id === s.id && isPlaying;
-    const mob = isMobile();
-    const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
-    const artHtml = s.cover ? `<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
-    const globalIdx = songs.findIndex(x => x.id === s.id);
-    const clickIdx = globalIdx >= 0 ? globalIdx : (() => { songs.push(s); return songs.length - 1; })();
-    if (mob) {
-      return `<div class="track${playing?' now':''}" onclick="playSong(${clickIdx})">
-        <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
-        <div style="position:relative;flex-shrink:0"><div class="t-art">${artHtml}</div></div>
-        <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}</div></div>
-        <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${clickIdx})">${liked?'&#9829;':'&#9825;'}</button>
-        <span class="t-dur" onclick="event.stopPropagation();openVideo(${clickIdx})" style="cursor:pointer;color:var(--accent);font-size:15px;display:flex;align-items:center;justify-content:center">▶</span>
-      </div>`;
-    }
-    return `<div class="track${playing?' now':''}" onclick="playSong(${clickIdx})">
-      <span class="t-num">${playing ? barsHtml : i + 1}</span>
-      <span class="t-play">&#9654;</span>
-      <div style="position:relative"><div class="t-art">${artHtml}</div></div>
-      <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
-      <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${clickIdx})">${liked?'&#9829;':'&#9825;'}</button>
-      <span class="t-dur" onclick="event.stopPropagation();openVideo(${clickIdx})" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
-    </div>`;
-  }).join('');
-  if (!isMobile()) initTrack3D();
-}
-function initTrack3D(){
-  document.querySelectorAll('.track').forEach(track=>{
-    track.addEventListener('mouseenter',function(){this.classList.add('hovered');});
-    track.addEventListener('mouseleave',function(){this.classList.remove('hovered');});
-  });
-}
-
-// ── Update all player UIs ──
-function updatePlayerUI(s) {
-  const art = s.cover ? `<img src="${s.cover}" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
-  // Desktop
-  document.getElementById('p-art').innerHTML = art;
-  document.getElementById('pname').textContent = s.title;
-  document.getElementById('psub').textContent = s.artist + (s.album?' — '+s.album:'');
-  document.getElementById('plike').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
-  document.getElementById('plike').classList.toggle('on', likedSongs.has(s.id));
-  // Mini
-  document.getElementById('pm-art').innerHTML = art;
-  document.getElementById('pm-name').textContent = s.title;
-  document.getElementById('pm-sub').textContent = s.artist;
-  document.getElementById('pm-like').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
-  document.getElementById('pm-like').classList.toggle('on', likedSongs.has(s.id));
-  // Full player
-  document.getElementById('fp-art').innerHTML = art;
-  document.getElementById('fp-name').textContent = s.title;
-  document.getElementById('fp-sub').textContent = s.artist + (s.album?' — '+s.album:'');
-  document.getElementById('fp-like').innerHTML = likedSongs.has(s.id)?'&#9829;':'&#9825;';
-  document.getElementById('fp-like').classList.toggle('on', likedSongs.has(s.id));
-  // Reset progress
-  ['progress-fill','fp-fill','pm-fill'].forEach(id => setById(id,'style.width','0%'));
-  ['curr-time','fp-curr','pm-curr'].forEach(id => setById(id,'textContent','0:00'));
-  ['total-time','fp-total','pm-total'].forEach(id => setById(id,'textContent','0:00'));
-}
-
-// ── Play ──
-async function playSong(idx){
-  if(idx<0||idx>=songs.length) return;
-  const s=songs[idx];
-  currentIdx=idx; playedCount++;
-  addToHistory(s);
-  updatePlayerUI(s);
-  updatePlayIcons(false);
-  setAmbient(232,82,10);
-  renderSongList();
-
-  const videoId=await findYTVideoId(s.ytQuery);
-  if(!videoId){showToast('Не найдено на YouTube');return;}
-  showToast('▶ '+s.title);
-  if(ytReady&&ytPlayer&&ytPlayer.loadVideoById){
-    ytPlayer.loadVideoById(videoId);
-    ytPlayer.mute();
-    setTimeout(()=>{ytPlayer.unMute();ytPlayer.setVolume(70);},1500);
-  } else {
-    let attempts=0;
-    const wait=setInterval(()=>{
-      attempts++;
-      if(ytPlayer&&ytPlayer.loadVideoById){
-        clearInterval(wait);
-        ytPlayer.loadVideoById(videoId);
-        ytPlayer.mute();
-        setTimeout(()=>{ytPlayer.unMute();ytPlayer.setVolume(70);},1500);
-      } else if(attempts>20){clearInterval(wait);}
-    },500);
-  }
-}
-
-function togglePlay(){
-  if(currentIdx===-1){showToast('Выбери трек');return;}
-  if(!ytReady||!ytPlayer) return;
-  isPlaying?ytPlayer.pauseVideo():ytPlayer.playVideo();
-}
-function prevSong(){if(songs.length)playSong((currentIdx-1+songs.length)%songs.length);}
-function nextSong(){if(!songs.length)return;playSong(isShuffle?Math.floor(Math.random()*songs.length):(currentIdx+1)%songs.length);}
-function toggleShuffle(){
-  isShuffle=!isShuffle;
-  document.getElementById('shuf').classList.toggle('on',isShuffle);
-  document.getElementById('fp-shuf').classList.toggle('on',isShuffle);
-  showToast(isShuffle?'Перемешивание вкл':'Перемешивание выкл');
-}
-
-function seekTo(e){
-  if(!ytReady||!ytPlayer) return;
-  const dur=ytPlayer.getDuration(); if(!dur) return;
-  const r=document.getElementById('progress-bar').getBoundingClientRect();
-  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
-}
-function seekTo2(e){
-  if(!ytReady||!ytPlayer) return;
-  const dur=ytPlayer.getDuration(); if(!dur) return;
-  const r=document.getElementById('fp-bar').getBoundingClientRect();
-  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
-}
-function seekTo3(e){
-  if(!ytReady||!ytPlayer) return;
-  const dur=ytPlayer.getDuration(); if(!dur) return;
-  const r=document.getElementById('pm-bar').getBoundingClientRect();
-  ytPlayer.seekTo(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*dur,true);
-}
-function setVolClick(e,bar){
-  const p=Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
-  document.getElementById('vfill').style.width=(p*100)+'%';
-  if(ytReady&&ytPlayer)ytPlayer.setVolume(Math.round(p*100));
-}
-function setFpVolClick(e,bar){
-  const p=Math.max(0,Math.min(1,(e.clientX-bar.getBoundingClientRect().left)/bar.offsetWidth));
-  document.getElementById('fp-vfill').style.width=(p*100)+'%';
-  if(ytReady&&ytPlayer)ytPlayer.setVolume(Math.round(p*100));
-}
-
-// ── Mobile full player ──
-function openFullPlayer(){
-  document.getElementById('full-player').classList.add('open');
-}
-function closeFullPlayer(){
-  document.getElementById('full-player').classList.remove('open');
-}
-
-// ── Mobile sidebar sheet ──
-function openSidebarSheet(){
-  document.getElementById('sidebar-sheet').classList.add('open');
-}
-function closeSidebarSheet(){
-  document.getElementById('sidebar-sheet').classList.remove('open');
-}
-
-// ── Search ──
-function doSearch(){
-  const q=document.getElementById('search-input').value.trim();
-  if(!q){showToast('Введи запрос');return;}
-  document.getElementById('search-input-2').value=q;
-  showTab('search-tab',null);
-  runSearch(q);
-}
-function doSearch2(){
-  const q=document.getElementById('search-input-2').value.trim();
-  if(!q){showToast('Введи запрос');return;}
-  runSearch(q);
-}
-function doSearchMob(){
-  const q=document.getElementById('search-input-mob').value.trim();
-  if(!q){showToast('Введи запрос');return;}
-  document.getElementById('search-input-2').value=q;
-  mnavClick('search-tab', document.getElementById('mnav-search'));
-  runSearch(q);
-}
-async function runSearch(q){
-  const el=document.getElementById('search-results');
-  el.innerHTML='<div class="loader-wrap"><div class="spinner"></div><div class="loader-text">Поиск...</div></div>';
-  try {
-    const data=await itunesFetch(q,50);
-    const found=(data.results||[]).map(itunesTrack);
-    if(!found.length){el.innerHTML='<div class="empty-state">Ничего не найдено</div>';return;}
-    // Добавляем новые треки в глобальный массив
-    found.forEach(f=>{if(!songs.find(s=>s.id===f.id))songs.push(f);});
-    const mob = isMobile();
-    const barsHtml = '<div class="bars"><div class="bar" style="height:4px"></div><div class="bar" style="height:8px"></div><div class="bar" style="height:13px"></div><div class="bar" style="height:6px"></div></div>';
-    // Рендерим с нумерацией 1,2,3... для результатов поиска
-    el.innerHTML = found.map((s, localI) => {
-      const globalIdx = songs.findIndex(x => x.id === s.id);
-      const liked = likedSongs.has(s.id);
-      const playing = globalIdx === currentIdx && isPlaying;
-      const artHtml = s.cover ? `<img src="${s.cover}" loading="lazy" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;background:linear-gradient(135deg,#E8520A,#FF8C3A)"></div>';
-      if (mob) {
-        return `<div class="track${playing?' now':''}" id="sr-${globalIdx}" onclick="playSong(${globalIdx})">
-          <span class="t-play" style="position:absolute;left:0;width:52px;text-align:center;font-size:12px;z-index:6">&#9654;</span>
-          <div style="position:relative;flex-shrink:0"><div class="t-art">${artHtml}</div></div>
-          <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}</div></div>
-          <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${globalIdx})">${liked?'&#9829;':'&#9825;'}</button>
-          <span class="t-dur" onclick="event.stopPropagation();openVideo(${globalIdx})" style="cursor:pointer;color:var(--accent);font-size:15px;display:flex;align-items:center;justify-content:center">▶</span>
-        </div>`;
-      }
-      return `<div class="track${playing?' now':''}" id="sr-${globalIdx}" onclick="playSong(${globalIdx})">
-        <span class="t-num">${playing ? barsHtml : localI + 1}</span>
-        <span class="t-play">&#9654;</span>
-        <div style="position:relative"><div class="t-art">${artHtml}</div><div class="t-art-shadow"></div></div>
-        <div class="t-info"><div class="t-name">${xss(s.title)}</div><div class="t-sub">${xss(s.artist)}${s.album?' · '+xss(s.album):''}</div></div>
-        <button class="t-like${liked?' on':''}" onclick="event.stopPropagation();toggleLike('${s.id}',${globalIdx})">${liked?'&#9829;':'&#9825;'}</button>
-        <span class="t-dur" onclick="event.stopPropagation();openVideo(${globalIdx})" style="cursor:pointer;color:var(--accent);font-size:16px;text-align:right">▶</span>
-      </div>`;
-    }).join('');
-    if (!isMobile()) initTrack3D();
-  } catch(e){el.innerHTML='<div class="empty-state">Ошибка поиска</div>';}
-}
-
-// ── Tabs ──
-function showTab(tab, el){
-  activeTab=tab;
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(s=>s.classList.remove('active'));
-  if(el) el.classList.add('active');
-  if(tab==='history') renderHistoryList();
-  if(tab==='liked') renderLikedList();
-  if(tab==='search-tab') setTimeout(()=>document.getElementById('search-input-2').focus(),50);
-}
-
-function mnavClick(tab, el){
-  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
-  if(el) el.classList.add('active');
-  showTab(tab, null);
-}
-
-// ── Likes ──
-function toggleLike(id,idx){
-  likedSongs.has(id)?(likedSongs.delete(id),showToast('Лайк убран')):(likedSongs.add(id),showToast('❤️ Лайк поставлен'));
-  const row=document.getElementById('sr-'+idx);
-  if(row){const lb=row.querySelector('.t-like');if(lb){lb.classList.toggle('on',likedSongs.has(id));lb.innerHTML=likedSongs.has(id)?'&#9829;':'&#9825;';}}
-  if(currentIdx===idx){
-    ['plike','fp-like','pm-like'].forEach(id2=>{
-      const el=document.getElementById(id2);
-      if(el){el.innerHTML=likedSongs.has(id)?'&#9829;':'&#9825;';el.classList.toggle('on',likedSongs.has(id));}
-    });
-  }
-  if(activeTab==='liked')renderLikedList();
-}
-function toggleLikeFromPlayer(){if(currentIdx>=0)toggleLike(songs[currentIdx].id,currentIdx);}
-
-// ── Profile ──
-function toggleProfile(){showToast('Профиль · '+playedCount+' прослушано');}
-
-// ── Video Modal ──
-async function openVideo(idx){
-  if(idx<0||idx>=songs.length) return;
-  const s=songs[idx];
-  document.getElementById('video-title').textContent=s.title;
-  document.getElementById('video-artist').textContent=s.artist;
-  document.getElementById('video-iframe-wrap').innerHTML='<div class="loader-wrap" style="background:#111;aspect-ratio:16/9"><div class="spinner" style="border-color:#333;border-top-color:#E8520A"></div><div class="loader-text" style="color:#888">Ищем клип...</div></div>';
-  document.getElementById('video-modal').classList.add('open');
-  const videoId = await findYTVideoId(s.artist+' '+s.title+' official video');
-  if(!videoId){
-    document.getElementById('video-iframe-wrap').innerHTML='<div class="loader-wrap" style="background:#111;aspect-ratio:16/9"><div class="loader-text" style="color:#888">Клип не найден</div></div>';
-    return;
-  }
-  document.getElementById('video-iframe-wrap').innerHTML=`<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-}
-function closeVideoBtn(){
-  document.getElementById('video-modal').classList.remove('open');
-  document.getElementById('video-iframe-wrap').innerHTML='';
-}
-function closeVideo(e){
-  if(e.target===document.getElementById('video-modal')) closeVideoBtn();
-}
-
-// ── Touch swipe down to close full player ──
-let touchStartY = 0;
-document.getElementById('full-player').addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-}, {passive:true});
-document.getElementById('full-player').addEventListener('touchend', e => {
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  if (dy > 80) closeFullPlayer();
-}, {passive:true});
-
-// ── Utils ──
-function xss(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-let toastT;
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2500);}
-
-document.addEventListener('keydown',e=>{
-  if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;
-  if(e.code==='Space'){e.preventDefault();togglePlay();}
-  else if(e.code==='ArrowRight')nextSong();
-  else if(e.code==='ArrowLeft')prevSong();
-});
-
-// ── Init ──
-setAmbient(110,40,190);
-buildChartChips();
-loadChart('world', document.querySelector('.chart-item.active'));
-</script>
-</body>
-</html>
+  --bg:#07080f; --surface:#0e1020; --card:#131525; --card2:#181a2e;
+  --border:#252840; --border2:#2e3158;
+  --accent:#7c6dfa; --accentH:#9d91ff;
+  --green:#26d97f; --pink:#f06292; --yellow:#ffca28; --blue:#42a5f5; --red:#ef5350;
+  --text:#eef0ff; --text2:#8890c0; --text3:#555880;
+  --r:16px; --r2:12px; --shadow:0 8px 32px rgba(0,0,0,.5);
+  /* time-of-day tint */
+  --tod-tint:rgba(0,0,0,0);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── BG ATMOSPHERE ── */
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;transition:background 60s linear;}
+.bg-glow::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,109,250,.13) 0%,transparent 70%);
+  top:-200px;left:-150px;animation:gm1 20s ease-in-out infinite alternate;}
+.bg-glow::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,98,146,.08) 0%,transparent 70%);
+  bottom:-100px;right:-100px;animation:gm2 15s ease-in-out infinite alternate;}
+@keyframes gm1{from{transform:translate(0,0)}to{transform:translate(100px,80px)}}
+@keyframes gm2{from{transform:translate(0,0)}to{transform:translate(-70px,-90px)}}
+
+.tod-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--tod-tint);transition:background 3s linear;}
+.dots-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:28px 28px;}
+
+/* ── SCREENS ── */
+.screen{position:relative;z-index:1;display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px;animation:screenIn .45s cubic-bezier(.4,0,.2,1);}
+.screen.active{display:flex;}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════ LOBBY ══════ */
+#lobby{gap:0;text-align:center;}
+.lobby-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.3);border-radius:50px;padding:5px 16px;font-size:.68rem;font-weight:800;color:var(--accentH);letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;}
+
+.lobby-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,10vw,6.5rem);font-weight:700;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,#c4baff 45%,#f06292 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.lobby-sub{font-size:.95rem;color:var(--text2);font-weight:600;letter-spacing:1px;margin-bottom:48px;}
+
+/* showcase */
+.lobby-showcase{position:relative;width:210px;height:210px;margin:0 auto 28px;}
+.showcase-ring{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--accent),var(--pink),var(--yellow),var(--green),var(--blue),var(--accent));
+  padding:3px;animation:ringRot 4s linear infinite;}
+@keyframes ringRot{to{transform:rotate(360deg)}}
+.showcase-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;}
+.showcase-pet{font-size:5.8rem;animation:scBounce 2.2s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,109,250,.5));}
+@keyframes scBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.06)}}
+
+.pet-selector{display:flex;gap:12px;justify-content:center;margin-bottom:36px;}
+.pet-sel-btn{width:54px;height:54px;background:var(--card);border:2px solid var(--border2);border-radius:14px;cursor:pointer;font-size:1.7rem;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.4,0,.2,1);}
+.pet-sel-btn:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 20px rgba(124,109,250,.25);}
+.pet-sel-btn.active{border-color:var(--accent);background:rgba(124,109,250,.15);box-shadow:0 0 22px rgba(124,109,250,.35);transform:translateY(-4px);}
+
+.lobby-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 42px;background:linear-gradient(135deg,var(--accent),#5a4de8);border:none;border-radius:50px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(124,109,250,.45);transition:all .25s;animation:ctaP 3s ease-in-out infinite;}
+@keyframes ctaP{0%,100%{box-shadow:0 8px 25px rgba(124,109,250,.4)}50%{box-shadow:0 8px 50px rgba(124,109,250,.75)}}
+.lobby-cta:hover{transform:translateY(-3px) scale(1.03);}
+.lobby-cta .arr{animation:arrB 1s ease-in-out infinite;}
+@keyframes arrB{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+
+/* achievements preview on lobby */
+.lobby-stats-row{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
+.lobby-stat-chip{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:50px;padding:6px 14px;font-size:.72rem;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:5px;}
+
+/* ══════ SELECT ══════ */
+#select-screen{gap:22px;max-width:640px;width:100%;margin:auto;}
+.sel-header{text-align:center;}
+.sel-title{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;margin-bottom:5px;}
+.sel-sub{font-size:.9rem;color:var(--text2);}
+.animal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;}
+.a-card{background:var(--card);border:2px solid var(--border2);border-radius:var(--r);padding:18px 8px 14px;cursor:pointer;text-align:center;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.a-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,109,250,.0),rgba(124,109,250,.08));opacity:0;transition:opacity .25s;}
+.a-card:hover{border-color:var(--accent);transform:translateY(-5px);box-shadow:0 12px 30px rgba(124,109,250,.2);}
+.a-card:hover::before{opacity:1;}
+.a-card.selected{border-color:var(--accent);background:rgba(124,109,250,.1);box-shadow:0 0 0 4px rgba(124,109,250,.15),0 12px 30px rgba(124,109,250,.25);transform:translateY(-5px);}
+.a-card.selected::after{content:'✓';position:absolute;top:7px;right:9px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;}
+.a-emo{font-size:2.8rem;display:block;margin-bottom:8px;}
+.a-card:hover .a-emo,.a-card.selected .a-emo{animation:emoJ .5s ease-in-out infinite alternate;}
+@keyframes emoJ{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+.a-nm{font-size:.78rem;font-weight:800;}
+.a-type{font-size:.68rem;color:var(--text3);margin-top:2px;}
+.a-trait{font-size:.6rem;color:var(--accentH);margin-top:3px;font-weight:700;}
+@keyframes cardAppear{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* personality chips */
+.personality-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.p-chip{padding:5px 12px;border-radius:50px;font-size:.65rem;font-weight:800;border:1px solid;cursor:pointer;transition:all .2s;}
+.p-chip.sel{box-shadow:0 0 12px currentColor;}
+
+.name-section{text-align:center;width:100%;}
+.name-lbl{font-size:.7rem;font-weight:800;color:var(--text2);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:10px;}
+.name-field{width:100%;max-width:300px;background:var(--card);border:2px solid var(--border2);border-radius:50px;padding:13px 22px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);text-align:center;outline:none;transition:all .25s;}
+.name-field::placeholder{color:var(--text3);}
+.name-field:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,109,250,.15);}
+.begin-btn{font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;padding:14px 36px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--accent),#5a4de8);color:#fff;cursor:pointer;transition:all .3s;opacity:.35;pointer-events:none;box-shadow:0 6px 20px rgba(124,109,250,.3);}
+.begin-btn.on{opacity:1;pointer-events:all;box-shadow:0 8px 30px rgba(124,109,250,.5);}
+.begin-btn.on:hover{transform:translateY(-2px) scale(1.03);}
+
+/* ══════ GAME ══════ */
+#game-screen{padding:12px;justify-content:flex-start;padding-top:14px;}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:10px 18px;width:100%;max-width:1000px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+.top-left{display:flex;align-items:center;gap:10px;}
+.top-pet-name{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;}
+.top-stage{font-size:.68rem;font-weight:800;background:rgba(124,109,250,.12);border:1px solid rgba(124,109,250,.25);border-radius:20px;padding:3px 10px;color:var(--accentH);}
+.top-trait{font-size:.62rem;font-weight:700;border-radius:20px;padding:3px 9px;border:1px solid;}
+.top-right{display:flex;align-items:center;gap:16px;}
+.top-coins{display:flex;align-items:center;gap:5px;font-weight:800;color:var(--yellow);font-size:.95rem;}
+.top-mood{font-size:1.2rem;}
+.top-time{font-size:.75rem;font-weight:700;color:var(--text3);display:flex;align-items:center;gap:5px;}
+.tod-icon{font-size:.9rem;}
+.top-level{font-size:.68rem;font-weight:800;color:var(--green);background:rgba(38,217,127,.1);border:1px solid rgba(38,217,127,.25);border-radius:20px;padding:3px 9px;}
+
+/* GAME WRAP */
+.game-wrap{display:grid;grid-template-columns:230px 1fr 270px;gap:12px;width:100%;max-width:1000px;align-items:start;}
+.g-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:16px;}
+.g-panel-title{font-size:.62rem;font-weight:800;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.g-panel-title::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;display:inline-block;}
+
+/* STATS */
+.stats-list{display:flex;flex-direction:column;gap:10px;}
+.stat-row{display:flex;align-items:center;gap:8px;}
+.s-ico{font-size:.95rem;width:20px;text-align:center;flex-shrink:0;}
+.s-lbl{font-size:.66rem;font-weight:700;color:var(--text2);width:60px;flex-shrink:0;}
+.s-track{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden;}
+.s-fill{height:100%;border-radius:10px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.sf-h{background:linear-gradient(90deg,#ef5350,#ff7043);}
+.sf-p{background:linear-gradient(90deg,#ffca28,#ffa726);}
+.sf-e{background:linear-gradient(90deg,#42a5f5,#26c6da);}
+.sf-c{background:linear-gradient(90deg,#ec407a,#ab47bc);}
+.sf-hp{background:linear-gradient(90deg,#26d97f,#00bcd4);}
+.sf-xp{background:linear-gradient(90deg,#7c6dfa,#f06292);}
+.s-num{font-size:.63rem;font-weight:800;width:26px;text-align:right;color:var(--text2);}
+
+/* XP BAR */
+.xp-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.xp-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.xp-lv-txt{font-size:.65rem;font-weight:800;color:var(--accentH);}
+.xp-num-txt{font-size:.62rem;color:var(--text3);font-weight:700;}
+
+/* MOOD CARD */
+.mood-card{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px;margin-top:10px;text-align:center;}
+.mood-big{font-size:2.2rem;margin-bottom:3px;animation:moodPop 2s ease-in-out infinite;}
+@keyframes moodPop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.mood-txt{font-size:.7rem;font-weight:700;color:var(--text2);}
+.mood-personality{font-size:.62rem;color:var(--text3);margin-top:2px;}
+
+/* ACTIONS */
+.act-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+.ab{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 5px;cursor:pointer;color:var(--text);font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+.ab .aico{font-size:1.4rem;}
+.ab .acost{font-size:.5rem;color:var(--yellow);font-weight:700;}
+.ab:hover{transform:translateY(-2px);}
+.ab:disabled{opacity:.25;cursor:not-allowed;transform:none;}
+.ab.feed-b:hover{background:rgba(239,83,80,.12);border-color:#ef5350;}
+.ab.play-b:hover{background:rgba(255,202,40,.1);border-color:var(--yellow);}
+.ab.sleep-b:hover{background:rgba(66,165,245,.1);border-color:var(--blue);}
+.ab.heal-b:hover{background:rgba(38,217,127,.1);border-color:var(--green);}
+.ab.bath-b:hover{background:rgba(236,64,122,.12);border-color:#ec407a;}
+.ab.walk-b:hover{background:rgba(124,109,250,.1);border-color:var(--accent);}
+
+/* CENTER */
+.center-col{display:flex;flex-direction:column;align-items:center;gap:11px;}
+
+/* PET WINDOW */
+.pet-window{width:240px;height:240px;background:var(--card);border:1px solid var(--border2);border-radius:28px;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:visible;transition:box-shadow .5s;}
+/* spinning conic border */
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false;}
+.pet-window::before{content:'';position:absolute;inset:-1px;border-radius:29px;
+  background:conic-gradient(from var(--a,0deg),var(--accent) 0%,transparent 30%,transparent 70%,var(--pink) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;padding:1.5px;
+  animation:bSpin 4s linear infinite;}
+@keyframes bSpin{to{--a:360deg}}
+.pet-window.night-mode{background:#0d1022;}
+.pet-window.night-mode::before{background:conic-gradient(from var(--a,0deg),#6baaff 0%,transparent 30%,transparent 70%,#9d91ff 100%);}
+
+.pet-bg-aura{position:absolute;inset:0;border-radius:28px;opacity:0;transition:opacity 1s;pointer-events:none;}
+.pet-bg-aura.happy{background:radial-gradient(circle at 50% 60%,rgba(255,202,40,.08) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.sad{background:radial-gradient(circle at 50% 60%,rgba(66,165,245,.06) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.sick{background:radial-gradient(circle at 50% 60%,rgba(0,255,0,.05) 0%,transparent 70%);opacity:1;}
+.pet-bg-aura.danger{background:radial-gradient(circle at 50% 60%,rgba(239,83,80,.12) 0%,transparent 60%);opacity:1;}
+
+.weather-layer{position:absolute;inset:0;border-radius:28px;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1s;}
+.weather-layer.on{opacity:1;}
+.weather-layer .w-particle{position:absolute;font-size:.8rem;animation:wFall linear infinite;}
+@keyframes wFall{from{transform:translateY(-10px) rotate(0)}to{transform:translateY(260px) rotate(360deg)}}
+
+.pet-skin-layer{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:2.6rem;pointer-events:none;z-index:10;
+  animation:skinF 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(255,215,0,.8));display:none;line-height:1;}
+@keyframes skinF{0%,100%{transform:translateX(-50%) translateY(0) rotate(-3deg);}50%{transform:translateX(-50%) translateY(-6px) rotate(3deg);}}
+.pet-skin-layer.skin-pop{animation:skinPop .4s cubic-bezier(.17,.67,.35,1.5) forwards,skinF 3s ease-in-out .4s infinite;}
+@keyframes skinPop{0%{transform:translateX(-50%) scale(0) rotate(-20deg);opacity:0;}60%{transform:translateX(-50%) scale(1.3) rotate(5deg);opacity:1;}100%{transform:translateX(-50%) scale(1) rotate(-3deg);opacity:1;}}
+
+.pet-activity-bubble{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 0 12px;padding:5px 9px;font-size:1.1rem;pointer-events:none;opacity:0;transform:scale(0);transform-origin:top right;transition:opacity .3s,transform .3s cubic-bezier(.17,.67,.35,1.4);z-index:3;}
+.pet-activity-bubble.show{opacity:1;transform:scale(1);}
+.pet-activity-text{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);pointer-events:none;opacity:0;transition:opacity .4s;z-index:3;}
+.pet-activity-text.show{opacity:1;}
+
+.pet-big{font-size:5rem;cursor:pointer;user-select:none;display:inline-block;filter:drop-shadow(0 0 12px rgba(124,109,250,.3));transition:filter .3s;}
+.pet-big:active{transform:scale(.82) rotate(-15deg)!important;}
+
+/* pet animations */
+.pet-big.state-idle   {animation:pIdle 3s ease-in-out infinite;}
+.pet-big.state-walk   {animation:pWalk .6s ease-in-out infinite;}
+.pet-big.state-scratch{animation:pScratch .4s ease-in-out infinite;}
+.pet-big.state-spin   {animation:pSpin .8s ease-in-out 2;}
+.pet-big.state-sit    {animation:pSit 4s ease-in-out infinite;}
+.pet-big.state-blink  {animation:pBlink .1s step-end 3;}
+.pet-big.state-sneeze {animation:pSneeze .3s ease-in-out 2;}
+.pet-big.state-dance  {animation:pDance .5s ease-in-out infinite;}
+.pet-big.state-flip   {animation:pFlip .6s ease-in-out 2;}
+.pet-big.pet-sad   {animation:pShake .5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(66,165,245,.5)) saturate(.5);}
+.pet-big.pet-happy {animation:pJoy .4s ease-in-out 4;filter:drop-shadow(0 0 22px rgba(255,215,0,.8));}
+.pet-big.pet-sick  {animation:pSick 1.5s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(0,255,0,.5)) hue-rotate(60deg) brightness(.75);}
+.pet-big.pet-sleep {animation:pSleep 3s ease-in-out infinite;filter:drop-shadow(0 0 8px rgba(107,170,255,.4));}
+.pet-big.pet-danger{animation:pDanger .25s ease-in-out infinite;filter:drop-shadow(0 0 22px rgba(255,50,50,.95)) brightness(1.2);}
+.pet-big.pet-run   {animation:pRun .3s linear infinite;}
+@keyframes pIdle{0%,100%{transform:translateY(0) rotate(-1deg) scale(1);}40%{transform:translateY(-12px) rotate(1deg) scale(1.04);}70%{transform:translateY(-7px) rotate(0)}}
+@keyframes pWalk{0%{transform:translateX(-5px) rotate(-5deg);}50%{transform:translateX(5px) rotate(5deg);}100%{transform:translateX(-5px) rotate(-5deg);}}
+@keyframes pScratch{0%,100%{transform:rotate(0);}25%{transform:rotate(-10deg) translateY(-2px);}75%{transform:rotate(10deg) translateY(2px);}}
+@keyframes pSpin{0%{transform:rotate(0) scale(1);}50%{transform:rotate(180deg) scale(1.1);}100%{transform:rotate(360deg) scale(1);}}
+@keyframes pSit{0%,100%{transform:translateY(0) scale(1,1);}50%{transform:translateY(5px) scale(1.06,.93);}}
+@keyframes pBlink{0%,100%{transform:scaleY(1);}50%{transform:scaleY(.08);}}
+@keyframes pSneeze{0%,100%{transform:rotate(0);}30%{transform:rotate(-18deg) translateX(-5px);}60%{transform:rotate(12deg) translateX(9px);}}
+@keyframes pDance{0%,100%{transform:rotate(-8deg) translateY(0);}25%{transform:rotate(8deg) translateY(-8px);}75%{transform:rotate(-4deg) translateY(-4px);}}
+@keyframes pFlip{0%{transform:scale(1) rotate(0);}50%{transform:scale(1.15) rotate(180deg);}100%{transform:scale(1) rotate(360deg);}}
+@keyframes pShake{0%,100%{transform:rotate(0);}25%{transform:rotate(-9deg);}75%{transform:rotate(9deg);}}
+@keyframes pJoy{0%,100%{transform:scale(1);}50%{transform:scale(1.28) translateY(-18px);}}
+@keyframes pSick{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(6px) rotate(3deg);}}
+@keyframes pSleep{0%,100%{transform:translateY(0) rotate(-6deg) scale(.94);}50%{transform:translateY(-6px) rotate(-6deg) scale(.94);}}
+@keyframes pDanger{0%,100%{transform:scale(1) rotate(0);}25%{transform:scale(1.17) rotate(-6deg);}75%{transform:scale(1.17) rotate(6deg);}}
+@keyframes pRun{0%{transform:translateX(-9px) scaleX(1);}50%{transform:translateX(9px) scaleX(-1);}100%{transform:translateX(-9px) scaleX(1);}}
+
+/* STA
